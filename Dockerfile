@@ -1,13 +1,16 @@
 # Use Java 17 base image
 FROM openjdk:17-jdk-slim
 
-# Set working directory inside container
+# Set working directory
 WORKDIR /app
 
-# Copy Maven wrapper and pom.xml first
+# Copy Maven wrapper and pom.xml first (for caching)
 COPY mvnw .
 COPY .mvn .mvn
 COPY pom.xml .
+
+# **Give execute permission to mvnw**
+RUN chmod +x mvnw
 
 # Download dependencies
 RUN ./mvnw dependency:go-offline
