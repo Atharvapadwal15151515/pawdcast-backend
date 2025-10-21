@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pawdcast - Training Tips</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <style>
+    /* DMC Color Palette */
+    :root {
+      --medium-yellow-beige: #D4C5A9;    /* DMC 3046 */
+      --dark-yellow-beige: #B8A082;      /* DMC 3045 */
+      --dark-drab-brown: #8B7355;        /* DMC 610 */
+      --very-dark-mocha: #4A3728;        /* DMC 3031 */
+      --black-brown: #2B1F17;            /* DMC 3371 */
+      --dark-wedgwood: #4A6741;          /* DMC 517 */
+      --white: #FFFFFF;
+      
+      /* Gradients */
+      --primary-gradient: linear-gradient(135deg, var(--medium-yellow-beige), var(--dark-yellow-beige));
+      --accent-gradient: linear-gradient(135deg, var(--dark-wedgwood), #5a7d4f);
+      --dark-gradient: linear-gradient(135deg, var(--very-dark-mocha), var(--black-brown));
+      --light-gradient: linear-gradient(135deg, var(--white), #faf9f5);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+      background: var(--primary-gradient);
+      min-height: 100vh;
+      color: var(--black-brown);
+    }
+
+    .container-lg {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Header Styling */
+    .pawdcast-header {
+      font-family: 'Segoe UI', sans-serif;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: var(--very-dark-mocha);
+      font-size: 3rem;
+      margin: 2rem 0 1.5rem 0;
+      text-align: center;
+      text-shadow: 2px 4px 8px rgba(43, 31, 23, 0.1);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .pawdcast-header::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 4px;
+      background: var(--accent-gradient);
+      border-radius: 2px;
+    }
+
+    /* Logo Styling */
+    .logo-container {
+      position: relative;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(43, 31, 23, 0.2);
+      transition: all 0.4s ease;
+      background: var(--white);
+      border: 3px solid var(--dark-yellow-beige);
+    }
+
+    .logo-container:hover {
+      transform: scale(1.1) rotate(5deg);
+      box-shadow: 0 8px 25px rgba(43, 31, 23, 0.3);
+      border-color: var(--dark-wedgwood);
+    }
+
+    .logo-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+
+    .logo-container:hover img {
+      transform: scale(1.1);
+    }
+
+    /* Back Button Styling */
+    .back-button {
+      position: absolute;
+      top: 2rem;
+      left: 2rem;
+      background: var(--accent-gradient);
+      color: var(--white);
+      padding: 0.75rem 1.5rem;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 15px rgba(74, 103, 65, 0.3);
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+      z-index: 10;
+    }
+
+    .back-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(74, 103, 65, 0.4);
+      background: var(--dark-wedgwood);
+    }
+
+    .back-button:active {
+      transform: translateY(-1px);
+    }
+
+    /* Filter Bar */
+    .filter-bar {
+      margin: 2rem auto 3rem auto;
+      padding: 2rem;
+      background: var(--white);
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(43, 31, 23, 0.15);
+      border: 1px solid var(--dark-yellow-beige);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    @media (min-width: 768px) {
+      .filter-bar {
+        flex-direction: row;
+        align-items: end;
+        justify-content: center;
+      }
+    }
+
+    .form-select, .form-control {
+      padding: 0.75rem 1rem;
+      border: 2px solid var(--dark-yellow-beige);
+      border-radius: 12px;
+      background: var(--white);
+      color: var(--black-brown);
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      outline: none;
+    }
+
+    .form-select:focus, .form-control:focus {
+      border-color: var(--dark-wedgwood);
+      box-shadow: 0 0 0 3px rgba(74, 103, 65, 0.15);
+      transform: translateY(-1px);
+    }
+
+    .form-select {
+      width: 100%;
+      max-width: 200px;
+    }
+
+    .form-control {
+      width: 100%;
+      max-width: 250px;
+      padding-left: 2.5rem;
+      position: relative;
+    }
+
+    .search-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 250px;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--dark-drab-brown);
+      z-index: 1;
+    }
+
+    /* Button Styling */
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+
+    .btn-success {
+      background: var(--accent-gradient);
+      color: var(--white);
+      box-shadow: 0 4px 15px rgba(74, 103, 65, 0.3);
+    }
+
+    .btn-success:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(74, 103, 65, 0.4);
+    }
+
+    /* Cards Container */
+    .row {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 2rem;
+      margin: 2rem 0;
+    }
+
+    @media (max-width: 767px) {
+      .row {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+    }
+
+    /* Card Styling */
+    .tip-card {
+      background: var(--white);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(43, 31, 23, 0.12);
+      border: 1px solid var(--dark-yellow-beige);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .tip-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 20px 40px rgba(43, 31, 23, 0.2);
+      border-color: var(--dark-wedgwood);
+    }
+
+    .tip-img-wrap {
+      position: relative;
+      height: 220px;
+      overflow: hidden;
+      background: var(--light-gradient);
+    }
+
+    .tip-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+      filter: brightness(0.95) contrast(1.1);
+    }
+
+    .tip-card:hover .tip-img {
+      transform: scale(1.08);
+      filter: brightness(1) contrast(1.15);
+    }
+
+    .tip-category-badge {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      background: var(--accent-gradient);
+      color: var(--white);
+      padding: 6px 16px;
+      border-radius: 15px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(74, 103, 65, 0.4);
+      z-index: 2;
+      letter-spacing: 0.5px;
+    }
+
+    .card-body {
+      padding: 1.5rem;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--very-dark-mocha);
+      margin-bottom: 0.75rem;
+      letter-spacing: 0.3px;
+      line-height: 1.3;
+    }
+
+    .card-text {
+      color: var(--dark-drab-brown);
+      font-size: 1.05rem;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+      flex-grow: 1;
+    }
+
+    .tip-footer {
+      padding: 1rem 1.5rem;
+      background: var(--light-gradient);
+      border-top: 1px solid var(--dark-yellow-beige);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.95rem;
+      color: var(--dark-wedgwood);
+      font-weight: 500;
+    }
+
+    .tip-footer i {
+      margin-right: 0.5rem;
+      color: var(--dark-wedgwood);
+    }
+
+    /* No Tips Message */
+    .no-tips-message {
+      text-align: center;
+      padding: 4rem 2rem;
+      font-size: 1.5rem;
+      color: var(--very-dark-mocha);
+      font-weight: 600;
+      letter-spacing: 1px;
+      background: var(--white);
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(43, 31, 23, 0.1);
+      border: 1px solid var(--dark-yellow-beige);
+      margin: 2rem 0;
+      position: relative;
+    }
+
+    .no-tips-message::before {
+      content: '🐾';
+      display: block;
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    /* Loading Animation */
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 3rem;
+    }
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid var(--dark-yellow-beige);
+      border-left: 4px solid var(--dark-wedgwood);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 767px) {
+      .pawdcast-header {
+        font-size: 2.2rem;
+        margin: 1.5rem 0 1rem 0;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      
+      .logo-container {
+        width: 60px;
+        height: 60px;
+      }
+      
+      .back-button {
+        position: relative;
+        top: auto;
+        left: auto;
+        align-self: flex-start;
+        margin-bottom: 1rem;
+      }
+      
+      .filter-bar {
+        padding: 1.5rem;
+        margin: 1.5rem auto 2rem auto;
+      }
+      
+      .form-select, .form-control {
+        max-width: 100%;
+      }
+      
+      .tip-img-wrap {
+        height: 180px;
+      }
+      
+      .card-body {
+        padding: 1.25rem;
+      }
+      
+      .tip-footer {
+        padding: 0.75rem 1.25rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+      }
+    }
+
+    /* Micro-interactions */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-in-up {
+      animation: fadeInUp 0.6s ease forwards;
+    }
+
+    /* Staggered animation for cards */
+    .tip-card:nth-child(1) { animation-delay: 0.1s; }
+    .tip-card:nth-child(2) { animation-delay: 0.2s; }
+    .tip-card:nth-child(3) { animation-delay: 0.3s; }
+    .tip-card:nth-child(4) { animation-delay: 0.4s; }
+    .tip-card:nth-child(5) { animation-delay: 0.5s; }
+    .tip-card:nth-child(6) { animation-delay: 0.6s; }
+
+    /* Focus indicators for accessibility */
+    .form-select:focus-visible, .form-control:focus-visible, .btn:focus-visible {
+      outline: 3px solid var(--dark-wedgwood);
+      outline-offset: 2px;
+    }
+
+    /* Smooth transitions */
+    * {
+      transition: color 0.2s ease, background-color 0.2s ease;
+    }
+  </style>
+</head>
+<body>
+  <div class="container-lg">
+    <!-- Back Button -->
+    <a href="home.html" class="back-button fade-in-up">
+      <i class="fas fa-arrow-left"></i>
+      Back to Home
+    </a>
+
+    <!-- Header with Logo -->
+    <h1 class="pawdcast-header fade-in-up">
+      <div class="logo-container">
+        <img src="https://res.cloudinary.com/dkuuvasoe/image/upload/v1760186124/pawdcastlogo_cb1l1b.png" alt="Pawdcast Logo">
+      </div>
+      <span>
+        <i class="fas fa-graduation-cap" style="color: var(--dark-wedgwood); margin-right: 0.5rem;"></i>
+        Pawdcast Training Tips
+      </span>
+    </h1>
+
+    <!-- Filter Dropdown & Search -->
+    <div class="filter-bar fade-in-up">
+      <select id="categoryFilter" class="form-select" aria-label="Filter by category">
+        <option value="">All Categories</option>
+      </select>
+      
+      <div class="search-wrapper">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" id="searchInput" class="form-control" placeholder="Search tips..." aria-label="Search tips" />
+      </div>
+      
+      <button id="refreshBtn" class="btn btn-success">
+        <i class="fas fa-sync-alt"></i>
+        Refresh
+      </button>
+    </div>
+
+    <!-- Cards Container -->
+    <div id="tipsContainer" class="row fade-in-up"></div>
+  </div>
+
+  <script>
+    let allTips = [];
+
+    // Show loading state
+    function showLoading() {
+      document.getElementById("tipsContainer").innerHTML = `
+        <div class="loading">
+          <div class="loading-spinner"></div>
+        </div>
+      `;
+    }
+
+    async function fetchTips() {
+      showLoading();
+      try {
+        const response = await fetch("/api/training-tips");
+        if (!response.ok) throw new Error("Failed to load tips");
+        allTips = await response.json();
+
+        populateCategories(allTips);
+        renderTips(allTips);
+      } catch (err) {
+        console.error('Error fetching tips:', err);
+        document.getElementById("tipsContainer").innerHTML =
+          `<div class="no-tips-message">Failed to load tips. Please try again later.</div>`;
+      }
+    }
+
+    function populateCategories(tips) {
+      const categories = [...new Set(tips.map(t => t.category))].sort();
+      const filter = document.getElementById("categoryFilter");
+      filter.innerHTML = `<option value="">All Categories</option>`;
+      categories.forEach(cat => {
+        const option = document.createElement("option");
+        option.value = cat;
+        option.textContent = cat;
+        filter.appendChild(option);
+      });
+    }
+
+    function renderTips(tips) {
+      const container = document.getElementById("tipsContainer");
+      container.innerHTML = "";
+      
+      if (tips.length === 0) {
+        container.innerHTML = `<div class="no-tips-message">No tips found for your selection.</div>`;
+        return;
+      }
+
+      tips.forEach((tip, index) => {
+        const col = document.createElement("div");
+        col.className = "tip-card fade-in-up";
+        col.style.animationDelay = `${index * 0.1}s`;
+        
+        // Format date safely
+        let formattedDate = 'Recent';
+        if (tip.date) {
+          try {
+            formattedDate = new Date(tip.date).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric'
+            });
+          } catch (e) {
+            formattedDate = 'Recent';
+          }
+        }
+
+        // Handle missing image
+        const imageUrl = tip.imageUrl || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjQjhBMDgyIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iI0ZGRkZGRiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPjxpIGNsYXNzPSJmYXMgZmEtZG9nIiBzdHlsZT0iZm9udC1zaXplOiAyZW07Ij48L2k+PGJyLz5UcmFpbmluZyBUaXA8L3RleHQ+PC9zdmc+';
+
+        col.innerHTML = `
+          <div class="tip-img-wrap">
+            <img src="${imageUrl}" class="tip-img" alt="${tip.title || 'Training Tip'}" 
+                 onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjQjhBMDgyIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iI0ZGRkZGRiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPjxpIGNsYXNzPSJmYXMgZmEtZG9nIiBzdHlsZT0iZm9udC1zaXplOiAyZW07Ij48L2k+PGJyLz5UcmFpbmluZyBUaXA8L3RleHQ+PC9zdmc+'">
+            <span class="tip-category-badge">${tip.category || 'General'}</span>
+          </div>
+          <div class="card-body">
+            <h5 class="card-title">${tip.title || 'Training Tip'}</h5>
+            <p class="card-text">${tip.description || 'No description available.'}</p>
+          </div>
+          <div class="tip-footer">
+            <span>
+              <i class="fas fa-user"></i>
+              ${tip.author || "Pawdcast Team"}
+            </span>
+            <span>
+              <i class="fas fa-calendar-alt"></i>
+              ${formattedDate}
+            </span>
+          </div>
+        `;
+        container.appendChild(col);
+      });
+    }
+
+    function getFilteredTips() {
+      const selectedCategory = document.getElementById("categoryFilter").value;
+      const search = document.getElementById("searchInput").value.trim().toLowerCase();
+
+      return allTips.filter(tip => {
+        const matchesCategory = selectedCategory === "" || tip.category === selectedCategory;
+        const matchesSearch = !search || (
+          (tip.title && tip.title.toLowerCase().includes(search)) ||
+          (tip.description && tip.description.toLowerCase().includes(search)) ||
+          (tip.author && tip.author.toLowerCase().includes(search)) ||
+          (tip.category && tip.category.toLowerCase().includes(search))
+        );
+        return matchesCategory && matchesSearch;
+      });
+    }
+
+    // Event Listeners
+    document.getElementById("categoryFilter").addEventListener("change", () => {
+      renderTips(getFilteredTips());
+    });
+
+    document.getElementById("searchInput").addEventListener("input", () => {
+      renderTips(getFilteredTips());
+    });
+
+    document.getElementById("refreshBtn").addEventListener("click", () => {
+      // Reset filters
+      document.getElementById("categoryFilter").value = "";
+      document.getElementById("searchInput").value = "";
+      
+      // Refresh button animation
+      const btn = document.getElementById("refreshBtn");
+      const icon = btn.querySelector('i');
+      icon.style.transform = 'rotate(360deg)';
+      setTimeout(() => {
+        icon.style.transform = 'rotate(0deg)';
+      }, 300);
+      
+      // Fetch fresh data
+      fetchTips();
+    });
+
+    // Keyboard navigation support
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && e.target.id === 'searchInput') {
+        renderTips(getFilteredTips());
+      }
+    });
+
+    // Initial load
+    fetchTips();
+
+    // Add smooth scroll behavior
+    document.documentElement.style.scrollBehavior = 'smooth';
+  </script>
+</body>
+</html>

@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pet Profiles - PawdCast</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* DMC Color Variables */
+        :root {
+            --dmc-3046: #E6D7B8;  /* Medium Yellow Beige */
+            --dmc-3045: #D9C6A3;  /* Dark Yellow Beige */
+            --dmc-610: #8B7355;   /* Dark Drab Brown */
+            --dmc-3031: #5D4037;  /* Very Dark Mocha Brown */
+            --dmc-3371: #2D1F1A;  /* Black Brown */
+            --dmc-517: #4A708B;   /* Dark Wedgwood */
+            --white: #FFFFFF;
+            
+            /* Semantic Colors */
+            --primary-bg: var(--dmc-3046);
+            --secondary-bg: var(--dmc-3045);
+            --text-primary: var(--dmc-3371);
+            --text-secondary: var(--dmc-3031);
+            --accent-color: var(--dmc-517);
+            --border-color: var(--dmc-610);
+            --card-bg: var(--white);
+            --success-color: #27AE60;
+            --error-color: #E74C3C;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--primary-bg) 0%, var(--secondary-bg) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--dmc-3031) 0%, var(--dmc-3371) 100%);
+            color: var(--primary-bg);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(45, 31, 26, 0.2);
+            margin-bottom: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--dmc-517), var(--dmc-3045));
+        }
+
+        /* Logo Styles */
+        .logo-container {
+            width: 150px;
+            height: 150px;
+            margin-bottom: 20px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-circle {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--dmc-3046), var(--dmc-3045));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            border: 4px solid var(--dmc-517);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.5s ease;
+        }
+
+        .logo-circle::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--dmc-517), var(--dmc-3045), var(--dmc-517));
+            border-radius: 50%;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .logo-circle:hover::before {
+            opacity: 1;
+            animation: rotate 3s linear infinite;
+        }
+
+        .logo-circle:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+            border-color: var(--dmc-3046);
+        }
+
+        .logo-image {
+            width: 80%;
+            height: 80%;
+            object-fit: contain;
+            border-radius: 50%;
+            transition: all 0.5s ease;
+            filter: brightness(0.9) contrast(1.1);
+        }
+
+        .logo-circle:hover .logo-image {
+            transform: scale(1.05);
+            filter: brightness(1) contrast(1.2);
+        }
+
+        @keyframes rotate {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .logo-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120%;
+            height: 120%;
+            background: radial-gradient(circle, rgba(74, 112, 139, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+        }
+
+        .logo-circle:hover .logo-glow {
+            opacity: 1;
+        }
+
+        .header-content {
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        /* Messages */
+        .message {
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            text-align: center;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(45, 31, 26, 0.1);
+            animation: slideIn 0.3s ease-out;
+            border-left: 4px solid transparent;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .success {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            color: #155724;
+            border-left-color: var(--success-color);
+        }
+
+        .error {
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            color: #721c24;
+            border-left-color: var(--error-color);
+        }
+
+        /* Sections */
+        .pet-section {
+            background: var(--card-bg);
+            padding: 35px;
+            border-radius: 20px;
+            box-shadow: 0 8px 25px rgba(45, 31, 26, 0.1);
+            margin-bottom: 30px;
+            border: 2px solid var(--border-color);
+            position: relative;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .pet-section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(45, 31, 26, 0.15);
+        }
+
+        .pet-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--dmc-517), var(--dmc-3045));
+            border-radius: 20px 20px 0 0;
+        }
+
+        .section-title {
+            margin-bottom: 25px;
+            color: var(--dmc-3031);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .section-title h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            position: relative;
+            padding-left: 15px;
+        }
+
+        .section-title h2::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 25px;
+            background: var(--accent-color);
+            border-radius: 2px;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 1rem;
+            background: var(--white);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(45, 31, 26, 0.05);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(74, 112, 139, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .form-group textarea {
+            height: 120px;
+            resize: vertical;
+            line-height: 1.5;
+        }
+
+        /* Buttons */
+        .submit-btn {
+            background: linear-gradient(135deg, var(--accent-color), #5A8BA8);
+            color: var(--white);
+            border: none;
+            padding: 16px 40px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(74, 112, 139, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 112, 139, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn:disabled {
+            background: var(--dmc-610);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .submit-btn:disabled::before {
+            display: none;
+        }
+
+        .add-pet-btn {
+            background: linear-gradient(135deg, var(--dmc-3031), var(--dmc-3371));
+            color: var(--white);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(93, 64, 55, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .add-pet-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(93, 64, 55, 0.4);
+        }
+
+        /* Pets Grid */
+        .pets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
+        }
+
+        .pet-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 6px 20px rgba(45, 31, 26, 0.1);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 2px solid var(--border-color);
+            position: relative;
+        }
+
+        .pet-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(45, 31, 26, 0.15);
+        }
+
+        .pet-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--dmc-517), var(--dmc-3045));
+        }
+
+        .pet-photo {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            background: linear-gradient(135deg, var(--primary-bg), var(--secondary-bg));
+            transition: transform 0.3s ease;
+        }
+
+        .pet-card:hover .pet-photo {
+            transform: scale(1.05);
+        }
+
+        .pet-details {
+            padding: 25px;
+        }
+
+        .pet-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--text-secondary);
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .pet-name::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background: var(--accent-color);
+            border-radius: 2px;
+        }
+
+        .pet-info {
+            margin-bottom: 10px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pet-info strong {
+            color: var(--text-secondary);
+            min-width: 70px;
+        }
+
+        .pet-info i {
+            color: var(--accent-color);
+            width: 16px;
+        }
+
+        /* Empty States */
+        .no-pets {
+            text-align: center;
+            padding: 60px 30px;
+            color: var(--text-secondary);
+            background: linear-gradient(135deg, var(--primary-bg), var(--secondary-bg));
+            border-radius: 16px;
+            border: 2px dashed var(--border-color);
+            grid-column: 1 / -1;
+        }
+
+        .no-pets h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--text-secondary);
+        }
+
+        .no-pets p {
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        /* File Input Styling */
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-input-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--primary-bg), var(--secondary-bg));
+            color: var(--text-secondary);
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .file-input-label:hover {
+            background: linear-gradient(135deg, var(--secondary-bg), var(--dmc-3045));
+            border-color: var(--accent-color);
+            transform: translateY(-1px);
+        }
+
+        .file-name {
+            margin-top: 8px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-align: center;
+            font-style: italic;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 10px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .logo-container {
+                width: 120px;
+                height: 120px;
+            }
+            
+            .pet-section {
+                padding: 25px;
+            }
+            
+            .pets-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .section-title {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .section-title h2 {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 1.7rem;
+            }
+            
+            .logo-container {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .pet-section {
+                padding: 20px;
+            }
+            
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                padding: 12px;
+            }
+            
+            .submit-btn {
+                padding: 14px 30px;
+                font-size: 1rem;
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--primary-bg);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--dmc-517);
+        }
+
+        /* Loading Animation */
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .loading {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        /* Success Animation */
+        @keyframes successBounce {
+            0%, 20%, 60%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            80% { transform: translateY(-5px); }
+        }
+
+        .success-animation {
+            animation: successBounce 0.6s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo-container">
+                <div class="logo-circle">
+                    <img src="https://res.cloudinary.com/dkuuvasoe/image/upload/v1760186124/pawdcastlogo_cb1l1b.png" 
+                         alt="PawdCast Logo" class="logo-image">
+                    <div class="logo-glow"></div>
+                </div>
+            </div>
+            <div class="header-content">
+                <h1><i class="fas fa-paw"></i> Create Pet Profile</h1>
+                <p>Manage your furry friends with love and care</p>
+            </div>
+        </div>
+
+        <!-- Messages Container -->
+        <div id="messageContainer"></div>
+
+        <!-- Pet Creation Form -->
+        <div class="pet-section">
+            <div class="section-title">
+                <h2>Add New Pet</h2>
+            </div>
+            
+            <form id="petForm">
+                <div class="form-group">
+                    <label for="name"><i class="fas fa-tag"></i> Pet Name *</label>
+                    <input type="text" id="name" name="name" required placeholder="Enter your pet's name">
+                </div>
+
+                <div class="form-group">
+                    <label for="type"><i class="fas fa-paw"></i> Animal Type *</label>
+                    <select id="type" name="type" required>
+                        <option value="">Select Type</option>
+                        <option value="Dog">🐕 Dog</option>
+                        <option value="Cat">🐈 Cat</option>
+                        <option value="Bird">🐦 Bird</option>
+                        <option value="Rabbit">🐇 Rabbit</option>
+                        <option value="Fish">🐠 Fish</option>
+                        <option value="Other">🐾 Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="breed"><i class="fas fa-dna"></i> Breed *</label>
+                    <input type="text" id="breed" name="breed" required placeholder="Enter breed (e.g., Golden Retriever)">
+                </div>
+
+                <div class="form-group">
+                    <label for="dob"><i class="fas fa-birthday-cake"></i> Date of Birth</label>
+                    <input type="date" id="dob" name="dob">
+                </div>
+
+                <div class="form-group">
+                    <label for="medicalRecords"><i class="fas fa-heartbeat"></i> Medical Records</label>
+                    <textarea id="medicalRecords" name="medicalRecords" placeholder="Any existing medical conditions, allergies, medications, etc."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-camera"></i> Pet Photo</label>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="photo" name="photo" accept="image/*" class="file-input">
+                        <label for="photo" class="file-input-label">
+                            <i class="fas fa-cloud-upload-alt"></i> Choose Photo
+                        </label>
+                    </div>
+                    <div id="fileName" class="file-name">No file chosen</div>
+                </div>
+
+                <button type="button" class="submit-btn" id="submitBtn" onclick="handleFormSubmit()">
+                    <i class="fas fa-plus-circle"></i> Create Pet Profile
+                </button>
+            </form>
+        </div>
+
+        <!-- Existing Pets Section -->
+        <div class="pet-section">
+            <div class="section-title">
+                <h2>My Pets</h2>
+                <button class="add-pet-btn" onclick="loadUserPets()">
+                    <i class="fas fa-sync-alt"></i> Refresh Pets
+                </button>
+            </div>
+
+            <!-- Pets Grid -->
+            <div id="petsGrid" class="pets-grid">
+                <div class="no-pets">
+                    <h3>No pets created yet</h3>
+                    <p>Fill the form above to create your first pet profile!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080';
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded, loading pets...');
+            loadUserPets();
+            
+            // Add form submission handler
+            document.getElementById('petForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                handleFormSubmit();
+            });
+
+            // File input change handler
+            document.getElementById('photo').addEventListener('change', function(e) {
+                const fileName = document.getElementById('fileName');
+                if (this.files.length > 0) {
+                    fileName.textContent = this.files[0].name;
+                    fileName.style.color = 'var(--success-color)';
+                } else {
+                    fileName.textContent = 'No file chosen';
+                    fileName.style.color = 'var(--text-secondary)';
+                }
+            });
+        });
+
+        // Load user's pets
+        async function loadUserPets() {
+            const petsGrid = document.getElementById('petsGrid');
+            petsGrid.classList.add('loading');
+            
+            try {
+                console.log('Loading pets...');
+                const response = await fetch(`${API_BASE}/pet-profiles/my-pets`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                console.log('Response status:', response.status);
+                
+                if (response.ok) {
+                    const pets = await response.json();
+                    console.log('Pets loaded:', pets);
+                    displayPets(pets);
+                } else {
+                    const errorText = await response.text();
+                    console.error('Error response:', errorText);
+                    showMessage('Please login first from the home page', 'error');
+                }
+            } catch (error) {
+                console.error('Error loading pets:', error);
+                showMessage('Network error. Please check your connection.', 'error');
+            } finally {
+                petsGrid.classList.remove('loading');
+            }
+        }
+
+        // Display pets in grid
+        function displayPets(pets) {
+            const petsGrid = document.getElementById('petsGrid');
+            
+            if (pets.length === 0) {
+                petsGrid.innerHTML = `
+                    <div class="no-pets">
+                        <h3>No pets yet</h3>
+                        <p>Fill the form above to create your first pet!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            petsGrid.innerHTML = pets.map(pet => `
+                <div class="pet-card" data-pet-id="${pet.petId}">
+                    <img src="${pet.hasPhoto ? `${API_BASE}/pet-profiles/${pet.petId}/photo` : 'https://via.placeholder.com/300x200?text=No+Image'}" 
+                         alt="${pet.name}" class="pet-photo"
+                         onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
+                    <div class="pet-details">
+                        <div class="pet-name">${pet.name}</div>
+                        <div class="pet-info">
+                            <i class="fas fa-paw"></i>
+                            <strong>Type:</strong> ${pet.type}
+                        </div>
+                        <div class="pet-info">
+                            <i class="fas fa-dna"></i>
+                            <strong>Breed:</strong> ${pet.breed}
+                        </div>
+                        <div class="pet-info">
+                            <i class="fas fa-birthday-cake"></i>
+                            <strong>Age:</strong> ${calculateAge(pet.dob)}
+                        </div>
+                        ${pet.medicalRecords ? `
+                        <div class="pet-info">
+                            <i class="fas fa-heartbeat"></i>
+                            <strong>Medical:</strong> ${pet.medicalRecords.substring(0, 50)}${pet.medicalRecords.length > 50 ? '...' : ''}
+                        </div>` : ''}
+                    </div>
+                </div>
+            `).join('');
+
+            // Add success animation to cards
+            setTimeout(() => {
+                document.querySelectorAll('.pet-card').forEach(card => {
+                    card.classList.add('success-animation');
+                    setTimeout(() => card.classList.remove('success-animation'), 600);
+                });
+            }, 100);
+        }
+
+        // Calculate age from date of birth
+        function calculateAge(dobString) {
+            if (!dobString) return 'Unknown';
+            
+            const dob = new Date(dobString);
+            const today = new Date();
+            let age = today.getFullYear() - dob.getFullYear();
+            const monthDiff = today.getMonth() - dob.getMonth();
+            
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+                age--;
+            }
+            
+            return age > 0 ? `${age} years` : 'Less than 1 year';
+        }
+
+        // Handle form submission
+        async function handleFormSubmit() {
+            console.log('Form submission started...');
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+            submitBtn.disabled = true;
+
+            try {
+                const formData = new FormData();
+                formData.append('name', document.getElementById('name').value);
+                formData.append('type', document.getElementById('type').value);
+                formData.append('breed', document.getElementById('breed').value);
+                formData.append('dob', document.getElementById('dob').value);
+                formData.append('medicalRecords', document.getElementById('medicalRecords').value);
+                
+                const photoFile = document.getElementById('photo').files[0];
+                if (photoFile) {
+                    formData.append('photo', photoFile);
+                }
+
+                console.log('Sending request to create pet...');
+                
+                const response = await fetch(`${API_BASE}/pet-profiles/create`, {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                });
+
+                console.log('Create pet response status:', response.status);
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('Pet created successfully:', result);
+                    showMessage(`🎉 Pet profile "${document.getElementById('name').value}" created successfully!`, 'success');
+                    document.getElementById('petForm').reset();
+                    document.getElementById('fileName').textContent = 'No file chosen';
+                    document.getElementById('fileName').style.color = 'var(--text-secondary)';
+                    loadUserPets(); // Refresh the pets list
+                } else {
+                    const error = await response.text();
+                    console.error('Error creating pet:', error);
+                    showMessage(error || 'Error creating pet profile. Please login first.', 'error');
+                }
+            } catch (error) {
+                console.error('Error creating pet:', error);
+                showMessage('Network error. Please check your connection.', 'error');
+            } finally {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        // Show message
+        function showMessage(message, type) {
+            const messageContainer = document.getElementById('messageContainer');
+            messageContainer.innerHTML = `
+                <div class="message ${type}">
+                    ${message}
+                </div>
+            `;
+            
+            setTimeout(() => {
+                messageContainer.innerHTML = '';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

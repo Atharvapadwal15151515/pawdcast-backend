@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Vet Clinics Map - Pawdcast</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.fullscreen/Control.FullScreen.css" />
+    <script src="https://unpkg.com/leaflet.fullscreen/Control.FullScreen.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+    <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+
+    <style>
+        /* Color System */
+        :root {
+            --medium-yellow-beige: #C8A882;
+            --dark-yellow-beige: #B39369;
+            --dark-drab-brown: #8B7355;
+            --very-dark-mocha: #3E342A;
+            --black-brown: #1A1612;
+            --dark-wedgwood: #4A6D7C;
+            --emergency-red: #E74C3C;
+            --emergency-red-hover: #C0392B;
+            --directions-blue: #3498DB;
+            --directions-blue-hover: #2980B9;
+            --white: #FFFFFF;
+
+            --primary: var(--dark-wedgwood);
+            --primary-hover: #3d5865;
+            --secondary: var(--medium-yellow-beige);
+            --secondary-hover: var(--dark-yellow-beige);
+            --accent: var(--dark-drab-brown);
+            --dark: var(--very-dark-mocha);
+            --darker: var(--black-brown);
+
+            --bg-primary: #FAF8F5;
+            --bg-secondary: var(--white);
+            --text-primary: var(--black-brown);
+            --text-secondary: var(--very-dark-mocha);
+            --text-muted: var(--dark-drab-brown);
+            --border-color: #E5DFD6;
+
+            --shadow-sm: 0 2px 8px rgba(62, 52, 42, 0.08);
+            --shadow-md: 0 4px 16px rgba(62, 52, 42, 0.12);
+            --shadow-lg: 0 8px 32px rgba(62, 52, 42, 0.16);
+            --shadow-xl: 0 12px 48px rgba(62, 52, 42, 0.2);
+
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --transition-base: 250ms ease;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+            color: var(--text-primary);
+            background: var(--bg-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+            padding: 32px 24px;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(200, 168, 130, 0.1) 0%, transparent 70%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(5deg); }
+        }
+
+        /* Logo Styles */
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            border: 3px solid var(--medium-yellow-beige);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+            border-color: var(--dark-wedgwood);
+        }
+
+        .logo::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--dark-wedgwood), var(--medium-yellow-beige), var(--dark-drab-brown));
+            border-radius: 50%;
+            z-index: -1;
+            animation: rotate 10s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .logo img {
+            width: 85%;
+            height: 85%;
+            object-fit: contain;
+            border-radius: 50%;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+        }
+
+        .header-text {
+            text-align: center;
+        }
+
+        header h1 {
+            position: relative;
+            margin: 0;
+            font-weight: 800;
+            font-size: 36px;
+            color: var(--white);
+            text-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            letter-spacing: -0.5px;
+        }
+
+        header p {
+            position: relative;
+            margin: 12px 0 0;
+            color: var(--secondary);
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        /* Controls Section */
+        #controls {
+            width: min(1080px, 94%);
+            margin: 28px auto 20px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            padding: 28px 24px;
+            transition: all var(--transition-base);
+        }
+
+        #controls:hover {
+            box-shadow: var(--shadow-xl);
+        }
+
+        .controls-title {
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            font-size: 18px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .controls-title i {
+            color: var(--primary);
+        }
+
+        #controls .row {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .form-group label i {
+            color: var(--primary);
+        }
+
+        select, button {
+            padding: 14px 18px;
+            border-radius: var(--radius-md);
+            font-size: 15px;
+            font-family: inherit;
+            font-weight: 500;
+            transition: all var(--transition-base);
+            outline: none;
+        }
+
+        select {
+            border: 2px solid var(--border-color);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            cursor: pointer;
+            min-width: 200px;
+        }
+
+        select:hover {
+            border-color: var(--accent);
+        }
+
+        select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(74, 109, 124, 0.15);
+        }
+
+        select:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        button {
+            border: none;
+            background: var(--primary);
+            color: var(--white);
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            min-width: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        button:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.emergency {
+            background: var(--emergency-red);
+        }
+
+        button.emergency:hover {
+            background: var(--emergency-red-hover);
+        }
+
+        button.directions {
+            background: var(--directions-blue);
+        }
+
+        button.directions:hover {
+            background: var(--directions-blue-hover);
+        }
+
+        /* Filter Section */
+        .filter-section {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 10px 16px;
+            border: 2px solid var(--border-color);
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all var(--transition-base);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            color: var(--white);
+            border-color: var(--primary);
+        }
+
+        .filter-btn.emergency.active {
+            background: var(--emergency-red);
+            border-color: var(--emergency-red);
+        }
+
+        /* Main Layout */
+        main {
+            width: min(1400px, 96%);
+            margin: 0 auto 40px;
+            display: grid;
+            grid-template-columns: 1.8fr 1fr;
+            gap: 20px;
+            flex: 1;
+        }
+
+        /* Map Container */
+        #map-wrap {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            transition: all var(--transition-base);
+            position: relative;
+        }
+
+        #map-wrap:hover {
+            box-shadow: var(--shadow-xl);
+        }
+
+        #map {
+            height: 70vh;
+            width: 100%;
+        }
+
+        /* Location button */
+        #location-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition-base);
+        }
+
+        #location-btn:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Directions Controls */
+        #directions-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            box-shadow: var(--shadow-lg);
+            max-width: 300px;
+            display: none;
+        }
+
+        #directions-controls.active {
+            display: block;
+        }
+
+        .directions-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .directions-header h4 {
+            margin: 0;
+            color: var(--text-primary);
+            font-size: 16px;
+        }
+
+        .close-directions {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--text-muted);
+            min-width: auto;
+            padding: 4px;
+        }
+
+        .close-directions:hover {
+            color: var(--emergency-red);
+            background: none;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Sidebar */
+        #sidebar {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            padding: 24px;
+            box-shadow: var(--shadow-lg);
+            overflow-y: auto;
+            max-height: 70vh;
+        }
+
+        #sidebar::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #sidebar::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+            border-radius: 4px;
+        }
+
+        #sidebar::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 4px;
+        }
+
+        #sidebar::-webkit-scrollbar-thumb:hover {
+            background: var(--dark);
+        }
+
+        #sidebar h3 {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 3px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #clinicList {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* Clinic Item Cards */
+        .clinic-item {
+            border: 2px solid var(--border-color);
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--white) 100%);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            margin: 12px 0;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .clinic-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(74, 109, 124, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .clinic-item:hover::before {
+            left: 100%;
+        }
+
+        .clinic-item:hover {
+            border-color: var(--primary);
+            transform: translateX(4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .clinic-item.emergency {
+            border-left: 4px solid var(--emergency-red);
+        }
+
+        .clinic-name {
+            font-weight: 800;
+            font-size: 16px;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .clinic-name::before {
+            content: '🏥';
+            font-size: 18px;
+        }
+
+        .clinic-area {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-top: 4px;
+            padding-left: 26px;
+        }
+
+        .clinic-distance {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            padding-left: 26px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .clinic-hours {
+            font-size: 13px;
+            margin-top: 6px;
+            padding-left: 26px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .emergency-badge {
+            background: var(--emergency-red);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-left: 8px;
+        }
+
+        .clinic-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            padding-left: 26px;
+        }
+
+        .action-btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .action-btn.directions {
+            background: var(--directions-blue);
+            color: white;
+        }
+
+        .action-btn.directions:hover {
+            background: var(--directions-blue-hover);
+            transform: translateY(-1px);
+        }
+
+        .action-btn.view {
+            background: var(--primary);
+            color: white;
+        }
+
+        .action-btn.view:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Success message */
+        .success-message {
+            background: rgba(74, 109, 124, 0.1);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            padding: 15px 20px;
+            border-radius: var(--radius-md);
+            margin: 15px 0;
+            font-weight: 500;
+        }
+
+        /* Disclaimer */
+        #disclaimer {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(62, 52, 42, 0.95);
+            color: white;
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            font-size: 12px;
+            max-width: 300px;
+            box-shadow: var(--shadow-lg);
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            border-left: 4px solid var(--emergency-red);
+            transition: all var(--transition-base);
+        }
+
+        #disclaimer:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        #disclaimer .disclaimer-title {
+            font-weight: 700;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        #disclaimer .disclaimer-title i {
+            color: var(--emergency-red);
+        }
+
+        #disclaimer .disclaimer-content {
+            line-height: 1.4;
+        }
+
+        /* Leaflet Popup Customization */
+        .leaflet-popup-content-wrapper {
+            background: var(--bg-secondary);
+            border: 2px solid var(--primary);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .leaflet-popup-content {
+            margin: 16px;
+            font-family: inherit;
+        }
+
+        .leaflet-popup-content b {
+            color: var(--primary);
+            font-size: 16px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .leaflet-popup-content a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color var(--transition-base);
+        }
+
+        .leaflet-popup-content a:hover {
+            color: var(--primary-hover);
+            text-decoration: underline;
+        }
+
+        .leaflet-popup-tip {
+            background: var(--primary);
+        }
+
+        /* Routing machine customization */
+        .leaflet-routing-container {
+            background: var(--bg-secondary);
+            border: 2px solid var(--primary);
+            border-radius: var(--radius-md);
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .leaflet-routing-alt {
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .leaflet-routing-alt:last-child {
+            border-bottom: none;
+        }
+
+        .leaflet-routing-alt h2 {
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .leaflet-routing-alt h3 {
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+
+            #sidebar {
+                max-height: 50vh;
+            }
+
+            #map {
+                height: 55vh;
+            }
+        }
+
+        @media (max-width: 640px) {
+            header h1 {
+                font-size: 28px;
+            }
+
+            header p {
+                font-size: 14px;
+            }
+
+            #controls {
+                padding: 20px 16px;
+            }
+
+            #controls .row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            select, button {
+                width: 100%;
+                min-width: unset;
+            }
+
+            #map {
+                height: 50vh;
+            }
+
+            #sidebar {
+                max-height: 45vh;
+            }
+            
+            .logo {
+                width: 60px;
+                height: 60px;
+            }
+
+            .filter-section {
+                flex-direction: column;
+            }
+
+            .clinic-actions {
+                flex-direction: column;
+            }
+
+            #directions-controls {
+                max-width: calc(100% - 40px);
+            }
+            
+            #disclaimer {
+                max-width: calc(100% - 40px);
+                right: 20px;
+                left: 20px;
+            }
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.4s ease-out;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo-container">
+        <div class="logo">
+            <img src="https://res.cloudinary.com/dkuuvasoe/image/upload/v1760186124/pawdcastlogo_cb1l1b.png" alt="Pawdcast Logo">
+        </div>
+        <div class="header-text">
+            <h1>Vet Clinics Locator</h1>
+            <p>Find trusted veterinary clinics near you - including 24/7 emergency services</p>
+        </div>
+    </div>
+</header>
+
+<section id="controls" class="fade-in">
+    <div class="controls-title">
+        <i class="fas fa-search-location"></i>
+        Find Veterinary Clinics
+    </div>
+    <div class="row">
+        <div class="form-group">
+            <label for="radiusSelect">
+                <i class="fas fa-ruler"></i>
+                Search Radius
+            </label>
+            <select id="radiusSelect">
+                <option value="3000">3 km</option>
+                <option value="5000" selected>5 km</option>
+                <option value="10000">10 km</option>
+                <option value="25000">25 km</option>
+                <option value="50000">50 km</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>&nbsp;</label>
+            <button onclick="getUserLocation()">
+                <i class="fas fa-location-arrow"></i>
+                Use My Location
+            </button>
+        </div>
+    </div>
+
+    <div class="filter-section">
+        <div class="filter-btn active" data-filter="all">
+            <i class="fas fa-clinic-medical"></i>
+            All Clinics
+        </div>
+        <div class="filter-btn" data-filter="emergency">
+            <i class="fas fa-ambulance"></i>
+            24/7 Emergency
+        </div>
+    </div>
+</section>
+
+<main>
+    <div id="map-wrap" class="fade-in">
+        <div id="map"></div>
+        <button id="location-btn" title="Use my location">
+            <i class="fas fa-location-arrow"></i>
+        </button>
+        <div id="directions-controls">
+            <div class="directions-header">
+                <h4><i class="fas fa-route"></i> Directions</h4>
+                <button class="close-directions" onclick="hideDirections()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="directions-info"></div>
+        </div>
+    </div>
+    <aside id="sidebar" class="fade-in">
+        <h3><i class="fas fa-clinic-medical"></i> Available Clinics</h3>
+        <div id="clinicList">Use your location to find veterinary clinics nearby</div>
+    </aside>
+</main>
+
+<!-- Disclaimer Section -->
+<div id="disclaimer" class="fade-in">
+    <div class="disclaimer-title">
+        <i class="fas fa-exclamation-triangle"></i>
+        Important Notice
+    </div>
+    <div class="disclaimer-content">
+        Clinic data may not always be accurate. Please verify before visiting. 
+        Estimated travel times might be inaccurate due to traffic conditions.
+    </div>
+</div>
+
+<script>
+    // Map setup
+    const map = L.map('map', { 
+        fullscreenControl: true,
+        zoomControl: true
+    }).setView([20.5937, 78.9629], 5); // Default India view
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    let markers = [];
+    let userLocation = null;
+    let userMarker = null;
+    let allClinics = [];
+    let currentFilter = 'all';
+    let routingControl = null;
+
+    // Location button handler
+    document.getElementById('location-btn').addEventListener('click', getUserLocation);
+    
+    // Filter buttons
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            currentFilter = this.dataset.filter;
+            filterClinics();
+        });
+    });
+
+    // Get user's location
+    function getUserLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                position => {
+                    userLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    
+                    // Center map on user location
+                    map.setView([userLocation.lat, userLocation.lng], 13);
+                    
+                    // Add or update user marker
+                    if (userMarker) {
+                        map.removeLayer(userMarker);
+                    }
+                    
+                    userMarker = L.marker([userLocation.lat, userLocation.lng])
+                        .addTo(map)
+                        .bindPopup("<b>📍 You are here</b>")
+                        .openPopup();
+                        
+                    // Add a circle to show accuracy
+                    L.circle([userLocation.lat, userLocation.lng], {
+                        color: 'var(--primary)',
+                        fillColor: 'var(--primary)',
+                        fillOpacity: 0.1,
+                        radius: position.coords.accuracy / 2
+                    }).addTo(map);
+                    
+                    // Update UI and find clinics
+                    document.getElementById('clinicList').innerHTML = 
+                        '<div class="success-message"><i class="fas fa-check-circle"></i> Location found! Searching for veterinary clinics...</div>';
+                    
+                    findClinics();
+                },
+                error => {
+                    let errorMsg = "Unable to retrieve your location. ";
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMsg += "Location access was denied.";
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMsg += "Location information is unavailable.";
+                            break;
+                        case error.TIMEOUT:
+                            errorMsg += "Location request timed out.";
+                            break;
+                        default:
+                            errorMsg += "An unknown error occurred.";
+                            break;
+                    }
+                    alert(errorMsg);
+                }
+            );
+        } else {
+            alert("Geolocation is not supported by this browser.");
+        }
+    }
+    
+    // Calculate distance between two coordinates
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371; // Earth's radius in km
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = 
+            Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        const distance = R * c;
+        return distance;
+    }
+
+    // Fetch real veterinary clinics from OpenStreetMap
+    async function findClinics() {
+        // Clear existing markers 
+        markers.forEach(m => map.removeLayer(m)); 
+        markers = []; 
+
+        const list = document.getElementById('clinicList'); 
+        list.innerHTML = '<div class="loading">Finding veterinary clinics near you...</div>'; 
+
+        const radius = document.getElementById('radiusSelect').value; 
+
+        if (!userLocation) {
+            list.innerHTML = '<div class="empty-state">Please allow location access to find clinics near you.</div>';
+            return;
+        }
+        
+        // Define OSM query for veterinary clinics
+        const osmQuery = `[out:json];
+            (
+                node["amenity"="veterinary"](around:${radius},${userLocation.lat},${userLocation.lng});
+                node["amenity"="clinic"]["healthcare"="veterinary"](around:${radius},${userLocation.lat},${userLocation.lng});
+                node["healthcare"="veterinary"](around:${radius},${userLocation.lat},${userLocation.lng});
+            );
+            out;`;
+        
+        try {
+            const url = "https://overpass-api.de/api/interpreter?data=" + encodeURIComponent(osmQuery);
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            if (!data.elements || data.elements.length === 0) {
+                list.innerHTML = `<div class="empty-state"><i class="fas fa-clinic-medical"></i> No veterinary clinics found within ${parseInt(radius)/1000} km. Try increasing the search radius.</div>`;
+                return;
+            }
+            
+            // Process clinics
+            allClinics = data.elements
+                .filter(clinic => clinic.tags && clinic.tags.name) // Only include clinics with names
+                .map(clinic => {
+                    const distance = calculateDistance(userLocation.lat, userLocation.lng, clinic.lat, clinic.lon);
+                    
+                    // Determine if it's a 24/7 clinic (heuristic based on name/tags)
+                    const isEmergency = 
+                        clinic.tags.name?.toLowerCase().includes('emergency') ||
+                        clinic.tags.name?.toLowerCase().includes('24') ||
+                        clinic.tags.name?.toLowerCase().includes('urgent') ||
+                        clinic.tags['opening_hours'] === '24/7';
+                    
+                    return {
+                        ...clinic,
+                        distance: distance,
+                        isEmergency: isEmergency,
+                        travelTime: Math.round((distance / 40) * 60) // Driving time in minutes
+                    };
+                })
+                .sort((a, b) => a.distance - b.distance); // Sort by distance
+            
+            if (allClinics.length === 0) {
+                list.innerHTML = `<div class="empty-state"><i class="fas fa-clinic-medical"></i> No named veterinary clinics found within ${parseInt(radius)/1000} km. Try increasing the search radius.</div>`;
+                return;
+            }
+            
+            // Display clinics based on current filter
+            filterClinics();
+            
+        } catch (error) {
+            console.error('Error fetching clinics:', error);
+            list.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i> Sorry, we encountered an error while searching for clinics. Please try again later.</div>';
+        }
+    }
+
+    // Filter clinics based on current filter
+    function filterClinics() {
+        const list = document.getElementById('clinicList');
+        
+        // Clear existing markers
+        markers.forEach(m => map.removeLayer(m));
+        markers = [];
+        
+        // Filter clinics
+        const filteredClinics = currentFilter === 'emergency' 
+            ? allClinics.filter(clinic => clinic.isEmergency)
+            : allClinics;
+        
+        if (filteredClinics.length === 0) {
+            list.innerHTML = `<div class="empty-state"><i class="fas fa-clinic-medical"></i> No ${currentFilter === 'emergency' ? '24/7 emergency' : ''} clinics found. Try a different filter or increase search radius.</div>`;
+            return;
+        }
+        
+        // Display clinics
+        let html = '';
+        filteredClinics.forEach((clinic, idx) => {
+            // Create marker
+            const markerColor = clinic.isEmergency ? 'var(--emergency-red)' : 'var(--primary)';
+            const marker = L.marker([clinic.lat, clinic.lon]).addTo(map);
+            
+            // Build popup content
+            let popupContent = `<b>${clinic.tags.name}</b><br>`;
+            popupContent += `${clinic.distance.toFixed(1)} km away<br>`;
+            if (clinic.isEmergency) {
+                popupContent += '<span style="color: var(--emergency-red); font-weight: bold;">🆘 24/7 Emergency</span><br>';
+            }
+            if (clinic.tags['opening_hours']) {
+                popupContent += `<br><i class="fas fa-clock"></i> ${clinic.tags['opening_hours']}`;
+            }
+            if (clinic.tags['phone']) {
+                popupContent += `<br><i class="fas fa-phone"></i> <a href="tel:${clinic.tags['phone']}">${clinic.tags['phone']}</a>`;
+            }
+            if (clinic.tags['website']) {
+                popupContent += `<br><a href="${clinic.tags['website']}" target="_blank"><i class="fas fa-globe"></i> Website</a>`;
+            }
+            popupContent += `<br><button class="action-btn directions" onclick="showDirections(${idx})" style="margin-top: 8px; padding: 6px 10px; font-size: 11px;">
+                <i class="fas fa-route"></i> Get Directions
+            </button>`;
+            
+            marker.bindPopup(popupContent);
+            markers.push(marker);
+            
+            // Create list item
+            html += `
+                <div class="clinic-item ${clinic.isEmergency ? 'emergency' : ''}" onclick="focusClinic(${idx})">
+                    <div class="clinic-name">
+                        ${clinic.tags.name}
+                        ${clinic.isEmergency ? '<span class="emergency-badge">24/7</span>' : ''}
+                    </div>
+                    <div class="clinic-area"><i class="fas fa-map-marker-alt"></i> ${clinic.distance.toFixed(1)} km away</div>
+                    <div class="clinic-distance"><i class="fas fa-car"></i> About ${clinic.travelTime} min drive</div>
+                    ${clinic.tags['opening_hours'] ? `<div class="clinic-hours"><i class="fas fa-clock"></i> ${clinic.tags['opening_hours']}</div>` : ''}
+                    ${clinic.tags['phone'] ? `<div class="clinic-hours"><i class="fas fa-phone"></i> ${clinic.tags['phone']}</div>` : ''}
+                    <div class="clinic-actions">
+                        <button class="action-btn view" onclick="focusClinic(${idx})">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button class="action-btn directions" onclick="showDirections(${idx})">
+                            <i class="fas fa-route"></i> Directions
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+        
+        // Show success message
+        const successMsg = document.createElement('div');
+        successMsg.className = 'success-message';
+        successMsg.innerHTML = `<i class="fas fa-check-circle"></i> Found ${filteredClinics.length} ${currentFilter === 'emergency' ? '24/7 emergency ' : ''}clinic${filteredClinics.length !== 1 ? 's' : ''} within ${parseInt(document.getElementById('radiusSelect').value)/1000} km`;
+        list.innerHTML = '';
+        list.appendChild(successMsg);
+        list.innerHTML += html;
+        
+        // Focus map on first clinic
+        if (filteredClinics.length > 0) {
+            map.setView([filteredClinics[0].lat, filteredClinics[0].lon], 13);
+        }
+    }
+
+    function focusClinic(index) {
+        const filteredClinics = currentFilter === 'emergency' 
+            ? allClinics.filter(clinic => clinic.isEmergency)
+            : allClinics;
+            
+        if (filteredClinics[index]) {
+            const clinic = filteredClinics[index];
+            map.setView([clinic.lat, clinic.lon], 16);
+            markers[index].openPopup();
+        }
+    }
+
+    function showDirections(index) {
+        if (!userLocation) {
+            alert("Please enable location services first.");
+            return;
+        }
+
+        const filteredClinics = currentFilter === 'emergency' 
+            ? allClinics.filter(clinic => clinic.isEmergency)
+            : allClinics;
+            
+        const clinic = filteredClinics[index];
+        
+        if (!clinic) return;
+
+        // Remove existing routing control
+        if (routingControl) {
+            map.removeControl(routingControl);
+        }
+
+        // Create routing control
+        routingControl = L.Routing.control({
+            waypoints: [
+                L.latLng(userLocation.lat, userLocation.lng),
+                L.latLng(clinic.lat, clinic.lon)
+            ],
+            routeWhileDragging: false,
+            showAlternatives: false,
+            lineOptions: {
+                styles: [{color: 'var(--directions-blue)', weight: 6}]
+            },
+            createMarker: function() { return null; }, // Don't create default markers
+            formatter: new L.Routing.Formatter({
+                language: 'en',
+                units: 'metric'
+            })
+        }).addTo(map);
+
+        // Show directions panel
+        document.getElementById('directions-controls').classList.add('active');
+        document.getElementById('directions-info').innerHTML = `
+            <div style="margin-bottom: 10px;">
+                <strong>Route to:</strong> ${clinic.tags.name}<br>
+                <strong>Distance:</strong> ${clinic.distance.toFixed(1)} km<br>
+                <strong>Estimated time:</strong> ${clinic.travelTime} min
+            </div>
+            <div style="font-size: 12px; color: var(--text-muted);">
+                <i class="fas fa-info-circle"></i> Turn-by-turn directions will appear here
+            </div>
+        `;
+
+        // Fit map to show entire route
+        routingControl.on('routesfound', function(e) {
+            const routes = e.routes;
+            const bounds = new L.LatLngBounds();
+            routes[0].coordinates.forEach(coord => {
+                bounds.extend(coord);
+            });
+            map.fitBounds(bounds, { padding: [20, 20] });
+        });
+    }
+
+    function hideDirections() {
+        if (routingControl) {
+            map.removeControl(routingControl);
+            routingControl = null;
+        }
+        document.getElementById('directions-controls').classList.remove('active');
+    }
+
+    // Add Font Awesome icons
+    const faLink = document.createElement('link');
+    faLink.rel = 'stylesheet';
+    faLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css';
+    document.head.appendChild(faLink);
+</script>
+</body>
+</html>

@@ -1,0 +1,1499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pawdcast - Your Pet's Digital Companion</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'yellow-beige': '#F4E4BC',
+                        'dark-yellow-beige': '#E6D4A3',
+                        'drab-brown': '#8B7355',
+                        'mocha-brown': '#5D4E37',
+                        'black-brown': '#2F261A',
+                        'wedgwood': '#4682B4'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #F4E4BC 0%, #E6D4A3 100%); }
+        .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-hover:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(47, 38, 26, 0.15); }
+        .btn-primary { background: linear-gradient(135deg, #4682B4 0%, #5D4E37 100%); }
+        .btn-primary:hover { background: linear-gradient(135deg, #5D4E37 0%, #4682B4 100%); }
+        .pulse-slow { animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        .fade-in { animation: fadeIn 0.6s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .nav-link { position: relative; overflow: hidden; }
+        .nav-link::after { content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 2px; background: #4682B4; transition: width 0.3s ease; }
+        .nav-link:hover::after { width: 100%; }
+        .feature-icon { background: linear-gradient(135deg, #F4E4BC 0%, #E6D4A3 100%); }
+        .logo-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .logo-hover:hover { transform: scale(1.1) rotate(5deg); filter: brightness(1.1); }
+        .faq-item { transition: all 0.3s ease; }
+        .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+        .faq-item.active .faq-answer { max-height: 500px; }
+    </style>
+</head>
+<body class="bg-yellow-beige min-h-screen">
+
+<!-- HEADER -->
+<header class="bg-white/95 backdrop-blur-sm shadow-lg sticky top-0 z-50 border-b-2 border-dark-yellow-beige">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center py-4">
+            <!-- Logo & Brand -->
+            <div class="flex items-center space-x-3">
+                <img src="https://res.cloudinary.com/dkuuvasoe/image/upload/v1760186124/pawdcastlogo_cb1l1b.png" 
+                     alt="Pawdcast Logo" 
+                     class="logo-hover w-10 h-10 rounded-full">
+                <h1 class="text-2xl font-bold text-black-brown">Pawdcast</h1>
+            </div>
+
+            <!-- Navigation (Desktop) -->
+            <nav class="hidden md:flex space-x-8">
+                <a href="#" class="nav-link text-mocha-brown hover:text-wedgwood font-medium transition-colors">Home</a>
+                <a href="#features" class="nav-link text-mocha-brown hover:text-wedgwood font-medium transition-colors">Features</a>
+                <a href="#faq" class="nav-link text-mocha-brown hover:text-wedgwood font-medium transition-colors" onclick="showFAQ()">FAQ</a>
+            </nav>
+
+            <!-- Auth Buttons -->
+            <div class="flex items-center space-x-3">
+                <button id="loginBtn" class="px-6 py-2 text-wedgwood border-2 border-wedgwood rounded-full hover:bg-wedgwood hover:text-white transition-all duration-300 font-medium">
+                    Login
+                </button>
+                <button id="signupBtn" class="px-6 py-2 btn-primary text-white rounded-full hover:scale-105 transition-all duration-300 font-medium shadow-lg">
+                    Sign Up
+                </button>
+                
+                <!-- Profile Container (Hidden by default) -->
+                <div id="profileContainer" class="relative hidden">
+                    <button id="profileBtn" class="flex items-center space-x-2 p-2 rounded-full hover:bg-white/80 transition-all duration-300 group">
+                        <div class="relative">
+                            <img id="profilePic" src="" alt="Profile" class="w-11 h-11 rounded-full object-cover border-3 border-wedgwood shadow-md group-hover:shadow-xl group-hover:scale-105 transition-all duration-300">
+                            <div class="absolute inset-0 rounded-full bg-wedgwood/0 group-hover:bg-wedgwood/10 transition-all duration-300"></div>
+                        </div>
+                        <svg class="w-4 h-4 text-mocha-brown group-hover:text-wedgwood transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    
+                    <!-- Dropdown -->
+                    <div id="profileDropdown" class="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-dark-yellow-beige hidden overflow-hidden">
+                        <div class="p-4 bg-gradient-to-r from-yellow-beige to-dark-yellow-beige">
+                            <p id="profileName" class="font-bold text-black-brown"></p>
+                            <p id="profileEmail" class="text-sm text-mocha-brown"></p>
+                        </div>
+                        <div class="p-4">
+                            <button id="logoutBtn" class="w-full py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors font-medium">
+                                Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- HERO SECTION -->
+<section class="gradient-bg py-20 relative overflow-hidden">
+    <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%235D4E37" fill-opacity="0.1"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-30"></div>
+    
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <div class="text-center fade-in">
+            <!-- Big Circle Logo -->
+            <div class="flex justify-center mb-8">
+                <img src="https://res.cloudinary.com/dkuuvasoe/image/upload/v1760186124/pawdcastlogo_cb1l1b.png" 
+                     alt="Pawdcast Logo" 
+                     class="logo-hover w-48 h-48 rounded-full shadow-2xl border-4 border-white">
+            </div>
+
+            <h1 class="text-5xl md:text-7xl font-bold text-black-brown mb-6 leading-tight">
+                Your Pet's Digital
+                <span class="text-wedgwood">Companion</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-mocha-brown mb-8 max-w-3xl mx-auto leading-relaxed">
+                Comprehensive pet care management, breed information, training tips, and health tracking - all in one beautiful platform.
+            </p>
+            
+            <!-- Why This Matters Section -->
+            <div class="max-w-4xl mx-auto mb-10 bg-white/60 backdrop-blur rounded-2xl p-8 shadow-lg">
+                <h3 class="text-2xl font-bold text-black-brown mb-4 flex items-center justify-center gap-2">
+                    <span>🎯</span> Why Pawdcast Matters
+                </h3>
+                <p class="text-lg text-mocha-brown leading-relaxed text-center">
+                    Every pet deserves exceptional care, but finding reliable information and managing their health can be overwhelming. Pawdcast brings together expert knowledge, intuitive tools, and a supportive community to simplify pet parenting. Whether you're a first-time owner or experienced guardian, we help you make informed decisions, track important milestones, and ensure your furry companion lives their healthiest, happiest life.
+                </p>
+                <button id="learnMoreBtn" class="mt-6 mx-auto block px-6 py-3 bg-wedgwood text-white rounded-full font-semibold hover:scale-105 transition-all duration-300 shadow-lg">
+                    Learn More About Our Mission →
+                </button>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
+                <button id="getStartedBtn" class="px-8 py-4 btn-primary text-white rounded-full text-lg font-semibold hover:scale-105 transition-all duration-300 shadow-2xl pulse-slow">
+                    🚀 Get Started Free
+                </button>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
+                <div class="text-center">
+                    <div id="totalUsers" class="text-3xl font-bold text-wedgwood pulse-slow">Loading...</div>
+                    <div class="text-mocha-brown">USERS ENROLLED</div>
+                </div>
+                <div class="text-center">
+                    <div id="totalPets" class="text-3xl font-bold text-wedgwood pulse-slow">Loading...</div>
+                    <div class="text-mocha-brown">PETS ENROLLED</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-wedgwood">24/7</div>
+                    <div class="text-mocha-brown">SUPPORT</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-wedgwood">200+</div>
+                    <div class="text-mocha-brown">Breed Guides</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES SECTION -->
+<section id="features" class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl md:text-5xl font-bold text-black-brown mb-6">Everything Your Pet Needs</h2>
+            <p class="text-xl text-mocha-brown max-w-3xl mx-auto">Discover our comprehensive suite of tools designed to keep your furry friends healthy, happy, and well-trained.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <!-- Breed Information Card -->
+            <div class="card-hover bg-gradient-to-br from-yellow-beige to-dark-yellow-beige rounded-2xl p-8 cursor-pointer border-2 border-transparent hover:border-wedgwood group" onclick="window.location.href='breed-information.html'">
+                <div class="feature-icon w-16 h-16 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <span class="text-3xl">📚</span>
+                </div>
+                <h3 class="text-2xl font-bold text-black-brown mb-4">Breed Information</h3>
+                <p class="text-mocha-brown mb-6 leading-relaxed">Comprehensive guides for over 200 dog breeds including characteristics, care requirements, and temperament insights.</p>
+                <div class="flex items-center text-wedgwood font-semibold group-hover:translate-x-2 transition-transform">
+                    Explore Breeds
+                    <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Pet Profile Card -->
+            <div class="card-hover bg-gradient-to-br from-yellow-beige to-dark-yellow-beige rounded-2xl p-8 cursor-pointer border-2 border-transparent hover:border-wedgwood group" onclick="window.location.href='petprofile.html'">
+                <div class="feature-icon w-16 h-16 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <span class="text-3xl">🐕</span>
+                </div>
+                <h3 class="text-2xl font-bold text-black-brown mb-4">Pet Profiles</h3>
+                <p class="text-mocha-brown mb-6 leading-relaxed">Create detailed profiles for your pets with photos, medical history, and important milestones tracking.</p>
+                <div class="flex items-center text-wedgwood font-semibold group-hover:translate-x-2 transition-transform">
+                    Manage Profiles
+                    <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Training Tips Card -->
+            <div class="card-hover bg-gradient-to-br from-yellow-beige to-dark-yellow-beige rounded-2xl p-8 cursor-pointer border-2 border-transparent hover:border-wedgwood group" onclick="window.location.href='training-tips.html'">
+                <div class="feature-icon w-16 h-16 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <span class="text-3xl">🎯</span>
+                </div>
+                <h3 class="text-2xl font-bold text-black-brown mb-4">Training Tips</h3>
+                <p class="text-mocha-brown mb-6 leading-relaxed">Expert-curated training guides and techniques to help your pet learn good behavior and fun tricks.</p>
+                <div class="flex items-center text-wedgwood font-semibold group-hover:translate-x-2 transition-transform">
+                    Start Training
+                    <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Pet Care Tips Card -->
+            <div class="card-hover bg-gradient-to-br from-yellow-beige to-dark-yellow-beige rounded-2xl p-8 cursor-pointer border-2 border-transparent hover:border-wedgwood group" onclick="window.location.href='petcare-tips.html'">
+                <div class="feature-icon w-16 h-16 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <span class="text-3xl">💝</span>
+                </div>
+                <h3 class="text-2xl font-bold text-black-brown mb-4">Pet Care Tips</h3>
+                <p class="text-mocha-brown mb-6 leading-relaxed">Essential care advice covering nutrition, grooming, health monitoring, and wellness best practices.</p>
+                <div class="flex items-center text-wedgwood font-semibold group-hover:translate-x-2 transition-transform">
+                    Learn Care
+                    <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- WHY WE BUILT THIS SECTION (Hidden by default) -->
+<section id="missionSection" class="py-20 bg-gradient-to-br from-yellow-beige via-white to-dark-yellow-beige hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl md:text-5xl font-bold text-black-brown mb-6">Why We Created Pawdcast</h2>
+            <p class="text-xl text-mocha-brown max-w-3xl mx-auto">Our mission is rooted in the love we have for pets and the challenges we've witnessed in pet care. Here's what drives us.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Reason 1 -->
+            <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-wedgwood">
+                <div class="w-16 h-16 bg-gradient-to-br from-wedgwood to-mocha-brown rounded-2xl flex items-center justify-center mb-6">
+                    <span class="text-3xl">📊</span>
+                </div>
+                <h3 class="text-2xl font-bold text-black-brown mb-4">Scattered Information</h3>
+                <p class="text-mocha-brown leading-relaxed">Pet parents struggle to find reliable, centralized information about breeds, training, and care. We bring everything together in one trusted platform, saving you countless hours of research.</p>
+            </div>
+
+            <!-- Reason 2 -->
+            <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-wedgwood">
+                <div class="w-16 h-16 bg-gradient-to-br from-wedgwood to-mocha-brown rounded-2xl flex items-center justify-center mb-6">
+                    <span class="text-3xl">🏥</span>
+                </div>
+                <h3 class="text-2xl font-bold text-black-brown mb-4">Health Record Chaos</h3>
+                <p class="text-mocha-brown leading-relaxed">Keeping track of vaccinations, medications, and vet visits across paper files and apps is messy. Our digital health profiles ensure you never miss an important appointment or milestone.</p>
+            </div>
+
+            <!-- Reason 3 -->
+            <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-wedgwood">
+                <div class="w-16 h-16 bg-gradient-to-br from-wedgwood to-mocha-brown rounded-2xl flex items-center justify-center mb-6">
+                    <span class="text-3xl">🎓</span>
+                </div>
+                <h3 class="text-2xl font-bold text-black-brown mb-4">Training Frustration</h3>
+                <p class="text-mocha-brown leading-relaxed">Many pet owners feel lost when it comes to training. We provide expert-backed, step-by-step guidance that's tailored to your pet's breed, age, and temperament for real results.</p>
+            </div>
+
+            <!-- Reason 4 -->
+            <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-wedgwood">
+                <div class="w-16 h-16 bg-gradient-to-br from-wedgwood to-mocha-brown rounded-2xl flex items-center justify-center mb-6">
+                    <span class="text-3xl">💰</span>
+                </div>
+                <h3 class="text-2xl font-bold text-black-brown mb-4">Preventable Expenses</h3>
+                <p class="text-mocha-brown leading-relaxed">Many health issues could be prevented with proper care and early detection. Our proactive approach helps you spot warning signs early, potentially saving thousands in emergency vet bills.</p>
+            </div>
+
+            <!-- Reason 5 -->
+            <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-wedgwood">
+                <div class="w-16 h-16 bg-gradient-to-br from-wedgwood to-mocha-brown rounded-2xl flex items-center justify-center mb-6">
+                    <span class="text-3xl">🤝</span>
+                </div>
+                <h3 class="text-2xl font-bold text-black-brown mb-4">Isolated Pet Parents</h3>
+                <p class="text-mocha-brown leading-relaxed">Pet ownership can feel isolating, especially for first-timers. We're building a supportive community where you can share experiences, ask questions, and celebrate your pet's victories together.</p>
+            </div>
+
+            <!-- Reason 6 -->
+            <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-wedgwood">
+                <div class="w-16 h-16 bg-gradient-to-br from-wedgwood to-mocha-brown rounded-2xl flex items-center justify-center mb-6">
+                    <span class="text-3xl">❤️</span>
+                </div>
+                <h3 class="text-2xl font-bold text-black-brown mb-4">Our Personal Journey</h3>
+                <p class="text-mocha-brown leading-relaxed">As pet parents ourselves, we experienced these challenges firsthand. Pawdcast was born from our desire to create the tool we wish we had—comprehensive, reliable, and genuinely helpful.</p>
+            </div>
+        </div>
+
+        <div class="text-center mt-12">
+            <button id="closeMissionBtn" class="px-8 py-4 bg-mocha-brown text-white rounded-full font-semibold hover:bg-black-brown transition-all duration-300 shadow-lg">
+                Back to Home
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ SECTION (Hidden by default) -->
+<section id="faqSection" class="py-20 bg-gradient-to-br from-yellow-beige to-dark-yellow-beige hidden">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl md:text-5xl font-bold text-black-brown mb-6">Frequently Asked Questions</h2>
+            <p class="text-xl text-mocha-brown">Everything you need to know about Pawdcast</p>
+        </div>
+
+        <div class="space-y-4">
+            <!-- FAQ 1 -->
+            <div class="faq-item bg-white rounded-2xl p-6 shadow-lg cursor-pointer" onclick="toggleFAQ(this)">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xl font-bold text-black-brown">What is Pawdcast and how does it work?</h3>
+                    <svg class="w-6 h-6 text-wedgwood transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+                <div class="faq-answer mt-4">
+                    <p class="text-mocha-brown leading-relaxed">
+                        Pawdcast is a comprehensive pet care platform that helps pet owners manage their pet's health, training, and overall well-being. You can create detailed pet profiles, access breed-specific information, get expert training tips, and track medical records - all in one place.
+                    </p>
+                </div>
+            </div>
+
+            <!-- FAQ 2 -->
+            <div class="faq-item bg-white rounded-2xl p-6 shadow-lg cursor-pointer" onclick="toggleFAQ(this)">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xl font-bold text-black-brown">Is Pawdcast completely free to use?</h3>
+                    <svg class="w-6 h-6 text-wedgwood transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+                <div class="faq-answer mt-4">
+                    <p class="text-mocha-brown leading-relaxed">
+                        Yes! Pawdcast offers a completely free basic plan that includes pet profile creation, breed information, basic training tips, and health tracking. We believe every pet deserves excellent care, which is why our core features will always remain free.
+                    </p>
+                </div>
+            </div>
+
+            <!-- FAQ 3 -->
+            <div class="faq-item bg-white rounded-2xl p-6 shadow-lg cursor-pointer" onclick="toggleFAQ(this)">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xl font-bold text-black-brown">How many pets can I add to my account?</h3>
+                    <svg class="w-6 h-6 text-wedgwood transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+                <div class="faq-answer mt-4">
+                    <p class="text-mocha-brown leading-relaxed">
+                        You can add unlimited pets to your Pawdcast account! Whether you have one furry friend or a whole family of pets, our platform can accommodate all of them with individual profiles and customized care plans.
+                    </p>
+                </div>
+            </div>
+
+            <!-- FAQ 4 -->
+            <div class="faq-item bg-white rounded-2xl p-6 shadow-lg cursor-pointer" onclick="toggleFAQ(this)">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xl font-bold text-black-brown">What type of pet information can I store?</h3>
+                    <svg class="w-6 h-6 text-wedgwood transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+                <div class="faq-answer mt-4">
+                    <p class="text-mocha-brown leading-relaxed">
+                        You can store comprehensive information including:
+                        <br>• Basic details (name, breed, age, weight)
+                        <br>• Medical records and vaccination history
+                        <br>• Dietary requirements and allergies
+                        <br>• Training progress and behavior notes
+                        <br>• Photos and important documents
+                        <br>• Emergency contact information
+                    </p>
+                </div>
+            </div>
+
+            <!-- FAQ 5 -->
+            <div class="faq-item bg-white rounded-2xl p-6 shadow-lg cursor-pointer" onclick="toggleFAQ(this)">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xl font-bold text-black-brown">Is my pet's data secure and private?</h3>
+                    <svg class="w-6 h-6 text-wedgwood transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+                <div class="faq-answer mt-4">
+                    <p class="text-mocha-brown leading-relaxed">
+                        Absolutely! We take data privacy very seriously. All your pet's information is encrypted and stored securely. We never share your personal data with third parties without your explicit consent. Your privacy is our top priority.
+                    </p>
+                </div>
+            </div>
+
+            <!-- FAQ 6 -->
+            <div class="faq-item bg-white rounded-2xl p-6 shadow-lg cursor-pointer" onclick="toggleFAQ(this)">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xl font-bold text-black-brown">Can I access Pawdcast on mobile devices?</h3>
+                    <svg class="w-6 h-6 text-wedgwood transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+                <div class="faq-answer mt-4">
+                    <p class="text-mocha-brown leading-relaxed">
+                        Yes! Pawdcast is fully responsive and works perfectly on all devices - smartphones, tablets, and desktops. You can access your pet's information anytime, anywhere with our mobile-friendly web interface.
+                    </p>
+                </div>
+            </div>
+
+            <!-- FAQ 7 -->
+            <div class="faq-item bg-white rounded-2xl p-6 shadow-lg cursor-pointer" onclick="toggleFAQ(this)">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xl font-bold text-black-brown">How accurate is the breed information provided?</h3>
+                    <svg class="w-6 h-6 text-wedgwood transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+                <div class="faq-answer mt-4">
+                    <p class="text-mocha-brown leading-relaxed">
+                        Our breed information is curated by veterinary experts and experienced breeders. We provide comprehensive details about temperament, exercise needs, grooming requirements, health considerations, and training tips for over 200 dog breeds, with regular updates based on the latest research.
+                    </p>
+                </div>
+            </div>
+
+            <!-- FAQ 8 -->
+            <div class="faq-item bg-white rounded-2xl p-6 shadow-lg cursor-pointer" onclick="toggleFAQ(this)">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xl font-bold text-black-brown">Can I share my pet's profile with my veterinarian?</h3>
+                    <svg class="w-6 h-6 text-wedgwood transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+                <div class="faq-answer mt-4">
+                    <p class="text-mocha-brown leading-relaxed">
+                        Yes! You can easily generate and share medical reports with your veterinarian. This feature helps your vet get a complete picture of your pet's health history, making consultations more efficient and effective.
+                    </p>
+                </div>
+            </div>
+
+            <!-- FAQ 9 -->
+            <div class="faq-item bg-white rounded-2xl p-6 shadow-lg cursor-pointer" onclick="toggleFAQ(this)">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xl font-bold text-black-brown">What if I need help using the platform?</h3>
+                    <svg class="w-6 h-6 text-wedgwood transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+                <div class="faq-answer mt-4">
+                    <p class="text-mocha-brown leading-relaxed">
+                        We offer 24/7 customer support through multiple channels. You can reach us via email at Info.pawdcast@gmail.com or contact our support team directly. We're always here to help you make the most of Pawdcast!
+                    </p>
+                </div>
+            </div>
+
+            <!-- FAQ 10 -->
+            <div class="faq-item bg-white rounded-2xl p-6 shadow-lg cursor-pointer" onclick="toggleFAQ(this)">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xl font-bold text-black-brown">Are there any plans for future features?</h3>
+                    <svg class="w-6 h-6 text-wedgwood transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+                <div class="faq-answer mt-4">
+                    <p class="text-mocha-brown leading-relaxed">
+                        We're constantly working on new features! Upcoming additions include:
+                        <br>• Mobile app for iOS and Android
+                        <br>• Integration with pet wearables
+                        <br>• Online vet consultation booking
+                        <br>• Pet community forums
+                        <br>• Advanced health analytics
+                        <br>• Multi-language support
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-12">
+            <button onclick="hideFAQ()" class="px-8 py-4 bg-mocha-brown text-white rounded-full font-semibold hover:bg-black-brown transition-all duration-300 shadow-lg">
+                Back to Home
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- CTA SECTION -->
+<section class="py-20 bg-gradient-to-r from-mocha-brown to-black-brown">
+    <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+        <h2 class="text-4xl md:text-5xl font-bold text-white mb-6">Ready to Give Your Pet the Best Care?</h2>
+        <p class="text-xl text-yellow-beige mb-8">Join thousands of pet parents who trust Pawdcast for their pet's well-being.</p>
+        <button id="ctaGetStarted" class="px-8 py-4 bg-wedgwood hover:bg-blue-600 text-white rounded-full text-lg font-semibold transition-all duration-300 shadow-2xl hover:scale-105">
+            Start Your Journey Today
+        </button>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-black-brown text-yellow-beige py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div>
+                <div class="flex items-center space-x-3 mb-4">
+                    <img src="https://res.cloudinary.com/dkuuvasoe/image/upload/v1760186124/pawdcastlogo_cb1l1b.png" 
+                         alt="Pawdcast Logo" 
+                         class="logo-hover w-8 h-8 rounded-full">
+                    <h3 class="text-xl font-bold">Pawdcast</h3>
+                </div>
+                <p class="text-dark-yellow-beige">Your pet's digital companion for a healthier, happier life together.</p>
+            </div>
+            <div>
+                <h4 class="font-semibold mb-4">Support</h4>
+                <ul class="space-y-2 text-dark-yellow-beige">
+                    <li><a href="#" class="hover:text-yellow-beige transition-colors" onclick="showContactPopup()">Contact Us</a></li>
+                    <li><a href="#" class="hover:text-yellow-beige transition-colors" onclick="showFAQ()">FAQ</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-semibold mb-4">Legal</h4>
+                <ul class="space-y-2 text-dark-yellow-beige">
+                    <li><a href="#" class="hover:text-yellow-beige transition-colors" onclick="showPrivacyPolicy()">Privacy Policy</a></li>
+                    <li><a href="#" class="hover:text-yellow-beige transition-colors" onclick="showTermsOfService()">Terms of Service</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-semibold mb-4">Connect</h4>
+                <div class="flex space-x-4">
+                    <!-- Facebook -->
+                    <a href="https://www.facebook.com/share/14KY5XC9Euo/" target="_blank" 
+                       class="w-10 h-10 bg-[#1877F2] rounded-full flex items-center justify-center hover:bg-[#166FE5] transition-colors group">
+                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                        </svg>
+                    </a>
+                    
+                    <!-- Instagram -->
+                    <a href="https://www.instagram.com/pawdcast_india/?utm_source=ig_web_button_share_sheet" target="_blank" 
+                       class="w-10 h-10 bg-gradient-to-r from-[#833AB4] via-[#FD1D1D] to-[#FCB045] rounded-full flex items-center justify-center hover:opacity-90 transition-all duration-300 group">
+                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 6.62 5.367 11.987 11.988 11.987 6.62 0 11.987-5.367 11.987-11.987C24.014 5.367 18.637.001 12.017.001zM8.449 16.988c-1.297 0-2.448-.703-2.448-2.449s1.151-2.449 2.448-2.449 2.449 1.151 2.449 2.449-1.152 2.449-2.449 2.449zm7.718 0c-1.297 0-2.449-.703-2.449-2.449s1.152-2.449 2.449-2.449 2.449 1.151 2.449 2.449-1.152 2.449-2.449 2.449z"/>
+                        </svg>
+                    </a>
+                    
+                    <!-- X (Twitter) -->
+                    <a href="https://x.com/Pawdcast173798?t=1h5gI956LBmTHeE2w5irWg&s=09" target="_blank" 
+                       class="w-10 h-10 bg-black rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors group">
+                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="border-t border-mocha-brown mt-8 pt-8 text-center text-dark-yellow-beige">
+            <p>&copy; 2025 Pawdcast. All rights reserved. Made with ❤️ for pets and their humans.</p>
+        </div>
+    </div>
+</footer>
+
+<!-- CONTACT POPUP -->
+<div id="contactPopup" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden fade-in">
+        <div class="bg-gradient-to-r from-yellow-beige to-dark-yellow-beige p-6 text-center">
+            <h2 class="text-2xl font-bold text-black-brown">Contact Us</h2>
+            <p class="text-mocha-brown mt-2">We're here to help you!</p>
+        </div>
+        <div class="p-8">
+            <div class="space-y-6">
+                <div class="text-center">
+                    <h3 class="text-lg font-semibold text-black-brown mb-4">Email</h3>
+                    <p class="text-wedgwood font-medium">Info.pawdcast@gmail.com</p>
+                </div>
+                
+                <div class="text-center">
+                    <h3 class="text-lg font-semibold text-black-brown mb-4">Phone Numbers</h3>
+                    <div class="space-y-2">
+                        <p class="text-mocha-brown">
+                            <span class="font-semibold">CEO: Atharva Padwal</span> +91-9321696332
+                        </p>
+                        <p class="text-mocha-brown">
+                            <span class="font-semibold">Co-CEO: Sahil Pote</span> +91-9137008297
+                        </p>
+                        <p class="text-mocha-brown">
+                            <span class="font-semibold">Head HR: Parth Nikam</span> +91-88283 88621
+                        </p>
+                    </div>
+                </div>
+                
+                <button onclick="document.getElementById('contactPopup').classList.add('hidden')" 
+                        class="w-full py-3 bg-wedgwood text-white rounded-xl font-semibold hover:bg-blue-600 transition-colors">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PRIVACY POLICY POPUP -->
+<div id="privacyPolicyPopup" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden fade-in">
+        <div class="bg-gradient-to-r from-yellow-beige to-dark-yellow-beige p-6 text-center">
+            <h2 class="text-2xl font-bold text-black-brown">Privacy Policy & Terms of Service</h2>
+            <p class="text-mocha-brown mt-2">How we protect and use your information</p>
+        </div>
+        <div class="p-8 overflow-y-auto max-h-[calc(90vh-140px)]">
+            <div class="space-y-6">
+                <div>
+                    <h3 class="text-xl font-bold text-black-brown mb-4">Privacy Policy</h3>
+                    <div class="space-y-4 text-mocha-brown">
+                        <p>At Pawdcast, we take your privacy seriously. This policy explains how we collect, use, and protect your personal information.</p>
+                        
+                        <h4 class="font-semibold text-black-brown">Information We Collect</h4>
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li>Personal details (name, email, phone number)</li>
+                            <li>Pet information and health records</li>
+                            <li>Usage data and preferences</li>
+                            <li>Device and browser information</li>
+                        </ul>
+                        
+                        <h4 class="font-semibold text-black-brown">How We Use Your Information</h4>
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li>Provide and improve our services</li>
+                            <li>Personalize your experience</li>
+                            <li>Send important updates and notifications</li>
+                            <li>Ensure platform security</li>
+                        </ul>
+                        
+                        <h4 class="font-semibold text-black-brown">Data Protection</h4>
+                        <p>We implement industry-standard security measures to protect your data from unauthorized access, alteration, or disclosure.</p>
+                    </div>
+                </div>
+                
+                <div class="border-t border-dark-yellow-beige pt-6">
+                    <h3 class="text-xl font-bold text-black-brown mb-4">Terms & Conditions</h3>
+                    <div class="space-y-4 text-mocha-brown">
+                        <p>By using Pawdcast, you agree to the following terms and conditions:</p>
+                        
+                        <div class="bg-yellow-beige/30 rounded-xl p-4">
+                            <div class="flex items-start space-x-3">
+                                <input type="checkbox" id="agreeTerms" class="mt-1">
+                                <label for="agreeTerms" class="text-sm">
+                                    <span class="font-semibold text-black-brown">I understand and agree to the following:</span>
+                                    <ul class="mt-2 space-y-1 text-mocha-brown">
+                                        <li>• I am responsible for maintaining the confidentiality of my account</li>
+                                        <li>• I will provide accurate information about my pets</li>
+                                        <li>• Pawdcast is not a substitute for professional veterinary advice</li>
+                                        <li>• I will not misuse the platform or its content</li>
+                                        <li>• Pawdcast may update these terms with notice to users</li>
+                                    </ul>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-yellow-beige/30 rounded-xl p-4">
+                            <div class="flex items-start space-x-3">
+                                <input type="checkbox" id="agreeMarketing" class="mt-1">
+                                <label for="agreeMarketing" class="text-sm">
+                                    <span class="font-semibold text-black-brown">Marketing Communications (Optional)</span>
+                                    <p class="mt-1 text-mocha-brown">I agree to receive marketing emails about new features, pet care tips, and special offers from Pawdcast.</p>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-yellow-beige/30 rounded-xl p-4">
+                            <div class="flex items-start space-x-3">
+                                <input type="checkbox" id="agreeData" class="mt-1">
+                                <label for="agreeData" class="text-sm">
+                                    <span class="font-semibold text-black-brown">Data Usage Consent (Optional)</span>
+                                    <p class="mt-1 text-mocha-brown">I consent to Pawdcast using my anonymized data to improve services and conduct research for better pet care solutions.</p>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex space-x-4 pt-4">
+                    <button onclick="document.getElementById('privacyPolicyPopup').classList.add('hidden')" 
+                            class="flex-1 py-3 bg-wedgwood text-white rounded-xl font-semibold hover:bg-blue-600 transition-colors">
+                        Accept & Continue
+                    </button>
+                    <button onclick="document.getElementById('privacyPolicyPopup').classList.add('hidden')" 
+                            class="flex-1 py-3 bg-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-400 transition-colors">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+        <button onclick="document.getElementById('privacyPolicyPopup').classList.add('hidden')" 
+                class="absolute top-4 right-4 w-8 h-8 bg-white/80 rounded-full flex items-center justify-center text-mocha-brown hover:bg-white transition-colors">
+            ✕
+        </button>
+    </div>
+</div>
+
+<!-- TERMS OF SERVICE POPUP -->
+<div id="termsOfServicePopup" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden fade-in">
+        <div class="bg-gradient-to-r from-yellow-beige to-dark-yellow-beige p-6 text-center">
+            <h2 class="text-2xl font-bold text-black-brown">Pawdcast – Terms of Service</h2>
+            <p class="text-mocha-brown mt-2">Effective Date: [Insert Date]</p>
+        </div>
+        <div class="p-8 overflow-y-auto max-h-[calc(90vh-140px)]">
+            <div class="space-y-6 text-mocha-brown">
+                <p class="text-lg">Welcome to Pawdcast. By using our app, you agree to these terms. Please read them carefully.</p>
+                
+                <div>
+                    <h3 class="text-xl font-bold text-black-brown mb-4">1. User Responsibilities</h3>
+                    <ul class="list-disc pl-5 space-y-2">
+                        <li>Provide accurate information.</li>
+                        <li>Keep login credentials private.</li>
+                        <li>Do not misuse or abuse the app.</li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-bold text-black-brown mb-4">2. Use of Information</h3>
+                    <p>User data (pet profiles, trackers, forms) is private. Pawdcast does not sell or share data without consent. Adoption listings and public content may be visible to others.</p>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-bold text-black-brown mb-4">3. Content Disclaimer</h3>
+                    <p>Information provided (pet care, legal, or training tips) is for general educational use only. Pawdcast does not offer medical or legal advice.</p>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-bold text-black-brown mb-4">4. Liability</h3>
+                    <p>Pawdcast is provided "as is." We are not liable for any data loss, inaccuracies, or damages resulting from use of the app.</p>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-bold text-black-brown mb-4">5. Document Storage</h3>
+                    <p>Uploaded files in the Digilocker are stored securely, but users are responsible for backups.</p>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-bold text-black-brown mb-4">6. Adoption Listings</h3>
+                    <p>Listings are user-submitted. Pawdcast does not verify accuracy and is not responsible for adoption-related outcomes.</p>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-bold text-black-brown mb-4">7. Contact</h3>
+                    <p>For support or feedback, email <span class="text-wedgwood font-semibold">Info.pawdcast@gmail.com</span></p>
+                </div>
+            </div>
+            
+            <div class="mt-8 text-center">
+                <button onclick="document.getElementById('termsOfServicePopup').classList.add('hidden')" 
+                        class="px-8 py-3 bg-wedgwood text-white rounded-xl font-semibold hover:bg-blue-600 transition-colors">
+                    I Understand
+                </button>
+            </div>
+        </div>
+        <button onclick="document.getElementById('termsOfServicePopup').classList.add('hidden')" 
+                class="absolute top-4 right-4 w-8 h-8 bg-white/80 rounded-full flex items-center justify-center text-mocha-brown hover:bg-white transition-colors">
+            ✕
+        </button>
+    </div>
+</div>
+
+<!-- LOGIN MODAL -->
+<div id="loginModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden fade-in">
+        <div class="bg-gradient-to-r from-yellow-beige to-dark-yellow-beige p-6 text-center">
+            <h2 class="text-2xl font-bold text-black-brown">Welcome Back!</h2>
+            <p class="text-mocha-brown mt-2">Sign in to your Pawdcast account</p>
+        </div>
+        <div class="p-8">
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-mocha-brown mb-2">Email Address</label>
+                    <input id="loginEmail" type="email" placeholder="your@email.com" 
+                           class="w-full p-4 border-2 border-dark-yellow-beige rounded-xl focus:border-wedgwood focus:outline-none transition-colors">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-mocha-brown mb-2">Password</label>
+                    <input id="loginPassword" type="password" placeholder="Enter your password" 
+                           class="w-full p-4 border-2 border-dark-yellow-beige rounded-xl focus:border-wedgwood focus:outline-none transition-colors">
+                </div>
+                
+                <!-- Forgot Password Link -->
+                <div class="text-right">
+                    <button id="forgotPasswordBtn" class="text-wedgwood hover:text-blue-600 font-medium text-sm transition-colors">
+                        Forgot your password?
+                    </button>
+                </div>
+                
+                <button id="loginSubmit" class="w-full py-4 btn-primary text-white rounded-xl font-semibold hover:scale-105 transition-all duration-300 shadow-lg">
+                    Sign In
+                </button>
+            </div>
+            <div class="mt-6 text-center">
+                <p class="text-mocha-brown">Don't have an account? 
+                    <span id="openSignup" class="text-wedgwood font-semibold cursor-pointer hover:underline">Sign up here</span>
+                </p>
+            </div>
+        </div>
+        <button onclick="document.getElementById('loginModal').classList.add('hidden')" 
+                class="absolute top-4 right-4 w-8 h-8 bg-white/80 rounded-full flex items-center justify-center text-mocha-brown hover:bg-white transition-colors">
+            ✕
+        </button>
+    </div>
+</div>
+
+<!-- FORGOT PASSWORD MODAL -->
+<div id="forgotPasswordModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden fade-in">
+        <div class="bg-gradient-to-r from-yellow-beige to-dark-yellow-beige p-6 text-center">
+            <h2 class="text-2xl font-bold text-black-brown">Reset Your Password</h2>
+            <p class="text-mocha-brown mt-2">We'll send you a reset link</p>
+        </div>
+        <div class="p-8">
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-mocha-brown mb-2">Email Address</label>
+                    <input id="forgotPasswordEmail" type="email" placeholder="your@email.com" 
+                           class="w-full p-4 border-2 border-dark-yellow-beige rounded-xl focus:border-wedgwood focus:outline-none transition-colors">
+                </div>
+                
+                <button id="sendResetLinkBtn" class="w-full py-4 btn-primary text-white rounded-xl font-semibold hover:scale-105 transition-all duration-300 shadow-lg">
+                    Send Reset Link
+                </button>
+            </div>
+            <div class="mt-6 text-center">
+                <p class="text-mocha-brown">Remember your password? 
+                    <span id="backToLogin" class="text-wedgwood font-semibold cursor-pointer hover:underline">Back to login</span>
+                </p>
+            </div>
+        </div>
+        <button onclick="document.getElementById('forgotPasswordModal').classList.add('hidden')" 
+                class="absolute top-4 right-4 w-8 h-8 bg-white/80 rounded-full flex items-center justify-center text-mocha-brown hover:bg-white transition-colors">
+            ✕
+        </button>
+    </div>
+</div>
+
+<!-- RESET PASSWORD MODAL -->
+<div id="resetPasswordModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden fade-in">
+        <div class="bg-gradient-to-r from-yellow-beige to-dark-yellow-beige p-6 text-center">
+            <h2 class="text-2xl font-bold text-black-brown">Create New Password</h2>
+            <p class="text-mocha-brown mt-2">Enter your new password</p>
+        </div>
+        <div class="p-8">
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-mocha-brown mb-2">New Password</label>
+                    <input id="newPassword" type="password" placeholder="Enter new password" 
+                           class="w-full p-4 border-2 border-dark-yellow-beige rounded-xl focus:border-wedgwood focus:outline-none transition-colors">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-mocha-brown mb-2">Confirm New Password</label>
+                    <input id="confirmNewPassword" type="password" placeholder="Confirm new password" 
+                           class="w-full p-4 border-2 border-dark-yellow-beige rounded-xl focus:border-wedgwood focus:outline-none transition-colors">
+                </div>
+                
+                <button id="resetPasswordBtn" class="w-full py-4 btn-primary text-white rounded-xl font-semibold hover:scale-105 transition-all duration-300 shadow-lg">
+                    Reset Password
+                </button>
+            </div>
+            <div class="mt-6 text-center">
+                <p class="text-mocha-brown">Remember your password? 
+                    <span id="backToLoginFromReset" class="text-wedgwood font-semibold cursor-pointer hover:underline">Back to login</span>
+                </p>
+            </div>
+        </div>
+        <button onclick="document.getElementById('resetPasswordModal').classList.add('hidden')" 
+                class="absolute top-4 right-4 w-8 h-8 bg-white/80 rounded-full flex items-center justify-center text-mocha-brown hover:bg-white transition-colors">
+            ✕
+        </button>
+    </div>
+</div>
+
+<!-- SIGNUP MODAL -->
+<div id="signupModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden">
+        <div class="bg-gradient-to-r from-yellow-beige to-dark-yellow-beige p-6 text-center">
+            <h2 class="text-2xl font-bold text-black-brown">Join Pawdcast!</h2>
+            <p class="text-mocha-brown mt-2">Create your account and start caring</p>
+        </div>
+        <div class="p-8 overflow-y-auto max-h-[calc(90vh-140px)]">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-mocha-brown mb-2">Full Name</label>
+                    <input id="signupFullName" type="text" placeholder="Enter your full name" 
+                           class="w-full p-3 border-2 border-dark-yellow-beige rounded-xl focus:border-wedgwood focus:outline-none transition-colors">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-mocha-brown mb-2">Email Address</label>
+                    <input id="signupEmail" type="email" placeholder="your@email.com" 
+                           class="w-full p-3 border-2 border-dark-yellow-beige rounded-xl focus:border-wedgwood focus:outline-none transition-colors">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-mocha-brown mb-2">Password</label>
+                    <input id="signupPassword" type="password" placeholder="Create a strong password" 
+                           class="w-full p-3 border-2 border-dark-yellow-beige rounded-xl focus:border-wedgwood focus:outline-none transition-colors">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-mocha-brown mb-2">Phone Number</label>
+                    <input id="signupPhone" type="text" placeholder="Your phone number" 
+                           class="w-full p-3 border-2 border-dark-yellow-beige rounded-xl focus:border-wedgwood focus:outline-none transition-colors">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-mocha-brown mb-2">Address</label>
+                    <input id="signupAddress" type="text" placeholder="Your address" 
+                           class="w-full p-3 border-2 border-dark-yellow-beige rounded-xl focus:border-wedgwood focus:outline-none transition-colors">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-mocha-brown mb-2">Profile Photo</label>
+                    <input id="signupPhoto" type="file" accept="image/*" 
+                           class="w-full p-3 border-2 border-dark-yellow-beige rounded-xl focus:border-wedgwood focus:outline-none transition-colors file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-wedgwood file:text-white file:font-semibold hover:file:bg-blue-600">
+                </div>
+                
+                <!-- Terms and Conditions Checkbox -->
+                <div class="bg-yellow-beige/30 rounded-xl p-4 mt-4">
+                    <div class="flex items-start space-x-3">
+                        <input type="checkbox" id="agreeTermsSignup" class="mt-1" required>
+                        <label for="agreeTermsSignup" class="text-sm">
+                            <span class="font-semibold text-black-brown">I agree to the <a href="#" class="text-wedgwood hover:underline" onclick="showTermsOfService(); return false;">Terms of Service</a></span>
+                            <p class="mt-1 text-mocha-brown">By checking this box, you acknowledge that you have read, understood, and agree to be bound by our Terms of Service.</p>
+                        </label>
+                    </div>
+                </div>
+                
+                <button id="signupSubmit" class="w-full py-4 btn-primary text-white rounded-xl font-semibold hover:scale-105 transition-all duration-300 shadow-lg mt-6">
+                    Create Account
+                </button>
+            </div>
+            <div class="mt-6 text-center">
+                <p class="text-mocha-brown">Already have an account? 
+                    <span id="openLogin" class="text-wedgwood font-semibold cursor-pointer hover:underline">Sign in here</span>
+                </p>
+            </div>
+        </div>
+        <button onclick="document.getElementById('signupModal').classList.add('hidden')" 
+                class="absolute top-4 right-4 w-8 h-8 bg-white/80 rounded-full flex items-center justify-center text-mocha-brown hover:bg-white transition-colors">
+            ✕
+        </button>
+    </div>
+</div>
+
+<script>
+    let loggedInUser = JSON.parse(localStorage.getItem("currentUser")) || null;
+    let resetToken = null;
+
+    // FAQ Toggle Function
+    function toggleFAQ(element) {
+        const isActive = element.classList.contains('active');
+        
+        // Close all FAQs
+        document.querySelectorAll('.faq-item').forEach(item => {
+            item.classList.remove('active');
+            item.querySelector('svg').style.transform = 'rotate(0deg)';
+        });
+        
+        // If clicked FAQ wasn't active, open it
+        if (!isActive) {
+            element.classList.add('active');
+            element.querySelector('svg').style.transform = 'rotate(180deg)';
+        }
+    }
+
+    // Show FAQ Section
+    function showFAQ() {
+        // Hide other sections
+        document.getElementById('missionSection').classList.add('hidden');
+        
+        // Show FAQ section
+        document.getElementById('faqSection').classList.remove('hidden');
+        
+        // Scroll to FAQ section
+        document.getElementById('faqSection').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Hide FAQ Section
+    function hideFAQ() {
+        document.getElementById('faqSection').classList.add('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Contact Popup Function
+    function showContactPopup() {
+        document.getElementById('contactPopup').classList.remove('hidden');
+    }
+
+    // Privacy Policy Popup Function
+    function showPrivacyPolicy() {
+        document.getElementById('privacyPolicyPopup').classList.remove('hidden');
+    }
+
+    // Terms of Service Popup Function
+    function showTermsOfService() {
+        document.getElementById('termsOfServicePopup').classList.remove('hidden');
+    }
+
+    // Close contact popup when clicking outside
+    document.getElementById('contactPopup').onclick = (e) => {
+        if (e.target.id === 'contactPopup') {
+            document.getElementById('contactPopup').classList.add('hidden');
+        }
+    };
+
+    // Close privacy policy popup when clicking outside
+    document.getElementById('privacyPolicyPopup').onclick = (e) => {
+        if (e.target.id === 'privacyPolicyPopup') {
+            document.getElementById('privacyPolicyPopup').classList.add('hidden');
+        }
+    };
+
+    // Close terms of service popup when clicking outside
+    document.getElementById('termsOfServicePopup').onclick = (e) => {
+        if (e.target.id === 'termsOfServicePopup') {
+            document.getElementById('termsOfServicePopup').classList.add('hidden');
+        }
+    };
+
+    // Fetch statistics from backend
+    async function fetchStatistics() {
+        try {
+            const response = await fetch('http://localhost:8080/stats/counts', {
+                method: 'GET',
+                credentials: 'include'
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                document.getElementById('totalUsers').textContent = data.totalUsers || '0';
+                document.getElementById('totalPets').textContent = data.totalPets || '0';
+                document.getElementById('totalUsers').classList.remove('pulse-slow');
+                document.getElementById('totalPets').classList.remove('pulse-slow');
+            } else {
+                document.getElementById('totalUsers').textContent = '0';
+                document.getElementById('totalPets').textContent = '0';
+                document.getElementById('totalUsers').classList.remove('pulse-slow');
+                document.getElementById('totalPets').classList.remove('pulse-slow');
+            }
+        } catch (error) {
+            console.error('Error fetching statistics:', error);
+            document.getElementById('totalUsers').textContent = '0';
+            document.getElementById('totalPets').textContent = '0';
+            document.getElementById('totalUsers').classList.remove('pulse-slow');
+            document.getElementById('totalPets').classList.remove('pulse-slow');
+        }
+    }
+
+    // Modal controls
+    document.getElementById('loginBtn').onclick = () => document.getElementById('loginModal').classList.remove('hidden');
+    document.getElementById('signupBtn').onclick = () => document.getElementById('signupModal').classList.remove('hidden');
+    
+    document.getElementById('openSignup').onclick = () => {
+        document.getElementById('loginModal').classList.add('hidden');
+        document.getElementById('signupModal').classList.remove('hidden');
+    };
+    
+    document.getElementById('openLogin').onclick = () => {
+        document.getElementById('signupModal').classList.add('hidden');
+        document.getElementById('loginModal').classList.remove('hidden');
+    };
+
+    // Forgot Password functionality
+    document.getElementById('forgotPasswordBtn').onclick = () => {
+        document.getElementById('loginModal').classList.add('hidden');
+        document.getElementById('forgotPasswordModal').classList.remove('hidden');
+    };
+
+    document.getElementById('backToLogin').onclick = () => {
+        document.getElementById('forgotPasswordModal').classList.add('hidden');
+        document.getElementById('loginModal').classList.remove('hidden');
+    };
+
+    document.getElementById('backToLoginFromReset').onclick = () => {
+        document.getElementById('resetPasswordModal').classList.add('hidden');
+        document.getElementById('loginModal').classList.remove('hidden');
+    };
+
+    // Send reset link - UPDATED WITH WORKING VERSION
+    document.getElementById('sendResetLinkBtn').onclick = async () => {
+        const email = document.getElementById('forgotPasswordEmail').value;
+        
+        if (!email) {
+            alert("⚠️ Please enter your email address.");
+            return;
+        }
+
+        if (!validateEmail(email)) {
+            alert("⚠️ Please enter a valid email address.");
+            return;
+        }
+
+        // Show loading state
+        const button = document.getElementById('sendResetLinkBtn');
+        const originalText = button.textContent;
+        button.textContent = 'Sending...';
+        button.disabled = true;
+
+        try {
+            // Simulate API call delay
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            // Success message (backend not implemented yet)
+            alert(`✅ Password reset feature coming soon!\n\nFor now, please contact our support team at Info.pawdcast@gmail.com for password assistance.`);
+            
+            // Close modal and return to login
+            document.getElementById('forgotPasswordModal').classList.add('hidden');
+            document.getElementById('loginModal').classList.remove('hidden');
+            document.getElementById('forgotPasswordEmail').value = '';
+            
+        } catch (error) {
+            alert("❌ Something went wrong. Please try again.");
+        } finally {
+            // Restore button
+            button.textContent = originalText;
+            button.disabled = false;
+        }
+    };
+
+    // Reset password - UPDATED WITH WORKING VERSION
+    document.getElementById('resetPasswordBtn').onclick = async () => {
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmNewPassword').value;
+        
+        if (!newPassword || !confirmPassword) {
+            alert("⚠️ Please fill in all fields.");
+            return;
+        }
+
+        if (newPassword.length < 6) {
+            alert("⚠️ Password must be at least 6 characters long.");
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            alert("⚠️ Passwords do not match.");
+            return;
+        }
+
+        // Show loading state
+        const button = document.getElementById('resetPasswordBtn');
+        const originalText = button.textContent;
+        button.textContent = 'Resetting...';
+        button.disabled = true;
+
+        try {
+            // Simulate API call delay
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            // Success message (backend not implemented yet)
+            alert("✅ Password reset feature coming soon!\n\nPlease contact support at Info.pawdcast@gmail.com for password assistance.");
+            
+            // Close modal and return to login
+            document.getElementById('resetPasswordModal').classList.add('hidden');
+            document.getElementById('loginModal').classList.remove('hidden');
+            
+            // Clear form
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmNewPassword').value = '';
+            
+        } catch (error) {
+            alert("❌ Something went wrong. Please try again.");
+        } finally {
+            // Restore button
+            button.textContent = originalText;
+            button.disabled = false;
+        }
+    };
+
+    // Check URL for reset token (if user comes from email link)
+    function checkResetTokenFromURL() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+        
+        if (token) {
+            resetToken = token;
+            document.getElementById('resetPasswordModal').classList.remove('hidden');
+            // Clean URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    }
+
+    // Close modals when clicking outside
+    ['loginModal', 'signupModal', 'privacyPolicyPopup', 'termsOfServicePopup', 'forgotPasswordModal', 'resetPasswordModal'].forEach(modalId => {
+        document.getElementById(modalId).onclick = (e) => {
+            if (e.target.id === modalId) {
+                document.getElementById(modalId).classList.add('hidden');
+            }
+        };
+    });
+
+    // Signup functionality with terms validation
+    document.getElementById('signupSubmit').onclick = async () => {
+        // Check if terms checkbox is checked
+        const termsCheckbox = document.getElementById('agreeTermsSignup');
+        if (!termsCheckbox.checked) {
+            alert("⚠️ Please agree to the Terms of Service to continue.");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("fullName", document.getElementById('signupFullName').value);
+        formData.append("email", document.getElementById('signupEmail').value);
+        formData.append("password", document.getElementById('signupPassword').value);
+        formData.append("phone", document.getElementById('signupPhone').value);
+        formData.append("address", document.getElementById('signupAddress').value);
+        formData.append("photo", document.getElementById('signupPhoto').files[0]);
+
+        try {
+            const res = await fetch('http://localhost:8080/auth/signup', { 
+                method: 'POST', 
+                body: formData,
+                credentials: 'include'
+            });
+            if (res.ok) {
+                alert("🎉 Signup successful! Please sign in to continue.");
+                document.getElementById('signupModal').classList.add('hidden');
+                document.getElementById('loginModal').classList.remove('hidden');
+                // Clear form
+                document.getElementById('signupFullName').value = '';
+                document.getElementById('signupEmail').value = '';
+                document.getElementById('signupPassword').value = '';
+                document.getElementById('signupPhone').value = '';
+                document.getElementById('signupAddress').value = '';
+                document.getElementById('signupPhoto').value = '';
+                document.getElementById('agreeTermsSignup').checked = false;
+                
+                // Refresh statistics after signup
+                setTimeout(fetchStatistics, 1000);
+            } else {
+                alert("❌ " + await res.text());
+            }
+        } catch (error) {
+            alert("❌ Network error. Please try again.");
+        }
+    };
+
+    // Login functionality - UPDATED
+    document.getElementById('loginSubmit').onclick = async () => {
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+
+        if (!email || !password) {
+            alert("⚠️ Please fill in all fields.");
+            return;
+        }
+
+        try {
+            const loginFormData = new FormData();
+            loginFormData.append('email', email);
+            loginFormData.append('password', password);
+
+            const res = await fetch('http://localhost:8080/auth/login', {
+                method: 'POST',
+                body: loginFormData,
+                credentials: 'include'
+            });
+            
+            if (res.ok) {
+                const userData = await res.json();
+                loggedInUser = userData;
+                localStorage.setItem("currentUser", JSON.stringify(loggedInUser));
+                document.getElementById('loginModal').classList.add('hidden');
+                showProfile(loggedInUser);
+                
+                // Clear form
+                document.getElementById('loginEmail').value = '';
+                document.getElementById('loginPassword').value = '';
+                
+                alert("✅ Login successful! Welcome back, " + userData.fullName + "!");
+            } else {
+                const errorText = await res.text();
+                alert("❌ Login failed: " + errorText);
+            }
+        } catch (error) {
+            alert("❌ Network error. Please try again.");
+        }
+    };
+
+    // Show profile when logged in - UPDATED
+    function showProfile(user) {
+        document.getElementById('loginBtn').style.display = 'none';
+        document.getElementById('signupBtn').style.display = 'none';
+        document.getElementById('profileContainer').classList.remove('hidden');
+        
+        // Set profile picture - prioritize profilePhoto, then photo, then default
+        let profilePicSrc = '';
+        if (user.profilePhoto) {
+            profilePicSrc = `data:image/jpeg;base64,${user.profilePhoto}`;
+        } else if (user.photo) {
+            profilePicSrc = `data:image/jpeg;base64,${user.photo}`;
+        } else {
+            // Default avatar if no photo
+            profilePicSrc = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiM0NjgyQjQiLz4KPGNpcmNsZSBjeD0iMjAiIGN5PSIxNiIgcj0iNiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTggMzJDOCAyNi40NzcyIDEyLjQ3NzIgMjIgMTggMjJIMjJDMjcuNTIyOCAyMiAzMiAyNi40NzcyIDMyIDMyVjM0SDhWMzJaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K';
+        }
+        document.getElementById('profilePic').src = profilePicSrc;
+        
+        // Set user details in dropdown
+        document.getElementById('profileName').textContent = user.fullName || 'User';
+        document.getElementById('profileEmail').textContent = user.email || '';
+        
+        // Add additional user details to dropdown
+        let userDetailsHtml = `
+            <div class="p-4 bg-gradient-to-r from-yellow-beige to-dark-yellow-beige">
+                <p id="profileName" class="font-bold text-black-brown">${user.fullName || 'User'}</p>
+                <p id="profileEmail" class="text-sm text-mocha-brown">${user.email || ''}</p>
+            </div>
+            <div class="p-4 border-b border-dark-yellow-beige">
+                <div class="space-y-2 text-sm">
+                    ${user.phone ? `<p class="flex items-center text-mocha-brown"><span class="font-semibold w-20">Phone:</span> ${user.phone}</p>` : ''}
+                    ${user.address ? `<p class="flex items-start text-mocha-brown"><span class="font-semibold w-20">Address:</span> <span class="flex-1">${user.address}</span></p>` : ''}
+                    ${user.dateOfBirth ? `<p class="flex items-center text-mocha-brown"><span class="font-semibold w-20">DOB:</span> ${new Date(user.dateOfBirth).toLocaleDateString()}</p>` : ''}
+                </div>
+            </div>
+            <div class="p-4">
+                <button id="logoutBtn" class="w-full py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors font-medium">
+                    Logout
+                </button>
+            </div>
+        `;
+        
+        document.getElementById('profileDropdown').innerHTML = userDetailsHtml;
+        
+        // Re-attach logout event listener
+        document.getElementById('logoutBtn').onclick = logoutUser;
+        
+        // Profile dropdown toggle
+        document.getElementById('profileBtn').onclick = () => {
+            document.getElementById('profileDropdown').classList.toggle('hidden');
+        };
+    }
+
+    // Hide profile when logged out
+    function hideProfile() {
+        document.getElementById('loginBtn').style.display = 'inline-block';
+        document.getElementById('signupBtn').style.display = 'inline-block';
+        document.getElementById('profileContainer').classList.add('hidden');
+        document.getElementById('profileDropdown').classList.add('hidden');
+    }
+
+    // Logout functionality
+    async function logoutUser() {
+        try {
+            await fetch('http://localhost:8080/auth/logout', {
+                method: 'POST',
+                credentials: 'include'
+            });
+        } catch (error) {
+            console.log('Logout API call failed, but continuing...');
+        }
+        
+        loggedInUser = null;
+        localStorage.removeItem("currentUser");
+        hideProfile();
+        alert("👋 You've been logged out successfully!");
+    }
+
+    // Get Started button functionality
+    function handleGetStarted() {
+        if (!loggedInUser) {
+            document.getElementById('loginModal').classList.remove('hidden');
+        } else {
+            window.location.href = "home2.html";
+        }
+    }
+
+    document.getElementById('getStartedBtn').onclick = handleGetStarted;
+    document.getElementById('ctaGetStarted').onclick = handleGetStarted;
+
+    // Learn More button functionality
+    document.getElementById('learnMoreBtn').onclick = () => {
+        document.getElementById('missionSection').classList.remove('hidden');
+        document.getElementById('missionSection').scrollIntoView({ behavior: 'smooth' });
+    };
+
+    // Close Mission button functionality
+    document.getElementById('closeMissionBtn').onclick = () => {
+        document.getElementById('missionSection').classList.add('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    // Initialize on page load
+    window.onload = () => {
+        if (loggedInUser) {
+            showProfile(loggedInUser);
+        }
+        
+        // Fetch statistics
+        fetchStatistics();
+        
+        // Check for reset token in URL
+        checkResetTokenFromURL();
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const profileContainer = document.getElementById('profileContainer');
+            const profileDropdown = document.getElementById('profileDropdown');
+            
+            if (profileContainer && profileDropdown && !profileContainer.contains(e.target)) {
+                profileDropdown.classList.add('hidden');
+            }
+        });
+        
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        
+        // Add scroll effect to header
+        let lastScrollY = window.scrollY;
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > lastScrollY && window.scrollY > 100) {
+                header.style.transform = 'translateY(-100%)';
+            } else {
+                header.style.transform = 'translateY(0)';
+            }
+            lastScrollY = window.scrollY;
+        });
+    };
+
+    // Form validation
+    function validateEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+    }
+
+    function validateForm(formType) {
+        if (formType === 'login') {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!email || !password) {
+                alert("⚠️ Please fill in all fields.");
+                return false;
+            }
+            
+            if (!validateEmail(email)) {
+                alert("⚠️ Please enter a valid email address.");
+                return false;
+            }
+        } else if (formType === 'signup') {
+            const fullName = document.getElementById('signupFullName').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            const phone = document.getElementById('signupPhone').value;
+            const address = document.getElementById('signupAddress').value;
+            
+            if (!fullName || !email || !password || !phone || !address) {
+                alert("⚠️ Please fill in all required fields.");
+                return false;
+            }
+            
+            if (!validateEmail(email)) {
+                alert("⚠️ Please enter a valid email address.");
+                return false;
+            }
+            
+            if (password.length < 6) {
+                alert("⚠️ Password must be at least 6 characters long.");
+                return false;
+            }
+        }
+        
+        return true;
+    }
+
+    // Add form validation to submit buttons
+    const originalLoginSubmit = document.getElementById('loginSubmit').onclick;
+    const originalSignupSubmit = document.getElementById('signupSubmit').onclick;
+    
+    document.getElementById('loginSubmit').onclick = (e) => {
+        if (validateForm('login')) {
+            originalLoginSubmit();
+        }
+    };
+    
+    document.getElementById('signupSubmit').onclick = (e) => {
+        if (validateForm('signup')) {
+            originalSignupSubmit();
+        }
+    };
+</script>
+</body>
+</html>

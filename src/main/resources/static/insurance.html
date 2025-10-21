@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pawdcast - Pet Insurance Estimator</title>
+    <style>
+        /* ===================================
+           CSS VARIABLES - DMC COLOR PALETTE
+           =================================== */
+        :root {
+            --medium-yellow-beige: #E8DABE;
+            --dark-yellow-beige: #C9A961;
+            --dark-drab-brown: #8B7355;
+            --very-dark-mocha: #4A3728;
+            --black-brown: #2D1B12;
+            --dark-wedgwood: #3E5F6F;
+            --white: #FFFFFF;
+        }
+
+        /* ===================================
+           RESET & BASE STYLES
+           =================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--medium-yellow-beige) 0%, var(--dark-yellow-beige) 100%);
+            min-height: 100vh;
+            color: var(--very-dark-mocha);
+            line-height: 1.6;
+        }
+
+        /* ===================================
+           NAVIGATION BAR
+           =================================== */
+        nav {
+            background: var(--black-brown);
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        /* ===================================
+           LOGO STYLES
+           =================================== */
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+        }
+
+        .logo-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--dark-yellow-beige);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            background: var(--white);
+        }
+
+        .logo-image:hover {
+            transform: scale(1.1) rotate(5deg);
+            border-color: var(--dark-wedgwood);
+            box-shadow: 0 6px 20px rgba(62, 95, 111, 0.5);
+        }
+
+        .logo-text {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: var(--dark-yellow-beige);
+            transition: transform 0.3s ease;
+        }
+
+        .logo-container:hover .logo-text {
+            transform: scale(1.05);
+        }
+
+        /* ===================================
+           ESTIMATION BUTTON IN NAV
+           =================================== */
+        .nav-estimate-btn {
+            background: linear-gradient(135deg, var(--dark-wedgwood) 0%, var(--very-dark-mocha) 100%);
+            color: var(--white);
+            border: none;
+            padding: 12px 25px;
+            font-size: 1.1em;
+            font-weight: 600;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(62, 95, 111, 0.4);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .nav-estimate-btn:hover {
+            background: linear-gradient(135deg, var(--black-brown) 0%, var(--dark-wedgwood) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(62, 95, 111, 0.6);
+            color: var(--white);
+        }
+
+        /* ===================================
+           MAIN CONTAINER
+           =================================== */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* ===================================
+           HEADER SECTION
+           =================================== */
+        header {
+            background: var(--white);
+            color: var(--black-brown);
+            padding: 3rem 2.5rem;
+            text-align: center;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            margin-bottom: 2.5rem;
+            animation: fadeInUp 0.8s ease-out;
+            border: 3px solid var(--dark-yellow-beige);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(201, 169, 97, 0.2), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        header h1 {
+            font-size: 2.8em;
+            margin-bottom: 0.8rem;
+            color: var(--black-brown);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 1;
+        }
+
+        header p {
+            font-size: 1.3em;
+            color: var(--very-dark-mocha);
+            position: relative;
+            z-index: 1;
+        }
+
+        .paw-icon {
+            display: inline-block;
+            animation: bounce 2s infinite ease-in-out;
+            font-size: 1.5em;
+        }
+
+        @keyframes bounce {
+            0%, 100% { 
+                transform: translateY(0) rotate(0deg); 
+            }
+            25% {
+                transform: translateY(-10px) rotate(-5deg);
+            }
+            50% { 
+                transform: translateY(-15px) rotate(0deg); 
+            }
+            75% {
+                transform: translateY(-10px) rotate(5deg);
+            }
+        }
+
+        /* ===================================
+           QUICK ESTIMATE BUTTON IN HEADER
+           =================================== */
+        .quick-estimate-btn {
+            background: linear-gradient(135deg, var(--dark-wedgwood) 0%, var(--very-dark-mocha) 100%);
+            color: var(--white);
+            border: none;
+            padding: 15px 35px;
+            font-size: 1.1em;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 25px rgba(62, 95, 111, 0.4);
+            margin-top: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .quick-estimate-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .quick-estimate-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .quick-estimate-btn:hover {
+            background: linear-gradient(135deg, var(--black-brown) 0%, var(--dark-wedgwood) 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 35px rgba(62, 95, 111, 0.6);
+        }
+
+        /* ===================================
+           SECTION STYLING
+           =================================== */
+        section {
+            background: var(--white);
+            margin: 2.5rem 0;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+            animation: fadeIn 1s ease-out;
+            border: 2px solid var(--dark-drab-brown);
+            transition: all 0.3s ease;
+        }
+
+        section:hover {
+            box-shadow: 0 15px 50px rgba(0,0,0,0.18);
+            transform: translateY(-5px);
+        }
+
+        @keyframes fadeIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(20px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+
+        /* ===================================
+           HEADINGS
+           =================================== */
+        h2 {
+            color: var(--black-brown);
+            margin-bottom: 1.5rem;
+            font-size: 2.2em;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--dark-wedgwood), var(--dark-yellow-beige));
+            border-radius: 2px;
+        }
+
+        h3 {
+            color: var(--very-dark-mocha);
+            margin: 1.8rem 0 1rem;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h4 {
+            color: var(--dark-drab-brown);
+            margin: 1.2rem 0 0.6rem;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        /* ===================================
+           FORM ELEMENTS
+           =================================== */
+        .estimator-form {
+            background: linear-gradient(135deg, var(--medium-yellow-beige) 0%, rgba(232, 218, 190, 0.6) 100%);
+            padding: 2.5rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            border: 2px solid var(--dark-drab-brown);
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        label {
+            display: block;
+            margin: 1.8rem 0 0.7rem;
+            color: var(--black-brown);
+            font-weight: 600;
+            font-size: 1.15em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        input, select {
+            padding: 14px 18px;
+            margin-bottom: 1.2rem;
+            width: 100%;
+            max-width: 450px;
+            border: 2px solid var(--dark-drab-brown);
+            border-radius: 12px;
+            font-size: 1.05em;
+            background: var(--white);
+            color: var(--very-dark-mocha);
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--dark-wedgwood);
+            box-shadow: 0 0 0 4px rgba(62, 95, 111, 0.15);
+            transform: translateY(-2px);
+            background: var(--white);
+        }
+
+        input::placeholder {
+            color: var(--dark-drab-brown);
+            opacity: 0.6;
+        }
+
+        /* ===================================
+           BUTTON STYLING
+           =================================== */
+        button {
+            background: linear-gradient(135deg, var(--dark-wedgwood) 0%, var(--very-dark-mocha) 100%);
+            color: var(--white);
+            border: none;
+            padding: 16px 45px;
+            font-size: 1.15em;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 25px rgba(62, 95, 111, 0.4);
+            margin-top: 1.2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, var(--black-brown) 0%, var(--dark-wedgwood) 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 35px rgba(62, 95, 111, 0.6);
+        }
+
+        button:active {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 20px rgba(62, 95, 111, 0.5);
+        }
+
+        /* ===================================
+           CARD STYLING
+           =================================== */
+        .card {
+            background: linear-gradient(135deg, var(--white) 0%, var(--medium-yellow-beige) 100%);
+            padding: 2.2rem;
+            margin: 1.8rem 0;
+            border-radius: 18px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+            transition: all 0.4s ease;
+            animation: cardAppear 0.6s ease-out;
+            border: 2px solid var(--dark-drab-brown);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: var(--dark-wedgwood);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover::before {
+            transform: scaleY(1);
+        }
+
+        @keyframes cardAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.18);
+            border-color: var(--dark-wedgwood);
+        }
+
+        .card h3 {
+            color: var(--black-brown);
+            margin-bottom: 1.2rem;
+            font-size: 1.7em;
+            border-bottom: 2px solid var(--dark-yellow-beige);
+            padding-bottom: 0.8rem;
+        }
+
+        .card p {
+            margin: 1rem 0;
+            color: var(--very-dark-mocha);
+            font-size: 1.05em;
+            line-height: 1.7;
+        }
+
+        .card b {
+            color: var(--dark-wedgwood);
+            font-weight: 600;
+        }
+
+        /* ===================================
+           LIST STYLING
+           =================================== */
+        ul {
+            padding-left: 2.2rem;
+            line-height: 1.9;
+        }
+
+        li {
+            margin: 1rem 0;
+            color: var(--very-dark-mocha);
+            position: relative;
+            padding-left: 5px;
+        }
+
+        li::marker {
+            color: var(--dark-wedgwood);
+        }
+
+        li b {
+            color: var(--dark-wedgwood);
+            font-weight: 600;
+        }
+
+        #info-content {
+            color: var(--very-dark-mocha);
+            line-height: 1.9;
+            font-size: 1.05em;
+        }
+
+        #info-content p {
+            margin-bottom: 1.3rem;
+            text-align: justify;
+        }
+
+        #results {
+            margin-top: 2.5rem;
+        }
+
+        /* ===================================
+           LOADING STATE
+           =================================== */
+        .loading {
+            text-align: center;
+            color: var(--dark-wedgwood);
+            font-size: 1.3em;
+            padding: 3rem;
+            font-weight: 600;
+            background: var(--medium-yellow-beige);
+            border-radius: 15px;
+            border: 2px dashed var(--dark-drab-brown);
+        }
+
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        /* ===================================
+           NO RESULTS STATE
+           =================================== */
+        .no-results {
+            text-align: center;
+            padding: 3.5rem;
+            color: var(--very-dark-mocha);
+            font-size: 1.3em;
+            background: linear-gradient(135deg, var(--medium-yellow-beige) 0%, var(--dark-yellow-beige) 100%);
+            border-radius: 18px;
+            border: 3px dashed var(--dark-drab-brown);
+            font-weight: 500;
+        }
+
+        /* ===================================
+           FOOTER
+           =================================== */
+        footer {
+            background: var(--black-brown);
+            color: var(--medium-yellow-beige);
+            text-align: center;
+            padding: 2.5rem;
+            margin-top: 3rem;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.2);
+        }
+
+        footer p {
+            margin: 0.7rem 0;
+            font-size: 1.05em;
+        }
+
+        footer a {
+            color: var(--dark-yellow-beige);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            font-weight: 500;
+        }
+
+        footer a:hover {
+            color: var(--dark-wedgwood);
+            text-decoration: underline;
+        }
+
+        /* ===================================
+           SCROLL TO TOP BUTTON
+           =================================== */
+        .scroll-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--dark-wedgwood);
+            color: var(--white);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            z-index: 999;
+        }
+
+        .scroll-top.visible {
+            opacity: 1;
+        }
+
+        .scroll-top:hover {
+            background: var(--black-brown);
+            transform: translateY(-5px);
+        }
+
+        /* ===================================
+           RESPONSIVE DESIGN
+           =================================== */
+        @media (max-width: 768px) {
+            .nav-container {
+                justify-content: center;
+                gap: 15px;
+            }
+
+            header h1 {
+                font-size: 2em;
+            }
+
+            header p {
+                font-size: 1.1em;
+            }
+
+            section {
+                padding: 1.8rem;
+            }
+
+            h2 {
+                font-size: 1.8em;
+            }
+
+            h3 {
+                font-size: 1.3em;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            input, select {
+                max-width: 100%;
+            }
+
+            button {
+                width: 100%;
+                max-width: 100%;
+            }
+
+            .estimator-form {
+                padding: 1.8rem;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            .scroll-top {
+                bottom: 20px;
+                right: 20px;
+                width: 45px;
+                height: 45px;
+            }
+
+            .nav-estimate-btn {
+                padding: 10px 20px;
+                font-size: 1em;
+            }
+
+            .quick-estimate-btn {
+                padding: 12px 25px;
+                font-size: 1em;
+            }
+
+            .logo-image {
+                width: 50px;
+                height: 50px;
+            }
+
+            .logo-text {
+                font-size: 1.5em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            header {
+                padding: 2rem 1.5rem;
+            }
+
+            header h1 {
+                font-size: 1.6em;
+            }
+
+            .logo-text {
+                font-size: 1.3em;
+            }
+
+            h2 {
+                font-size: 1.5em;
+            }
+
+            .logo-image {
+                width: 45px;
+                height: 45px;
+            }
+        }
+
+        /* ===================================
+           UTILITY CLASSES
+           =================================== */
+        .text-center {
+            text-align: center;
+        }
+
+        .mt-1 { margin-top: 1rem; }
+        .mt-2 { margin-top: 2rem; }
+        .mb-1 { margin-bottom: 1rem; }
+        .mb-2 { margin-bottom: 2rem; }
+
+        .fade-in {
+            animation: fadeIn 0.8s ease-out;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav>
+    <div class="nav-container">
+        <a href="index.html" class="logo-container">
+            <img src="https://res.cloudinary.com/dkuuvasoe/image/upload/v1760186124/pawdcastlogo_cb1l1b.png" 
+                 alt="Pawdcast Logo" 
+                 class="logo-image">
+            <span class="logo-text">Pawdcast</span>
+        </a>
+        <a href="#" class="nav-estimate-btn" onclick="scrollToEstimator()">💰 Insurance Estimation</a>
+    </div>
+</nav>
+
+<div class="container">
+    <!-- Header Section -->
+    <header>
+        <h1><span class="paw-icon">🐾</span> Pet Insurance <span class="paw-icon">🐾</span></h1>
+        <p>Learn about pet insurance and estimate the best plan for your furry friend!</p>
+        <button class="quick-estimate-btn" onclick="scrollToEstimator()">
+            🚀 Quick Insurance Estimation
+        </button>
+    </header>
+
+    <!-- Section 1: Insurance Information -->
+    <section id="insurance-info">
+        <h2>🏥 Pet Insurance Information</h2>
+        <div id="info-content" class="loading">Loading information</div>
+    </section>
+
+    <!-- Section 2: Insurance Estimator -->
+    <section id="estimator">
+        <h2>💰 Estimate Your Pet Insurance</h2>
+        <div class="estimator-form">
+            <label for="petType">🐶 Select Pet Type:</label>
+            <select id="petType">
+                <option value="Dog">Dog</option>
+                <option value="Cat">Cat</option>
+            </select>
+
+            <label for="age">🎂 Enter Pet Age (years):</label>
+            <input type="number" id="age" min="0" step="0.1" placeholder="e.g., 2.5">
+
+            <button onclick="estimateInsurance()">🔍 Find Best Insurance</button>
+        </div>
+
+        <div id="results"></div>
+    </section>
+</div>
+
+<!-- Scroll to Top Button -->
+<div class="scroll-top" id="scrollTop" onclick="scrollToTop()">
+    ↑
+</div>
+
+<!-- Footer -->
+<footer>
+    <p>&copy; 2025 Pawdcast. All rights reserved.</p>
+    <p>Caring for pets, one paw at a time. 🐾</p>
+</footer>
+
+<script>
+    let insuranceInfoData;
+    let estimatorData;
+
+    // Fetch Insurance Information
+    fetch("http://localhost:8080/api/insurance/info")
+        .then(res => res.json())
+        .then(data => {
+            insuranceInfoData = data;
+            displayInsuranceInfo();
+        })
+        .catch(err => document.getElementById("info-content").innerHTML = "<p class='no-results'>⚠️ Error loading information. Please try again later.</p>");
+
+    // Fetch Insurance Estimator Data
+    fetch("http://localhost:8080/api/insurance/estimator")
+        .then(res => res.json())
+        .then(data => estimatorData = data.providers)
+        .catch(err => console.error("Error loading estimator data:", err));
+
+    function displayInsuranceInfo() {
+        let infoDiv = document.getElementById("info-content");
+        let html = "";
+
+        if (insuranceInfoData.introduction) {
+            html += `<p>${insuranceInfoData.introduction}</p>`;
+        }
+
+        if (insuranceInfoData.whyNeed) {
+            html += "<h3>🌟 Why You Need Pet Insurance:</h3><ul>";
+            insuranceInfoData.whyNeed.forEach(item => html += `<li>${item}</li>`);
+            html += "</ul>";
+        }
+
+        if (insuranceInfoData.types) {
+            html += "<h3>📋 Types of Pet Insurance:</h3><ul>";
+            insuranceInfoData.types.forEach(type => html += `<li><b>${type.type}:</b> ${type.description}</li>`);
+            html += "</ul>";
+        }
+
+        if (insuranceInfoData.inclusions) {
+            html += "<h3>✅ Inclusions:</h3><ul>";
+            insuranceInfoData.inclusions.forEach(item => html += `<li>${item}</li>`);
+            html += "</ul>";
+        }
+
+        if (insuranceInfoData.exclusions) {
+            html += "<h3>❌ Exclusions:</h3><ul>";
+            insuranceInfoData.exclusions.forEach(item => html += `<li>${item}</li>`);
+            html += "</ul>";
+        }
+
+        if (insuranceInfoData.eligibility) {
+            html += "<h3>📝 Eligibility:</h3><ul>";
+            for (let key in insuranceInfoData.eligibility) {
+                html += `<li><b>${key}:</b> ${insuranceInfoData.eligibility[key]}</li>`;
+            }
+            html += "</ul>";
+        }
+
+        if (insuranceInfoData.laws) {
+            html += "<h3>⚖️ Laws & Regulations:</h3><ul>";
+            insuranceInfoData.laws.forEach(item => html += `<li>${item}</li>`);
+            html += "</ul>";
+        }
+
+        infoDiv.innerHTML = html;
+    }
+
+    function estimateInsurance() {
+        let petType = document.getElementById("petType").value;
+        let age = parseFloat(document.getElementById("age").value);
+        let resultsDiv = document.getElementById("results");
+        resultsDiv.innerHTML = "<div class='loading'>Finding the perfect plan for your pet</div>";
+
+        setTimeout(() => {
+            resultsDiv.innerHTML = "";
+
+            if (!estimatorData) {
+                resultsDiv.innerHTML = "<p class='no-results'>⚠️ Error loading insurance data. Please try again.</p>";
+                return;
+            }
+
+            if (isNaN(age) || age < 0) {
+                resultsDiv.innerHTML = "<p class='no-results'>⚠️ Please enter a valid age for your pet.</p>";
+                return;
+            }
+
+            let matches = estimatorData.filter(p =>
+                p.petType === petType && age >= p.minAge && age <= p.maxAge
+            );
+
+            if (matches.length === 0) {
+                resultsDiv.innerHTML = `<p class='no-results'>😔 No insurance plans available for a ${petType} aged ${age} years.</p>`;
+            } else {
+                matches.forEach((p, index) => {
+                    let card = document.createElement("div");
+                    card.className = "card";
+                    card.style.animationDelay = `${index * 0.1}s`;
+                    card.innerHTML = `
+                        <h3>🎯 ${p.name}</h3>
+                        <p><b>📅 Eligibility:</b> ${p.minAge} - ${p.maxAge} years</p>
+                        <p><b>💵 Premium Range:</b> ${p.premiumRange}</p>
+                        <h4>🎁 Benefits:</h4>
+                        <ul>${p.benefits.map(b => `<li>${b}</li>`).join("")}</ul>
+                    `;
+                    resultsDiv.appendChild(card);
+                });
+            }
+        }, 500);
+    }
+
+    // Scroll to Estimator Function
+    function scrollToEstimator() {
+        const estimatorSection = document.getElementById('estimator');
+        estimatorSection.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start'
+        });
+        
+        // Add a visual highlight effect
+        estimatorSection.style.boxShadow = '0 0 0 4px rgba(62, 95, 111, 0.3)';
+        setTimeout(() => {
+            estimatorSection.style.boxShadow = '0 10px 40px rgba(0,0,0,0.12)';
+        }, 2000);
+    }
+
+    // Scroll to Top Functionality
+    window.onscroll = function() {
+        const scrollTop = document.getElementById("scrollTop");
+        if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+            scrollTop.classList.add("visible");
+        } else {
+            scrollTop.classList.remove("visible");
+        }
+    };
+
+    function scrollToTop() {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    }
+</script>
+
+</body>
+</html>

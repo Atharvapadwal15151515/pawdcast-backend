@@ -1,0 +1,1571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pet Legal Hub - Pawdcast</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            /* DMC Color Palette */
+            --medium-yellow-beige: #E8DCC6;
+            --dark-yellow-beige: #D4C2A0;
+            --dark-drab-brown: #8B7355;
+            --very-dark-mocha: #4A3728;
+            --black-brown: #2C1810;
+            --dark-wedgwood: #1E3A5F;
+            --pure-white: #FFFFFF;
+
+            /* Design System Variables */
+            --primary: var(--dark-wedgwood);
+            --primary-light: #2B4A6B;
+            --primary-dark: #152A47;
+            --secondary: var(--dark-drab-brown);
+            --accent: var(--very-dark-mocha);
+            --neutral-light: var(--medium-yellow-beige);
+            --neutral: var(--dark-yellow-beige);
+            --neutral-dark: var(--black-brown);
+            --background: var(--pure-white);
+            --surface: var(--medium-yellow-beige);
+            --text-primary: var(--black-brown);
+            --text-secondary: var(--very-dark-mocha);
+            --text-accent: var(--dark-wedgwood);
+            --warning: #D9534F;
+            --info: var(--primary);
+            --success: #28A745;
+
+            /* Layout Variables */
+            --border-radius: 12px;
+            --border-radius-sm: 8px;
+            --border-radius-lg: 20px;
+            --shadow-sm: 0 2px 8px rgba(28, 24, 16, 0.08);
+            --shadow: 0 4px 16px rgba(28, 24, 16, 0.12);
+            --shadow-lg: 0 8px 32px rgba(28, 24, 16, 0.16);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: linear-gradient(135deg, var(--pure-white) 0%, var(--neutral-light) 50%, var(--neutral) 100%);
+            min-height: 100vh;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(232, 220, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(30, 58, 95, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(139, 115, 85, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Navigation Breadcrumb */
+        .nav-breadcrumb {
+            background: var(--pure-white);
+            padding: 1rem 2rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-sm);
+            border-left: 4px solid var(--primary);
+            animation: slideInDown 0.6s ease-out;
+        }
+
+        .nav-breadcrumb a {
+            color: var(--text-accent);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .nav-breadcrumb a:hover {
+            color: var(--primary);
+            text-decoration: underline;
+        }
+
+        .nav-breadcrumb .separator {
+            margin: 0 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        /* Enhanced Header */
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 50%, var(--accent) 100%);
+            color: var(--pure-white);
+            padding: 3rem 0;
+            border-radius: var(--border-radius-lg);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-conic-gradient(
+                from 0deg at 50% 50%,
+                transparent 0deg,
+                rgba(255, 255, 255, 0.03) 1deg,
+                transparent 2deg,
+                transparent 15deg
+            );
+            animation: rotate 25s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo {
+            width: 180px;
+            height: 180px;
+            margin-bottom: 1.5rem;
+            border-radius: 50%;
+            background: var(--pure-white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-lg);
+            border: 4px solid var(--neutral-light);
+            transition: var(--transition);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 40px rgba(28, 24, 16, 0.25);
+        }
+
+        .logo::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary), var(--accent));
+            border-radius: 50%;
+            z-index: -1;
+            animation: rotate 10s linear infinite;
+        }
+
+        .logo img {
+            width: 85%;
+            height: 85%;
+            object-fit: contain;
+            border-radius: 50%;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+        }
+
+        .logo-text {
+            text-align: center;
+            margin-top: 0.5rem;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Enhanced Info Bar */
+        .info-bar {
+            display: flex;
+            justify-content: space-between;
+            background: var(--pure-white);
+            padding: 1.5rem 2rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            flex-wrap: wrap;
+            border: 1px solid var(--neutral);
+            position: relative;
+            overflow: hidden;
+            animation: slideInLeft 0.6s ease-out 0.2s both;
+        }
+
+        .info-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            margin: 0.5rem 1rem;
+            transition: var(--transition);
+        }
+
+        .info-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .info-item i {
+            margin-right: 0.8rem;
+            color: var(--primary);
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .info-item span {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        /* Enhanced Disclaimer */
+        .disclaimer {
+            background: linear-gradient(135deg, var(--neutral-light), var(--pure-white));
+            border-left: 4px solid var(--warning);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+            animation: slideInRight 0.6s ease-out 0.4s both;
+        }
+
+        .disclaimer::before {
+            content: '';
+            position: absolute;
+            top: -100%;
+            right: -100%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(139, 115, 85, 0.05) 0%, transparent 70%);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(180deg); }
+        }
+
+        .disclaimer i {
+            color: var(--warning);
+            margin-right: 1rem;
+            font-size: 1.2rem;
+            animation: warning-pulse 2s infinite;
+        }
+
+        @keyframes warning-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .disclaimer strong {
+            color: var(--accent);
+        }
+
+        /* Enhanced Sections */
+        .section {
+            background: var(--pure-white);
+            border-radius: var(--border-radius-lg);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid rgba(139, 115, 85, 0.1);
+            position: relative;
+            animation: fadeInUp 0.6s ease-out both;
+        }
+
+        .section:nth-child(odd) {
+            animation-delay: 0.1s;
+        }
+
+        .section:nth-child(even) {
+            animation-delay: 0.2s;
+        }
+
+        .section:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: var(--pure-white);
+            padding: 1.5rem 2rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: var(--transition);
+        }
+
+        .section-header:hover::before {
+            left: 100%;
+        }
+
+        .section-header:hover {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+        }
+
+        .section-header h3 {
+            margin: 0;
+            font-size: 1.4rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-header h3 i {
+            margin-right: 0.8rem;
+            font-size: 1.2rem;
+        }
+
+        .section-content {
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            background: var(--pure-white);
+        }
+
+        .section-content.active {
+            padding: 2rem;
+            max-height: 5000px;
+        }
+
+        .section-content p {
+            margin-bottom: 1.2rem;
+            font-size: 1.05rem;
+            color: var(--text-primary);
+            line-height: 1.7;
+        }
+
+        /* Enhanced Subsections */
+        .subsection {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, var(--surface) 0%, var(--neutral-light) 100%);
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--secondary);
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .subsection:hover {
+            transform: translateX(4px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .subsection::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 50px;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(139, 115, 85, 0.05));
+        }
+
+        .subsection h4 {
+            color: var(--accent);
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .subsection h4 i {
+            margin-right: 0.8rem;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        /* Enhanced Lists */
+        .key-points, .rules, .checklist, .warnings {
+            margin: 1.2rem 0;
+        }
+
+        .key-points ul, .rules ul, .checklist ul, .warnings ul {
+            padding-left: 0;
+            list-style: none;
+        }
+
+        .key-points li, .rules li, .checklist li, .warnings li {
+            margin-bottom: 1rem;
+            padding: 0.8rem 1rem;
+            background: var(--pure-white);
+            border-radius: var(--border-radius-sm);
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            padding-left: 3rem;
+            transition: var(--transition);
+            border-left: 3px solid transparent;
+        }
+
+        .key-points li:hover, .rules li:hover, .checklist li:hover, .warnings li:hover {
+            transform: translateX(5px);
+            box-shadow: var(--shadow);
+        }
+
+        .key-points li {
+            border-left-color: var(--primary);
+        }
+
+        .rules li {
+            border-left-color: var(--secondary);
+        }
+
+        .checklist li {
+            border-left-color: var(--success);
+        }
+
+        .warnings li {
+            border-left-color: var(--warning);
+        }
+
+        .key-points li::before {
+            content: "•";
+            position: absolute;
+            left: 1rem;
+            top: 0.8rem;
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .rules li::before {
+            content: "📋";
+            position: absolute;
+            left: 1rem;
+            top: 0.8rem;
+            font-size: 1rem;
+        }
+
+        .checklist li::before {
+            content: "✅";
+            position: absolute;
+            left: 1rem;
+            top: 0.8rem;
+            font-size: 1rem;
+        }
+
+        .warnings li::before {
+            content: "⚠️";
+            position: absolute;
+            left: 1rem;
+            top: 0.8rem;
+            font-size: 1rem;
+        }
+
+        /* Enhanced Cards */
+        .process-card {
+            background: var(--pure-white);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin: 1rem 0;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--neutral);
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .process-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
+        }
+
+        .process-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        .process-card h5 {
+            color: var(--primary);
+            margin-bottom: 0.8rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .process-card h5 i {
+            margin-right: 0.5rem;
+        }
+
+        .example-card {
+            background: linear-gradient(135deg, var(--pure-white), var(--neutral-light));
+            border-radius: var(--border-radius);
+            padding: 1.2rem;
+            margin: 1rem 0;
+            border-left: 4px solid var(--info);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+
+        .example-card:hover {
+            transform: translateX(5px);
+            box-shadow: var(--shadow);
+        }
+
+        .example-card h5 {
+            color: var(--info);
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+        }
+
+        .liability-card {
+            background: var(--pure-white);
+            border-radius: var(--border-radius);
+            padding: 1.2rem;
+            margin: 0.8rem 0;
+            box-shadow: var(--shadow-sm);
+            border-left: 4px solid var(--warning);
+            transition: var(--transition);
+        }
+
+        .liability-card:hover {
+            transform: translateX(5px);
+            box-shadow: var(--shadow);
+        }
+
+        .liability-card h5 {
+            color: var(--warning);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .step-card {
+            display: flex;
+            align-items: flex-start;
+            margin: 1rem 0;
+            padding: 1.2rem;
+            background: var(--pure-white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            border: 1px solid var(--neutral);
+        }
+
+        .step-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
+        }
+
+        .step-number {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: var(--pure-white);
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            flex-shrink: 0;
+            font-weight: bold;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .resource-card {
+            display: flex;
+            align-items: center;
+            padding: 1.2rem;
+            background: var(--pure-white);
+            border-radius: var(--border-radius);
+            margin: 0.8rem 0;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            border: 1px solid var(--neutral);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .resource-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--primary), var(--secondary));
+        }
+
+        .resource-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .resource-icon {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: var(--pure-white);
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            flex-shrink: 0;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .resource-info h5 {
+            margin-bottom: 0.3rem;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .resource-info a {
+            color: var(--secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .resource-info a:hover {
+            color: var(--primary);
+            text-decoration: underline;
+        }
+
+        .resource-info p {
+            margin-top: 0.3rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        /* Enhanced Toggle Icon */
+        .toggle-icon {
+            transition: var(--transition);
+            font-size: 1.3rem;
+            padding: 0.5rem;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .section-header.active .toggle-icon {
+            transform: rotate(180deg);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Enhanced Footer */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+            background: linear-gradient(135deg, var(--neutral-dark), var(--black-brown));
+            color: var(--pure-white);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow);
+        }
+
+        /* Enhanced Loading & Error States */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+        }
+
+        .loading i {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+            animation: spin 2s linear infinite, pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .error {
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, rgba(139, 115, 85, 0.1), rgba(74, 55, 40, 0.1));
+            border: 2px solid var(--secondary);
+            border-radius: var(--border-radius);
+            color: var(--accent);
+            box-shadow: var(--shadow);
+        }
+
+        .error i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--warning);
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .info-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 1rem;
+            }
+            
+            .info-item {
+                margin: 0.3rem 0;
+                width: 100%;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .section-header h3 {
+                font-size: 1.1rem;
+            }
+
+            .section-header {
+                padding: 1rem;
+            }
+
+            .section-content.active {
+                padding: 1rem;
+            }
+
+            .subsection {
+                padding: 1rem;
+            }
+
+            .step-card, .resource-card {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .step-number, .resource-icon {
+                margin: 0 0 1rem 0;
+            }
+
+            .nav-breadcrumb {
+                padding: 0.8rem 1rem;
+                font-size: 0.9rem;
+            }
+            
+            .logo {
+                width: 140px;
+                height: 140px;
+            }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--surface);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--secondary), var(--accent));
+            border-radius: 5px;
+            transition: var(--transition);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, var(--primary), var(--secondary));
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: transparent;
+            z-index: 1000;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Search Bar */
+        .search-container {
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 2px solid var(--neutral);
+            border-radius: var(--border-radius);
+            background: var(--pure-white);
+            font-size: 1rem;
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        /* Quick Navigation */
+        .quick-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .nav-pill {
+            background: var(--pure-white);
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            text-decoration: none;
+            color: var(--text-primary);
+            font-weight: 500;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            border: 2px solid transparent;
+        }
+
+        .nav-pill:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Print Styles */
+        @media print {
+            .nav-breadcrumb, .search-container, .quick-nav, footer {
+                display: none;
+            }
+            
+            .section-content {
+                max-height: none !important;
+                display: block !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Progress Bar -->
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="container">
+        <!-- Breadcrumb Navigation -->
+        <nav class="nav-breadcrumb">
+            <a href="#home"><i class="fas fa-home"></i> Pawdcast Home</a>
+            <span class="separator">›</span>
+            <span style="color: var(--text-secondary); font-weight: 600;">Legal Hub</span>
+        </nav>
+
+        <header>
+            <div class="logo-container">
+                <div class="logo">
+                    <img src="https://res.cloudinary.com/dkuuvasoe/image/upload/v1760186124/pawdcastlogo_cb1l1b.png" alt="Pawdcast Logo">
+                </div>
+                <div class="logo-text">
+                    <h1>Pet Legal Hub - India</h1>
+                    <div class="subtitle">Your comprehensive guide to pet laws and regulations</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Search Bar -->
+        <div class="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" class="search-input" id="searchInput" placeholder="Search legal topics, sections, or keywords...">
+        </div>
+
+        <!-- Quick Navigation -->
+        <div class="quick-nav" id="quickNav">
+            <!-- Will be populated by JavaScript -->
+        </div>
+
+        <div id="legalHubContent">
+            <div class="loading">
+                <i class="fas fa-paw"></i>
+                <p>Loading comprehensive legal information...</p>
+                <div style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.7;">
+                    Please wait while we fetch the latest pet laws and regulations
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p><strong>Pet Legal Hub</strong> &copy; 2025 - For informational purposes only</p>
+            <p style="margin-top: 0.5rem; opacity: 0.8; font-size: 0.8rem;">
+                Always consult with a qualified legal professional for specific advice
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE_URL = 'http://localhost:8080/api/legal';
+        const API_ENDPOINTS = {
+            legalHub: `${API_BASE_URL}/pet-legal-hub`,
+            health: `${API_BASE_URL}/pet-legal-hub/health`
+        };
+
+        // State management
+        let legalData = null;
+        let activeSection = null;
+
+        // DOM Elements
+        const progressBar = document.getElementById('progressBar');
+        const searchInput = document.getElementById('searchInput');
+        const quickNav = document.getElementById('quickNav');
+        const legalHubContent = document.getElementById('legalHubContent');
+
+        // Enhanced API Service
+        const apiService = {
+            async fetchLegalHub() {
+                try {
+                    const response = await fetch(API_ENDPOINTS.legalHub, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    return await response.json();
+                } catch (error) {
+                    console.error('API Error:', error);
+                    throw new Error('Failed to fetch legal data. Please check your connection and try again.');
+                }
+            },
+
+            async checkHealth() {
+                try {
+                    const response = await fetch(API_ENDPOINTS.health);
+                    return response.ok;
+                } catch (error) {
+                    return false;
+                }
+            }
+        };
+
+        // UI Controller
+        const uiController = {
+            showLoading() {
+                legalHubContent.innerHTML = `
+                    <div class="loading">
+                        <i class="fas fa-paw"></i>
+                        <p>Loading comprehensive legal information...</p>
+                        <div style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.7;">
+                            Please wait while we fetch the latest pet laws and regulations
+                        </div>
+                    </div>
+                `;
+            },
+
+            showError(message) {
+                legalHubContent.innerHTML = `
+                    <div class="error">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <h3>Error Loading Legal Hub Data</h3>
+                        <p>${message}</p>
+                        <div style="margin-top: 1.5rem;">
+                            <button onclick="loadPetLegalHub()" class="retry-btn">
+                                <i class="fas fa-redo"></i> Try Again
+                            </button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            renderLegalHub(data) {
+                const hub = data.petLegalHubIndia;
+                legalData = data;
+
+                let html = `
+                    <div class="info-bar">
+                        <div class="info-item">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span><strong>Last Updated:</strong> ${hub.lastUpdated}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-clock"></i>
+                            <span><strong>Reading Time:</strong> 15-20 minutes</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-file-alt"></i>
+                            <span><strong>Sections:</strong> ${hub.sections.length} comprehensive topics</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-shield-alt"></i>
+                            <span><strong>Coverage:</strong> All-India Legal Framework</span>
+                        </div>
+                    </div>
+
+                    <div class="disclaimer">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Legal Disclaimer:</strong> ${hub.disclaimer}
+                    </div>
+                `;
+
+                // Render sections
+                hub.sections.forEach((section, index) => {
+                    html += this.renderSection(section, index);
+                });
+
+                legalHubContent.innerHTML = html;
+                this.initializeQuickNav(hub.sections);
+                this.initializeSectionInteractions();
+                this.animateContent();
+            },
+
+            renderSection(section, index) {
+                return `
+                    <div class="section" id="section-${section.id}" data-section-id="${section.id}">
+                        <div class="section-header ${index === 0 ? 'active' : ''}">
+                            <h3><i class="fas fa-gavel"></i> ${section.title}</h3>
+                            <i class="fas fa-chevron-down toggle-icon"></i>
+                        </div>
+                        <div class="section-content ${index === 0 ? 'active' : ''}">
+                            <p>${section.content}</p>
+                            ${section.subsections ? section.subsections.map(sub => this.renderSubsection(sub)).join('') : ''}
+                        </div>
+                    </div>
+                `;
+            },
+
+            renderSubsection(sub) {
+                let html = `
+                    <div class="subsection">
+                        <h4><i class="fas fa-file-contract"></i> ${sub.title}</h4>
+                        <p>${sub.content || ""}</p>
+                `;
+
+                // Render different content types
+                if (sub.keyProvisions) {
+                    html += `<div class="key-points"><ul>`;
+                    sub.keyProvisions.forEach(kp => {
+                        html += `<li><strong>${kp.point}:</strong> ${kp.details}</li>`;
+                    });
+                    html += `</ul></div>`;
+                }
+
+                if (sub.process) {
+                    html += `<div class="process-card">`;
+                    Object.keys(sub.process).forEach(key => {
+                        if (Array.isArray(sub.process[key])) {
+                            html += `<h5><i class="fas fa-list-check"></i> ${key}:</h5><ul style="margin-left: 1rem;">`;
+                            sub.process[key].forEach(item => {
+                                html += `<li style="margin-bottom: 0.5rem; color: var(--text-primary);">• ${item}</li>`;
+                            });
+                            html += `</ul>`;
+                        } else {
+                            html += `<p><strong>${key}:</strong> ${sub.process[key]}</p>`;
+                        }
+                    });
+                    html += `</div>`;
+                }
+
+                if (sub.rules) {
+                    html += `<div class="rules"><ul>`;
+                    sub.rules.forEach(rule => {
+                        html += `<li>${rule}</li>`;
+                    });
+                    html += `</ul></div>`;
+                }
+
+                if (sub.checklist) {
+                    html += `<div class="checklist"><ul>`;
+                    sub.checklist.forEach(item => {
+                        html += `<li>${item}</li>`;
+                    });
+                    html += `</ul></div>`;
+                }
+
+                if (sub.warnings) {
+                    html += `<div class="warnings"><ul>`;
+                    sub.warnings.forEach(item => {
+                        html += `<li>${item}</li>`;
+                    });
+                    html += `</ul></div>`;
+                }
+
+                if (sub.liabilities) {
+                    sub.liabilities.forEach(liability => {
+                        html += `
+                            <div class="liability-card">
+                                <h5><i class="fas fa-exclamation-triangle"></i> ${liability.type}</h5>
+                                <p>${liability.details}</p>
+                            </div>
+                        `;
+                    });
+                }
+
+                if (sub.steps) {
+                    sub.steps.forEach((step, stepIndex) => {
+                        html += `
+                            <div class="step-card">
+                                <div class="step-number">${stepIndex + 1}</div>
+                                <div>${step}</div>
+                            </div>
+                        `;
+                    });
+                }
+
+                if (sub.resources) {
+                    sub.resources.forEach(resource => {
+                        html += `
+                            <div class="resource-card">
+                                <div class="resource-icon">
+                                    <i class="fas fa-external-link-alt"></i>
+                                </div>
+                                <div class="resource-info">
+                                    <h5>${resource.name}</h5>
+                                    <a href="${resource.url}" target="_blank" rel="noopener noreferrer">${resource.url}</a>
+                                    <p>${resource.purpose}</p>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+
+                html += `</div>`;
+                return html;
+            },
+
+            initializeQuickNav(sections) {
+                quickNav.innerHTML = sections.map(section => 
+                    `<a href="#section-${section.id}" class="nav-pill" data-section="${section.id}">
+                        <i class="fas fa-arrow-right"></i> ${section.title.split(' ').slice(0, 3).join(' ')}
+                    </a>`
+                ).join('');
+
+                // Add click handlers for quick navigation
+                quickNav.querySelectorAll('.nav-pill').forEach(pill => {
+                    pill.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const sectionId = pill.getAttribute('data-section');
+                        this.scrollToSection(sectionId);
+                    });
+                });
+            },
+
+            initializeSectionInteractions() {
+                const sectionHeaders = document.querySelectorAll('.section-header');
+                
+                sectionHeaders.forEach(header => {
+                    header.addEventListener('click', () => {
+                        const content = header.nextElementSibling;
+                        const isActive = content.classList.contains('active');
+                        
+                        // Close all sections
+                        document.querySelectorAll('.section-content').forEach(s => {
+                            s.classList.remove('active');
+                        });
+                        document.querySelectorAll('.section-header').forEach(h => {
+                            h.classList.remove('active');
+                        });
+                        
+                        // Open clicked section if it wasn't active
+                        if (!isActive) {
+                            content.classList.add('active');
+                            header.classList.add('active');
+                            activeSection = header.parentElement.getAttribute('data-section-id');
+                            
+                            // Update URL hash
+                            window.location.hash = `section-${activeSection}`;
+                            
+                            // Smooth scroll to section
+                            setTimeout(() => {
+                                header.scrollIntoView({
+                                    behavior: 'smooth',
+                                    block: 'start'
+                                });
+                            }, 100);
+                        }
+                    });
+                });
+
+                // Handle URL hash on page load
+                if (window.location.hash) {
+                    const sectionId = window.location.hash.replace('#section-', '');
+                    this.scrollToSection(sectionId);
+                }
+            },
+
+            scrollToSection(sectionId) {
+                const section = document.getElementById(`section-${sectionId}`);
+                if (section) {
+                    const header = section.querySelector('.section-header');
+                    const content = section.querySelector('.section-content');
+                    
+                    // Close all sections
+                    document.querySelectorAll('.section-content').forEach(s => {
+                        s.classList.remove('active');
+                    });
+                    document.querySelectorAll('.section-header').forEach(h => {
+                        h.classList.remove('active');
+                    });
+                    
+                    // Open target section
+                    content.classList.add('active');
+                    header.classList.add('active');
+                    activeSection = sectionId;
+                    
+                    // Smooth scroll
+                    setTimeout(() => {
+                        section.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }, 100);
+                }
+            },
+
+            animateContent() {
+                const elements = legalHubContent.querySelectorAll('.info-bar, .disclaimer, .section');
+                elements.forEach((el, index) => {
+                    el.style.opacity = '0';
+                    el.style.transform = 'translateY(20px)';
+                    
+                    setTimeout(() => {
+                        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                        el.style.opacity = '1';
+                        el.style.transform = 'translateY(0)';
+                    }, index * 100);
+                });
+            }
+        };
+
+        // Search functionality
+        const searchController = {
+            init() {
+                searchInput.addEventListener('input', this.debounce(this.handleSearch.bind(this), 300));
+            },
+
+            debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            },
+
+            handleSearch(event) {
+                const query = event.target.value.toLowerCase().trim();
+                
+                if (!legalData || !query) {
+                    this.highlightSearchResults('');
+                    return;
+                }
+
+                this.highlightSearchResults(query);
+            },
+
+            highlightSearchResults(query) {
+                const sections = document.querySelectorAll('.section-content');
+                
+                sections.forEach(section => {
+                    const text = section.textContent.toLowerCase();
+                    const hasMatch = text.includes(query);
+                    
+                    if (hasMatch) {
+                        section.style.backgroundColor = 'rgba(30, 58, 95, 0.05)';
+                        section.style.border = '2px solid var(--primary)';
+                    } else {
+                        section.style.backgroundColor = '';
+                        section.style.border = '';
+                    }
+                });
+            }
+        };
+
+        // Progress bar controller
+        const progressController = {
+            init() {
+                window.addEventListener('scroll', this.updateProgressBar.bind(this));
+            },
+
+            updateProgressBar() {
+                const winHeight = window.innerHeight;
+                const docHeight = document.documentElement.scrollHeight;
+                const scrollTop = window.pageYOffset;
+                const trackLength = docHeight - winHeight;
+                const progress = Math.floor(scrollTop / trackLength * 100);
+                
+                progressBar.style.width = progress + '%';
+            }
+        };
+
+        // Main application
+        async function loadPetLegalHub() {
+            try {
+                uiController.showLoading();
+                
+                // Check API health first
+                const isHealthy = await apiService.checkHealth();
+                if (!isHealthy) {
+                    throw new Error('Legal hub service is currently unavailable. Please try again later.');
+                }
+
+                const data = await apiService.fetchLegalHub();
+                uiController.renderLegalHub(data);
+                
+            } catch (error) {
+                console.error('Failed to load legal hub:', error);
+                uiController.showError(error.message);
+            }
+        }
+
+        // Initialize application
+        document.addEventListener('DOMContentLoaded', () => {
+            progressController.init();
+            searchController.init();
+            loadPetLegalHub();
+        });
+
+        // Enhanced scroll-to-top functionality
+        window.addEventListener('scroll', () => {
+            const scrollButton = document.getElementById('scrollToTop');
+            if (window.pageYOffset > 300) {
+                if (!scrollButton) {
+                    const button = document.createElement('button');
+                    button.id = 'scrollToTop';
+                    button.innerHTML = '<i class="fas fa-arrow-up"></i>';
+                    button.style.cssText = `
+                        position: fixed;
+                        bottom: 2rem;
+                        right: 2rem;
+                        background: var(--primary);
+                        color: var(--pure-white);
+                        border: none;
+                        width: 50px;
+                        height: 50px;
+                        border-radius: 50%;
+                        cursor: pointer;
+                        box-shadow: var(--shadow-lg);
+                        transition: var(--transition);
+                        z-index: 1000;
+                        opacity: 0;
+                        transform: translateY(20px);
+                    `;
+                    button.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+                    document.body.appendChild(button);
+                    
+                    setTimeout(() => {
+                        button.style.opacity = '1';
+                        button.style.transform = 'translateY(0)';
+                    }, 100);
+                }
+            } else {
+                const scrollButton = document.getElementById('scrollToTop');
+                if (scrollButton) {
+                    scrollButton.style.opacity = '0';
+                    scrollButton.style.transform = 'translateY(20px)';
+                    setTimeout(() => {
+                        if (scrollButton.parentNode) {
+                            scrollButton.parentNode.removeChild(scrollButton);
+                        }
+                    }, 300);
+                }
+            }
+        });
+
+        // Add keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                // Close all open sections
+                document.querySelectorAll('.section-content.active').forEach(content => {
+                    content.classList.remove('active');
+                    content.previousElementSibling.classList.remove('active');
+                });
+                activeSection = null;
+            }
+            
+            // Ctrl+F for search
+            if (e.ctrlKey && e.key === 'f') {
+                e.preventDefault();
+                searchInput.focus();
+            }
+        });
+
+        // Add print functionality
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'p') {
+                e.preventDefault();
+                window.print();
+            }
+        });
+
+        // Add retry button styles
+        const style = document.createElement('style');
+        style.textContent = `
+            .retry-btn {
+                background: var(--primary);
+                color: var(--pure-white);
+                border: none;
+                padding: 0.8rem 1.5rem;
+                border-radius: var(--border-radius-sm);
+                cursor: pointer;
+                font-weight: 500;
+                transition: var(--transition);
+            }
+            .retry-btn:hover {
+                background: var(--primary-dark);
+                transform: translateY(-2px);
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

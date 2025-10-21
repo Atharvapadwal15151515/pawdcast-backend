@@ -1,0 +1,1421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PawdCast - Royal Pet Diary</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;600;700&family=Playfair+Display:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --dmc-3046: #E6D7B8; /* Medium Yellow Beige */
+            --dmc-3045: #D9C6A3; /* Dark Yellow Beige */
+            --dmc-610: #8B7355; /* Dark Drab Brown */
+            --dmc-3031: #5D4037; /* Very Dark Mocha Brown */
+            --dmc-3371: #2D1F1A; /* Black Brown */
+            --dmc-517: #4A708B; /* Dark Wedgwood */
+            --white: #FFFFFF;
+            --gold: #D4AF37;
+            --shadow: rgba(0, 0, 0, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Crimson Text', serif;
+            background: linear-gradient(135deg, var(--dmc-3031) 0%, var(--dmc-3371) 100%);
+            min-height: 100vh;
+            color: var(--dmc-3371);
+            overflow-x: hidden;
+        }
+
+        /* Royal Navigation */
+        .navbar {
+            background: linear-gradient(135deg, var(--dmc-610) 0%, var(--dmc-3031) 100%);
+            padding: 1.2rem 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            border-bottom: 3px solid var(--gold);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: var(--white);
+            font-family: 'Playfair Display', serif;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo-img {
+            height: 50px;
+            width: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--gold);
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+            transition: all 0.4s ease;
+        }
+
+        .logo-img:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-btn {
+            background: var(--dmc-3371);
+            color: var(--white);
+            border: 2px solid var(--gold);
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .nav-btn:hover {
+            background: var(--gold);
+            color: var(--dmc-3371);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
+        }
+
+        /* Sections */
+        .section {
+            display: none;
+            min-height: 100vh;
+            padding: 120px 2rem 2rem;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Royal Welcome Section */
+        .welcome-container {
+            text-align: center;
+            color: var(--white);
+            padding: 6rem 2rem;
+            position: relative;
+        }
+
+        .welcome-title {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            font-family: 'Playfair Display', serif;
+            color: var(--gold);
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .welcome-subtitle {
+            font-size: 1.4rem;
+            margin-bottom: 4rem;
+            opacity: 0.9;
+            font-weight: 300;
+            color: var(--dmc-3046);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, var(--dmc-3031), var(--dmc-3371));
+            color: var(--white);
+            border: 3px solid var(--gold);
+            padding: 1.5rem 3rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            font-family: 'Playfair Display', serif;
+        }
+
+        .action-btn:hover {
+            background: linear-gradient(135deg, var(--gold), #E6C260);
+            color: var(--dmc-3371);
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(212, 175, 55, 0.5);
+        }
+
+        /* Royal Diary Book */
+        .book-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 2000px;
+            margin: 4rem 0;
+            min-height: 700px;
+        }
+
+        .book {
+            width: 900px;
+            height: 600px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        /* Elegant Cover */
+        .cover {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(135deg, var(--dmc-610) 0%, var(--dmc-3031) 100%),
+                repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(212, 175, 55, 0.1) 3px, rgba(212, 175, 55, 0.1) 4px);
+            border-radius: 0 20px 20px 0;
+            box-shadow: 
+                -8px 0 30px rgba(0, 0, 0, 0.4),
+                0 15px 50px rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            backface-visibility: hidden;
+            border-left: 25px solid var(--dmc-3371);
+            border-top: 6px solid var(--gold);
+            border-bottom: 6px solid var(--gold);
+            border-right: 6px solid var(--gold);
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .cover::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(212, 175, 55, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(212, 175, 55, 0.15) 0%, transparent 50%);
+        }
+
+        .cover-content {
+            text-align: center;
+            padding: 3rem;
+            z-index: 2;
+            position: relative;
+        }
+
+        .cover-title {
+            font-size: 3.5rem;
+            margin-bottom: 2rem;
+            color: var(--gold);
+            font-family: 'Playfair Display', serif;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+        }
+
+        .cover-emblem {
+            width: 120px;
+            height: 120px;
+            background: var(--gold);
+            border-radius: 50%;
+            margin: 2rem auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.5);
+            border: 3px solid var(--white);
+        }
+
+        .cover-emblem i {
+            font-size: 3rem;
+            color: var(--dmc-3371);
+        }
+
+        /* Beautiful Pages */
+        .page-spread {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: none;
+            transform-style: preserve-3d;
+            animation: pageTurn 1s ease-out;
+        }
+
+        @keyframes pageTurn {
+            from {
+                opacity: 0;
+                transform: rotateY(-10deg);
+            }
+            to {
+                opacity: 1;
+                transform: rotateY(0deg);
+            }
+        }
+
+        .page-spread.active {
+            display: flex;
+        }
+
+        .page {
+            width: 50%;
+            height: 100%;
+            background: var(--dmc-3046);
+            padding: 3rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 50px rgba(139, 115, 85, 0.1);
+        }
+
+        .left-page {
+            border-radius: 0 10px 10px 0;
+            border-right: 2px solid var(--dmc-3045);
+            background-image: 
+                repeating-linear-gradient(
+                    transparent,
+                    transparent 1.8em,
+                    var(--dmc-3045) 1.8em,
+                    var(--dmc-3045) calc(1.8em + 1px)
+                );
+        }
+
+        .right-page {
+            border-radius: 10px 0 0 10px;
+        }
+
+        .page::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 50px;
+            background: linear-gradient(to right, 
+                rgba(139, 115, 85, 0.2) 0%,
+                rgba(139, 115, 85, 0.1) 40%,
+                transparent 100%);
+            pointer-events: none;
+        }
+
+        .page-content {
+            height: 100%;
+            overflow-y: auto;
+            padding-left: 60px;
+            padding-right: 30px;
+            line-height: 1.8em;
+        }
+
+        .page-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .page-content::-webkit-scrollbar-track {
+            background: var(--dmc-3046);
+            border-radius: 4px;
+        }
+
+        .page-content::-webkit-scrollbar-thumb {
+            background: var(--dmc-610);
+            border-radius: 4px;
+        }
+
+        /* Enhanced Content Styling */
+        .entry-header {
+            border-bottom: 3px double var(--dmc-517);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .entry-header::before {
+            content: '❧';
+            position: absolute;
+            left: -45px;
+            top: 0;
+            color: var(--dmc-517);
+            font-size: 2rem;
+            opacity: 0.6;
+        }
+
+        .entry-title {
+            font-size: 2.2rem;
+            color: var(--dmc-3371);
+            margin-bottom: 0.5rem;
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+        }
+
+        .entry-date {
+            color: var(--dmc-610);
+            font-style: italic;
+            font-size: 1.1rem;
+        }
+
+        .entry-content {
+            line-height: 1.9em;
+            margin: 2rem 0;
+            font-size: 1.1rem;
+        }
+
+        .entry-content p {
+            margin-bottom: 1.8em;
+            text-align: justify;
+        }
+
+        .entry-content p:first-child::first-letter {
+            font-size: 3em;
+            color: var(--dmc-517);
+            float: left;
+            line-height: 0.8em;
+            margin-right: 0.1em;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .entry-meta {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: rgba(217, 198, 163, 0.2);
+            border-radius: 15px;
+            border-left: 4px solid var(--dmc-517);
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--dmc-3371);
+            font-size: 1rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .meta-item i {
+            color: var(--dmc-517);
+            width: 20px;
+            text-align: center;
+        }
+
+        .entry-tags {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 2px dashed var(--dmc-3045);
+        }
+
+        .tag {
+            background: linear-gradient(135deg, var(--dmc-517), #3A5A78);
+            color: var(--white);
+            padding: 0.5rem 1.2rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin: 0 0.5rem 0.5rem 0;
+            display: inline-block;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .tag:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Right Page Enhancements */
+        .photo-container {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .entry-image {
+            max-width: 100%;
+            max-height: 280px;
+            border-radius: 15px;
+            border: 4px solid var(--dmc-517);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            transition: all 0.4s ease;
+        }
+
+        .entry-image:hover {
+            transform: scale(1.02);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+        }
+
+        .no-image {
+            width: 100%;
+            height: 250px;
+            background: linear-gradient(135deg, var(--dmc-3046), var(--dmc-3045));
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--dmc-610);
+            font-style: italic;
+            border: 2px dashed var(--dmc-3045);
+        }
+
+        .no-image i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .rating-section {
+            text-align: center;
+            margin: 2.5rem 0;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .rating-title {
+            font-size: 1.3rem;
+            color: var(--dmc-3371);
+            margin-bottom: 1.5rem;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .rating-stars {
+            display: flex;
+            justify-content: center;
+            gap: 0.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .rating-star {
+            font-size: 2.8rem;
+            color: var(--dmc-3045);
+            transition: all 0.3s ease;
+        }
+
+        .rating-star.filled {
+            color: var(--gold);
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        }
+
+        .mood-weather-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .mood-section, .weather-section {
+            text-align: center;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .mood-display, .weather-display {
+            font-size: 3.5rem;
+            margin: 1rem 0;
+        }
+
+        /* Royal Navigation */
+        .diary-navigation {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 3rem;
+            margin-top: 3rem;
+        }
+
+        .nav-btn-diary {
+            background: linear-gradient(135deg, var(--dmc-3031), var(--dmc-3371));
+            color: var(--white);
+            border: 2px solid var(--gold);
+            padding: 1.2rem 2.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-btn-diary:hover:not(:disabled) {
+            background: linear-gradient(135deg, var(--gold), #E6C260);
+            color: var(--dmc-3371);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.5);
+        }
+
+        .nav-btn-diary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        #pageInfo {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--gold);
+            min-width: 180px;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Enhanced Form */
+        .diary-form {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: 0 auto;
+            backdrop-filter: blur(20px);
+        }
+
+        .form-group {
+            margin-bottom: 2.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            color: var(--dmc-3371);
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 1.2rem;
+            border: 2px solid var(--dmc-3045);
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: 'Crimson Text', serif;
+            background: var(--white);
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--dmc-517);
+            box-shadow: 0 0 0 3px rgba(74, 112, 139, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-group textarea {
+            height: 200px;
+            resize: vertical;
+            line-height: 1.6em;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--dmc-3031), var(--dmc-3371));
+            color: var(--white);
+            border: 2px solid var(--gold);
+            padding: 1.2rem 2.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--gold), #E6C260);
+            color: var(--dmc-3371);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(108, 117, 125, 0.8);
+            color: white;
+            border: none;
+            padding: 1.2rem 2.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'Playfair Display', serif;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(108, 117, 125, 1);
+            transform: translateY(-2px);
+        }
+
+        /* Royal Loading */
+        .loading-spinner {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .spinner {
+            width: 80px;
+            height: 80px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid var(--gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Elegant Toast */
+        .toast {
+            position: fixed;
+            top: 120px;
+            right: 30px;
+            padding: 1.5rem 2.5rem;
+            background: rgba(255, 255, 255, 0.95);
+            color: var(--dmc-3371);
+            border-radius: 15px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            transform: translateX(400px);
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            z-index: 3000;
+            border-left: 4px solid var(--gold);
+            backdrop-filter: blur(20px);
+            font-family: 'Playfair Display', serif;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+            animation: toastSlide 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        @keyframes toastSlide {
+            0% { transform: translateX(400px); opacity: 0; }
+            70% { transform: translateX(-20px); }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+
+        .toast.success {
+            border-left-color: var(--gold);
+        }
+
+        .toast.error {
+            border-left-color: var(--dmc-517);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 968px) {
+            .book {
+                width: 700px;
+                height: 500px;
+            }
+            
+            .welcome-title {
+                font-size: 3rem;
+            }
+            
+            .cover-title {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .book {
+                width: 100%;
+                height: 400px;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .page-content {
+                padding-left: 40px;
+                font-size: 1rem;
+            }
+            
+            .entry-title {
+                font-size: 1.8rem;
+            }
+            
+            .mood-weather-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .diary-navigation {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .action-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .book {
+                height: 350px;
+            }
+            
+            .page {
+                padding: 1.5rem;
+            }
+            
+            .page-content {
+                padding-left: 30px;
+                padding-right: 15px;
+            }
+            
+            .entry-header::before {
+                left: -35px;
+                font-size: 1.5rem;
+            }
+            
+            .welcome-title {
+                font-size: 2.5rem;
+            }
+            
+            .diary-form {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <img src="https://res.cloudinary.com/dkuuvasoe/image/upload/v1760186124/pawdcastlogo_cb1l1b.png" alt="PawdCast Logo" class="logo-img">
+                <span>Royal Pet Diary</span>
+            </div>
+            <div class="nav-links">
+                <button id="homeBtn" class="nav-btn">
+                    <i class="fas fa-home"></i> Home
+                </button>
+                <button id="createEntryBtn" class="nav-btn">
+                    <i class="fas fa-plus"></i> New Entry
+                </button>
+                <button id="viewDiaryBtn" class="nav-btn">
+                    <i class="fas fa-book"></i> View Diary
+                </button>
+                <button id="logoutBtn" class="nav-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Welcome Section -->
+    <section id="welcomeSection" class="section active">
+        <div class="container">
+            <div class="welcome-container">
+                <h1 class="welcome-title">My Royal Pet Diary</h1>
+                <p class="welcome-subtitle">Capture your precious moments in royal style</p>
+                <div class="action-buttons">
+                    <button id="welcomeCreateBtn" class="action-btn">
+                        <i class="fas fa-feather-alt"></i> Write New Entry
+                    </button>
+                    <button id="welcomeViewBtn" class="action-btn">
+                        <i class="fas fa-book-open"></i> Read My Diary
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Create Entry Section -->
+    <section id="createEntrySection" class="section">
+        <div class="container">
+            <div class="section-header">
+                <h2 style="text-align: center; color: var(--gold); margin-bottom: 3rem; font-family: 'Playfair Display', serif;">Create New Diary Entry</h2>
+            </div>
+            
+            <form id="diaryForm" class="diary-form" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="entryDate">Date</label>
+                    <input type="date" id="entryDate" name="entryDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="entryTitle">Title</label>
+                    <input type="text" id="entryTitle" name="entryTitle" placeholder="Give your entry a beautiful title">
+                </div>
+
+                <div class="form-group">
+                    <label for="content">Your Story</label>
+                    <textarea id="content" name="content" placeholder="Write your beautiful story here..." required></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="mood">Mood</label>
+                        <select id="mood" name="mood">
+                            <option value="">How was the day?</option>
+                            <option value="😊 Happy">😊 Happy</option>
+                            <option value="😍 Excited">😍 Excited</option>
+                            <option value="😌 Peaceful">😌 Peaceful</option>
+                            <option value="🤔 Thoughtful">🤔 Thoughtful</option>
+                            <option value="😢 Sad">😢 Sad</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="weather">Weather</label>
+                        <select id="weather" name="weather">
+                            <option value="">What was the weather like?</option>
+                            <option value="☀️ Sunny">☀️ Sunny</option>
+                            <option value="⛅ Cloudy">⛅ Cloudy</option>
+                            <option value="🌧️ Rainy">🌧️ Rainy</option>
+                            <option value="❄️ Snowy">❄️ Snowy</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="activity">Activity</label>
+                        <input type="text" id="activity" name="activity" placeholder="What did you do together?">
+                    </div>
+                    <div class="form-group">
+                        <label for="location">Location</label>
+                        <input type="text" id="location" name="location" placeholder="Where were you?">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="tags">Tags</label>
+                    <input type="text" id="tags" name="tags" placeholder="playtime, walk, cuddle (separate with commas)">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Rating</label>
+                        <div class="rating-stars">
+                            <span class="star" data-rating="1">☆</span>
+                            <span class="star" data-rating="2">☆</span>
+                            <span class="star" data-rating="3">☆</span>
+                            <span class="star" data-rating="4">☆</span>
+                            <span class="star" data-rating="5">☆</span>
+                        </div>
+                        <input type="hidden" id="rating" name="rating">
+                    </div>
+                    <div class="form-group">
+                        <label for="image">Add Photo</label>
+                        <input type="file" id="image" name="image" accept="image/*">
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" id="cancelEntry" class="btn-secondary">Cancel</button>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save"></i> Save Entry
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- View Diary Section -->
+    <section id="viewDiarySection" class="section">
+        <div class="container">
+            <div class="book-container">
+                <div class="book">
+                    <!-- Cover Page -->
+                    <div class="cover" id="diaryCover">
+                        <div class="cover-content">
+                            <h1 class="cover-title">My Pet Diary</h1>
+                            <div class="cover-emblem">
+                                <i class="fas fa-paw"></i>
+                            </div>
+                            <p>Special moments with my best friend</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Diary Pages -->
+                    <div class="pages" id="diaryPages">
+                        <!-- Pages will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="diary-navigation">
+                <button id="prevPage" class="nav-btn-diary">
+                    <i class="fas fa-chevron-left"></i> Previous
+                </button>
+                <span id="pageInfo">Cover</span>
+                <button id="nextPage" class="nav-btn-diary">
+                    Next <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-spinner">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast" class="toast"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        const API_BASE_URL = 'http://localhost:8080';
+        let diaryEntries = [];
+        let currentPage = 0;
+        let showCover = true;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeEventListeners();
+        });
+
+        function initializeEventListeners() {
+            // Navigation
+            document.getElementById('homeBtn').addEventListener('click', () => showSection('welcome'));
+            document.getElementById('createEntryBtn').addEventListener('click', () => showSection('createEntry'));
+            document.getElementById('viewDiaryBtn').addEventListener('click', () => {
+                showSection('viewDiary');
+                loadDiaryEntries();
+            });
+
+            // Welcome buttons
+            document.getElementById('welcomeCreateBtn').addEventListener('click', () => showSection('createEntry'));
+            document.getElementById('welcomeViewBtn').addEventListener('click', () => {
+                showSection('viewDiary');
+                loadDiaryEntries();
+            });
+
+            // Logout
+            document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+
+            // Diary form
+            document.getElementById('diaryForm').addEventListener('submit', handleCreateEntry);
+            document.getElementById('cancelEntry').addEventListener('click', () => showSection('welcome'));
+
+            // Rating stars
+            document.querySelectorAll('.star').forEach(star => {
+                star.addEventListener('click', handleRating);
+            });
+
+            // Diary navigation
+            document.getElementById('prevPage').addEventListener('click', showPreviousPage);
+            document.getElementById('nextPage').addEventListener('click', showNextPage);
+
+            // Set default date
+            document.getElementById('entryDate').valueAsDate = new Date();
+        }
+
+        function handleRating(e) {
+            const rating = parseInt(e.target.dataset.rating);
+            document.getElementById('rating').value = rating;
+            
+            document.querySelectorAll('.star').forEach((star, index) => {
+                if (index < rating) {
+                    star.textContent = '★';
+                    star.style.color = '#D4AF37';
+                } else {
+                    star.textContent = '☆';
+                    star.style.color = '#B8A082';
+                }
+            });
+        }
+
+        async function handleCreateEntry(e) {
+            e.preventDefault();
+            showLoading(true);
+
+            const formData = new FormData(e.target);
+
+            try {
+                const response = await axios.post(`${API_BASE_URL}/api/diary/create`, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+
+                showToast('Diary entry saved successfully!', 'success');
+                e.target.reset();
+                document.getElementById('rating').value = '';
+                resetRatingStars();
+                showSection('welcome');
+            } catch (error) {
+                console.error("Error creating entry:", error);
+                showToast('Failed to save entry', 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function resetRatingStars() {
+            document.querySelectorAll('.star').forEach(star => {
+                star.textContent = '☆';
+                star.style.color = '#B8A082';
+            });
+        }
+
+        async function loadDiaryEntries() {
+            showLoading(true);
+
+            try {
+                const response = await axios.get(`${API_BASE_URL}/api/diary/entries`);
+                diaryEntries = response.data.diaries || response.data;
+                
+                currentPage = 0;
+                showCover = true;
+                renderDiaryPages();
+                updateNavigation();
+                
+                if (diaryEntries.length > 0) {
+                    showToast(`Loaded ${diaryEntries.length} beautiful entries`, 'success');
+                }
+            } catch (error) {
+                showToast('Failed to load diary entries', 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function renderDiaryPages() {
+            const pagesContainer = document.getElementById('diaryPages');
+            pagesContainer.innerHTML = '';
+
+            if (diaryEntries.length === 0) {
+                const emptySpread = createEmptySpread();
+                pagesContainer.appendChild(emptySpread);
+                return;
+            }
+
+            diaryEntries.forEach((entry, index) => {
+                const spread = createPageSpread(entry, index);
+                pagesContainer.appendChild(spread);
+            });
+
+            showCurrentView();
+        }
+
+        function createEmptySpread() {
+            const spread = document.createElement('div');
+            spread.className = 'page-spread';
+            spread.innerHTML = `
+                <div class="page left-page">
+                    <div class="page-content">
+                        <div class="entry-header">
+                            <h2 class="entry-title">Welcome to Your Diary</h2>
+                            <div class="entry-date">${new Date().toLocaleDateString()}</div>
+                        </div>
+                        <div class="entry-content">
+                            <p>Your beautiful diary is waiting for your first entry!</p>
+                            <p>Click "New Entry" to start writing about your wonderful adventures with your pet.</p>
+                            <p>Capture those special moments that make your bond unique and precious.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="page right-page">
+                    <div class="page-content">
+                        <div class="photo-container">
+                            <div class="no-image">
+                                <i class="fas fa-camera"></i>
+                                <p>Add your first photo</p>
+                            </div>
+                        </div>
+                        <div class="rating-section">
+                            <div class="rating-title">Day Rating</div>
+                            <div class="rating-stars">
+                                <span class="rating-star">☆</span>
+                                <span class="rating-star">☆</span>
+                                <span class="rating-star">☆</span>
+                                <span class="rating-star">☆</span>
+                                <span class="rating-star">☆</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            return spread;
+        }
+
+        function createPageSpread(entry, index) {
+            const spread = document.createElement('div');
+            spread.className = 'page-spread';
+            spread.dataset.index = index;
+
+            const entryDate = new Date(entry.entryDate).toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            // Format content
+            let formattedContent = '';
+            if (entry.content && entry.content.trim() !== '') {
+                formattedContent = entry.content
+                    .split('\n')
+                    .filter(paragraph => paragraph.trim() !== '')
+                    .map(paragraph => `<p>${paragraph}</p>`)
+                    .join('');
+            } else {
+                formattedContent = '<p><em>No content written for this entry.</em></p>';
+            }
+
+            // Create meta items
+            const metaItems = [];
+            if (entry.mood) metaItems.push(`<div class="meta-item"><i class="fas fa-smile"></i> Mood: ${entry.mood}</div>`);
+            if (entry.weather) metaItems.push(`<div class="meta-item"><i class="fas fa-cloud"></i> Weather: ${entry.weather}</div>`);
+            if (entry.activity) metaItems.push(`<div class="meta-item"><i class="fas fa-running"></i> Activity: ${entry.activity}</div>`);
+            if (entry.location) metaItems.push(`<div class="meta-item"><i class="fas fa-map-marker-alt"></i> Location: ${entry.location}</div>`);
+
+            const metaHtml = metaItems.length > 0 ? 
+                `<div class="entry-meta">${metaItems.join('')}</div>` 
+                : '';
+
+            // Create tags
+            const tagsHtml = entry.tags ? 
+                `<div class="entry-tags">
+                    <strong>Tags:</strong> ${entry.tags.split(',').map(tag => `<span class="tag">${tag.trim()}</span>`).join('')}
+                </div>` 
+                : '';
+
+            // Create rating stars
+            const ratingStars = entry.rating ? 
+                '<div class="rating-stars">' +
+                    Array(5).fill(0).map((_, i) => 
+                        `<span class="rating-star ${i < entry.rating ? 'filled' : ''}">★</span>`
+                    ).join('') +
+                '</div>' 
+                : '<div class="rating-stars"><span class="rating-star">☆</span><span class="rating-star">☆</span><span class="rating-star">☆</span><span class="rating-star">☆</span><span class="rating-star">☆</span></div>';
+
+            // Create image or placeholder
+            const imageHtml = (entry.hasImage || entry.photo) ? 
+                `<img src="${API_BASE_URL}/api/diary/entry/${entry.diaryId}/image" 
+                      alt="Diary photo" 
+                      class="entry-image"
+                      onerror="this.style.display='none'">` 
+                : `<div class="no-image">
+                      <i class="fas fa-camera"></i>
+                      <p>No photo for this entry</p>
+                   </div>`;
+
+            // Create mood and weather sections
+            const moodSection = entry.mood ? `
+                <div class="mood-section">
+                    <div class="mood-display">${entry.mood.split(' ')[0]}</div>
+                    <p>${entry.mood.split(' ')[1] || 'Mood'}</p>
+                </div>
+            ` : '';
+
+            const weatherSection = entry.weather ? `
+                <div class="weather-section">
+                    <div class="weather-display">${entry.weather.split(' ')[0]}</div>
+                    <p>${entry.weather.split(' ')[1] || 'Weather'}</p>
+                </div>
+            ` : '';
+
+            spread.innerHTML = `
+                <div class="page left-page">
+                    <div class="page-content">
+                        <div class="entry-header">
+                            <h2 class="entry-title">${entry.entryTitle || 'My Diary Entry'}</h2>
+                            <div class="entry-date">${entryDate}</div>
+                        </div>
+                        <div class="entry-content">
+                            ${formattedContent}
+                        </div>
+                        ${metaHtml}
+                        ${tagsHtml}
+                    </div>
+                </div>
+                <div class="page right-page">
+                    <div class="page-content">
+                        <div class="photo-container">
+                            ${imageHtml}
+                        </div>
+                        <div class="rating-section">
+                            <div class="rating-title">Day Rating</div>
+                            ${ratingStars}
+                        </div>
+                        <div class="mood-weather-container">
+                            ${moodSection}
+                            ${weatherSection}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            return spread;
+        }
+
+        function showCurrentView() {
+            const cover = document.getElementById('diaryCover');
+            const pages = document.querySelectorAll('.page-spread');
+            
+            if (showCover) {
+                cover.style.display = 'flex';
+                pages.forEach(page => page.classList.remove('active'));
+            } else {
+                cover.style.display = 'none';
+                pages.forEach(page => page.classList.remove('active'));
+                if (pages[currentPage]) {
+                    pages[currentPage].classList.add('active');
+                }
+            }
+        }
+
+        function showPreviousPage() {
+            if (showCover) {
+                return;
+            }
+            
+            if (currentPage > 0) {
+                currentPage--;
+                showCurrentView();
+            } else {
+                showCover = true;
+                showCurrentView();
+            }
+            updateNavigation();
+        }
+
+        function showNextPage() {
+            if (showCover) {
+                showCover = false;
+                currentPage = 0;
+            } else if (currentPage < diaryEntries.length - 1) {
+                currentPage++;
+            }
+            showCurrentView();
+            updateNavigation();
+        }
+
+        function updateNavigation() {
+            if (showCover) {
+                document.getElementById('pageInfo').textContent = 'Cover';
+                document.getElementById('prevPage').disabled = true;
+                document.getElementById('nextPage').disabled = diaryEntries.length === 0;
+            } else {
+                document.getElementById('pageInfo').textContent = 
+                    `Page ${currentPage + 1} of ${diaryEntries.length}`;
+                document.getElementById('prevPage').disabled = false;
+                document.getElementById('nextPage').disabled = currentPage === diaryEntries.length - 1;
+            }
+        }
+
+        async function handleLogout() {
+            showLoading(true);
+            try {
+                await axios.post(`${API_BASE_URL}/auth/logout`);
+                window.location.href = 'home.html';
+            } catch (error) {
+                window.location.href = 'home.html';
+            }
+        }
+
+        function showSection(sectionName) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionName + 'Section').classList.add('active');
+        }
+
+        function showLoading(show) {
+            document.getElementById('loadingSpinner').style.display = show ? 'flex' : 'none';
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pawdcast - Find Your Perfect Pet</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* DMC Color Palette */
+            --medium-yellow-beige: #D4C5A9;
+            --dark-yellow-beige: #B8A082;
+            --dark-drab-brown: #8B7355;
+            --very-dark-mocha: #4A3728;
+            --black-brown: #2B1F17;
+            --dark-wedgwood: #4A6741;
+            --white: #FFFFFF;
+            --light-bg: #F5F1E8;
+            --shadow: rgba(43, 31, 23, 0.15);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--black-brown);
+            background: linear-gradient(135deg, var(--light-bg) 0%, var(--medium-yellow-beige) 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--very-dark-mocha) 0%, var(--black-brown) 100%);
+            color: var(--white);
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: 0 4px 15px var(--shadow);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .logo-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--dark-wedgwood);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(74, 103, 65, 0.4);
+        }
+
+        .logo-image:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 6px 25px rgba(74, 103, 65, 0.6);
+            border-color: var(--dark-yellow-beige);
+        }
+
+        .logo {
+            font-size: 3rem;
+            margin: 0;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .tagline {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            color: var(--medium-yellow-beige);
+            font-weight: 300;
+        }
+
+        /* Main Content */
+        .main {
+            padding: 2rem 0;
+            min-height: 60vh;
+        }
+
+        /* Search Section */
+        .search-section {
+            margin-bottom: 2rem;
+        }
+
+        .search-box {
+            display: flex;
+            max-width: 500px;
+            margin: 0 auto;
+            gap: 10px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid var(--dark-yellow-beige);
+            border-radius: 8px;
+            font-size: 16px;
+            background: var(--white);
+            color: var(--black-brown);
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--dark-wedgwood);
+            box-shadow: 0 0 0 3px rgba(74, 103, 65, 0.15);
+        }
+
+        .search-box button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--dark-wedgwood) 0%, var(--very-dark-mocha) 100%);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        .search-box button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(74, 103, 65, 0.4);
+        }
+
+        /* Filter Section */
+        .filter-section {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px var(--shadow);
+            margin-bottom: 2rem;
+            border: 1px solid var(--dark-yellow-beige);
+        }
+
+        .filter-box h3 {
+            margin-bottom: 1.5rem;
+            color: var(--very-dark-mocha);
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-label {
+            font-size: 0.9rem;
+            color: var(--dark-drab-brown);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .filters select {
+            padding: 12px;
+            border: 2px solid var(--dark-yellow-beige);
+            border-radius: 8px;
+            font-size: 14px;
+            background: var(--white);
+            color: var(--black-brown);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .filters select:focus {
+            outline: none;
+            border-color: var(--dark-wedgwood);
+            box-shadow: 0 0 0 3px rgba(74, 103, 65, 0.15);
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            padding: 12px;
+            background: var(--light-bg);
+            border-radius: 8px;
+            border: 1px solid var(--dark-yellow-beige);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-label:hover {
+            background: var(--medium-yellow-beige);
+            border-color: var(--dark-wedgwood);
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--dark-wedgwood);
+        }
+
+        .btn-primary {
+            padding: 14px 24px;
+            background: linear-gradient(135deg, var(--dark-wedgwood) 0%, var(--very-dark-mocha) 100%);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(74, 103, 65, 0.4);
+        }
+
+        .btn-clear {
+            padding: 14px 24px;
+            background: linear-gradient(135deg, var(--dark-drab-brown) 0%, var(--very-dark-mocha) 100%);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-clear:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        /* Results Section */
+        .results-section h2 {
+            margin-bottom: 1.5rem;
+            color: var(--very-dark-mocha);
+            font-size: 2rem;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            font-size: 1.3rem;
+            color: var(--dark-wedgwood);
+            font-weight: 600;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .breeds-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .breed-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px var(--shadow);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 1px solid var(--dark-yellow-beige);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .breed-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, var(--dark-wedgwood) 0%, var(--very-dark-mocha) 100%);
+        }
+
+        .breed-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 30px rgba(74, 103, 65, 0.3);
+        }
+
+        .breed-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .breed-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--very-dark-mocha);
+            margin-bottom: 0.5rem;
+        }
+
+        .animal-type {
+            background: linear-gradient(135deg, var(--dark-wedgwood) 0%, var(--very-dark-mocha) 100%);
+            color: var(--white);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .breed-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            background: var(--light-bg);
+            padding: 0.8rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--dark-wedgwood);
+        }
+
+        .detail-label {
+            font-size: 0.75rem;
+            color: var(--dark-drab-brown);
+            margin-bottom: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-value {
+            font-weight: 600;
+            color: var(--black-brown);
+            font-size: 0.9rem;
+        }
+
+        .allergy-badge {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: var(--bg-white);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+        }
+
+        .breed-description {
+            color: var(--dark-drab-brown);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            font-style: italic;
+            border-top: 1px solid var(--dark-yellow-beige);
+            padding-top: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .more-info-link {
+            display: inline-block;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--dark-wedgwood) 0%, var(--very-dark-mocha) 100%);
+            color: var(--white);
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        .more-info-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(74, 103, 65, 0.4);
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: var(--white);
+            padding: 2.5rem;
+            border-radius: 20px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(43, 31, 23, 0.3);
+            border: 2px solid var(--dark-yellow-beige);
+        }
+
+        .close {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            font-size: 2rem;
+            cursor: pointer;
+            color: var(--dark-drab-brown);
+            background: none;
+            border: none;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .close:hover {
+            background: var(--light-bg);
+            color: var(--very-dark-mocha);
+        }
+
+        .modal-breed-name {
+            font-size: 2.5rem;
+            color: var(--very-dark-mocha);
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .modal-animal-type {
+            background: linear-gradient(135deg, var(--dark-wedgwood) 0%, var(--very-dark-mocha) 100%);
+            color: var(--white);
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .modal-detail-item {
+            background: linear-gradient(135deg, var(--light-bg) 0%, var(--medium-yellow-beige) 100%);
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid var(--dark-yellow-beige);
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        .modal-detail-label {
+            font-size: 0.8rem;
+            color: var(--dark-drab-brown);
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .modal-detail-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--very-dark-mocha);
+        }
+
+        .modal-description {
+            color: var(--black-brown);
+            line-height: 1.7;
+            font-size: 1.1rem;
+            background: var(--light-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--dark-wedgwood);
+        }s {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .modal-detail-item {
+            background: linear-gradient(135deg, var(--bg-light) 0%, #F0F3F4 100%);
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid var(--border-light);
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        .modal-detail-label {
+            font-size: 0.8rem;
+            color: var(--text-medium);
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .modal-detail-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+        }
+
+        .modal-description {
+            color: var(--text-dark);
+            line-height: 1.7;
+            font-size: 1.1rem;
+            background: var(--bg-light);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--accent-teal);
+        }
+
+        /* Demo Data Notice */
+        .demo-notice {
+            background: linear-gradient(135deg, var(--medium-yellow-beige) 0%, var(--dark-yellow-beige) 100%);
+            border: 2px solid var(--dark-drab-brown);
+            color: var(--very-dark-mocha);
+            padding: 1.2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            text-align: center;
+            font-weight: 600;
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        /* Footer */
+        .footer {
+            background: linear-gradient(135deg, var(--very-dark-mocha) 0%, var(--black-brown) 100%);
+            color: var(--white);
+            padding: 2rem 0;
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .footer-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .footer-links a {
+            color: var(--medium-yellow-beige);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--white);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .filters {
+                grid-template-columns: 1fr;
+            }
+            
+            .breeds-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .search-box {
+                flex-direction: column;
+            }
+            
+            .logo {
+                font-size: 2.2rem;
+            }
+
+            .logo-image {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .modal-content {
+                margin: 1rem;
+                width: calc(100% - 2rem);
+                padding: 1.5rem;
+            }
+            
+            .modal-details {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .footer-links {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .modal-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .breed-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .filter-section {
+                padding: 1.5rem;
+            }
+        }
+
+        /* No Results */
+        .no-results {
+            text-align: center;
+            padding: 4rem;
+            color: var(--dark-drab-brown);
+            grid-column: 1 / -1;
+            background: var(--white);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px var(--shadow);
+        }
+
+        .no-results h3 {
+            margin-bottom: 1rem;
+            color: var(--very-dark-mocha);
+            font-size: 1.5rem;
+        }
+
+        /* Animation Keyframes */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .breed-card {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-light);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-light);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="logo-container">
+                <img src="https://res.cloudinary.com/dkuuvasoe/image/upload/v1760186124/pawdcastlogo_cb1l1b.png" alt="Pawdcast Logo" class="logo-image">
+                <h1 class="logo">Pawdcast</h1>
+            </div>
+            <p class="tagline">Find your perfect furry companion</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <!-- Demo Notice -->
+            <div class="demo-notice" id="demoNotice">
+                <strong>Demo Mode:</strong> Using sample data. Connect to backend to see real breeds.
+            </div>
+
+            <!-- Search Section -->
+            <section class="search-section">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Search breeds by name...">
+                    <button onclick="searchBreeds()">🔍 Search</button>
+                </div>
+            </section>
+
+            <!-- Filter Section -->
+            <section class="filter-section">
+                <div class="filter-box">
+                    <h3>Find Your Perfect Match</h3>
+                    <div class="filters">
+                        <!-- Animal Type Filter -->
+                        <div class="filter-group">
+                            <label class="filter-label">Animal Type</label>
+                            <select id="animalType">
+                                <option value="">All Animals</option>
+                                <option value="Dog">🐕 Dogs</option>
+                                <option value="Cat">🐈 Cats</option>
+                                <option value="Rabbit">🐇 Rabbits</option>
+                                <option value="Bird">🐦 Birds</option>
+                                <option value="Fish">🐠 Fish</option>
+                                <option value="Hamster">🐹 Small Pets</option>
+                            </select>
+                        </div>
+
+                        <!-- Ideal Income Filter -->
+                        <div class="filter-group">
+                            <label class="filter-label">Ideal Income</label>
+                            <select id="idealIncome">
+                                <option value="">Any Income</option>
+                                <option value="Low">💰 Low</option>
+                                <option value="Medium">💰💰 Medium</option>
+                                <option value="High">💰💰💰 High</option>
+                            </select>
+                        </div>
+
+                        <!-- Ideal Home Filter -->
+                        <div class="filter-group">
+                            <label class="filter-label">Ideal Home</label>
+                            <select id="idealHome">
+                                <option value="">Any Home</option>
+                                <option value="Apartment">🏢 Apartment</option>
+                                <option value="Medium House">🏠 Medium House</option>
+                                <option value="Large House">🏡 Large House</option>
+                                <option value="Farmhouse">🌾 Farmhouse</option>
+                            </select>
+                        </div>
+
+                        <!-- Activity Level Filter -->
+                        <div class="filter-group">
+                            <label class="filter-label">Activity Level</label>
+                            <select id="activityLevel">
+                                <option value="">Any Activity</option>
+                                <option value="Low">🐢 Low</option>
+                                <option value="Moderate">🚶 Moderate</option>
+                                <option value="High">🏃 High</option>
+                            </select>
+                        </div>
+
+                        <!-- Care Time Filter -->
+                        <div class="filter-group">
+                            <label class="filter-label">Care Time</label>
+                            <select id="careTime">
+                                <option value="">Any Care Time</option>
+                                <option value="Low">⏱️ Low</option>
+                                <option value="Medium">⏱️⏱️ Medium</option>
+                                <option value="High">⏱️⏱️⏱️ High</option>
+                            </select>
+                        </div>
+
+                        <!-- Climate Preference Filter -->
+                        <div class="filter-group">
+                            <label class="filter-label">Climate Preference</label>
+                            <select id="climatePreference">
+                                <option value="">Any Climate</option>
+                                <option value="Hot">☀️ Hot</option>
+                                <option value="Cold">❄️ Cold</option>
+                                <option value="Humid">💧 Humid</option>
+                                <option value="Moderate">🌤️ Moderate</option>
+                            </select>
+                        </div>
+
+                        <!-- Allergy Friendly Filter -->
+                        <div class="filter-group">
+                            <label class="filter-label">Allergy Friendly</label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="allergyFriendly">
+                                🌿 Hypoallergenic Only
+                            </label>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="filter-group">
+                            <label class="filter-label">&nbsp;</label>
+                            <button onclick="getRecommendations()" class="btn-primary">🎯 Find Matches</button>
+                        </div>
+
+                        <div class="filter-group">
+                            <label class="filter-label">&nbsp;</label>
+                            <button onclick="clearFilters()" class="btn-clear">🔄 Clear Filters</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section">
+                <h2 id="resultsTitle">All Breeds</h2>
+                <div id="loading" class="loading hidden">Loading breeds...</div>
+                <div id="breedsContainer" class="breeds-container">
+                    <!-- Breeds will be loaded here -->
+                </div>
+            </section>
+        </div>
+    </main>
+
+
+
+    <!-- Breed Modal -->
+    <div id="breedModal" class="modal hidden">
+        <div class="modal-content">
+            <button class="close" onclick="closeModal()">&times;</button>
+            <div id="modalContent">
+                <!-- Breed details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Base URL - Update this to your Spring Boot server URL
+        const API_BASE_URL = 'http://localhost:8080/api/breeds';
+        
+        // Mock data for demo
+        const MOCK_BREEDS = [
+            {
+                id: 1,
+                animalType: "Dog",
+                breedName: "Labrador Retriever",
+                idealIncome: "Medium",
+                idealHome: "Large House",
+                activityLevel: "High",
+                allergyFriendly: false,
+                careTime: "Medium",
+                climatePreference: "Moderate",
+                description: "Friendly, outgoing, and high-spirited companion. Great with families and children."
+            },
+            {
+                id: 2,
+                animalType: "Cat",
+                breedName: "Persian",
+                idealIncome: "High",
+                idealHome: "Apartment",
+                activityLevel: "Low",
+                allergyFriendly: false,
+                careTime: "High",
+                climatePreference: "Moderate",
+                description: "Calm, affectionate, and elegant companion. Requires regular grooming."
+            },
+            {
+                id: 3,
+                animalType: "Dog",
+                breedName: "Poodle",
+                idealIncome: "High",
+                idealHome: "Medium House",
+                activityLevel: "Moderate",
+                allergyFriendly: true,
+                careTime: "High",
+                climatePreference: "Moderate",
+                description: "Intelligent, active, and hypoallergenic breed. Excellent family companion."
+            },
+            {
+                id: 4,
+                animalType: "Rabbit",
+                breedName: "Holland Lop",
+                idealIncome: "Low",
+                idealHome: "Apartment",
+                activityLevel: "Moderate",
+                allergyFriendly: true,
+                careTime: "Medium",
+                climatePreference: "Moderate",
+                description: "Friendly, floppy-eared, and gentle companion. Great for first-time owners."
+            },
+            {
+                id: 5,
+                animalType: "Bird",
+                breedName: "Budgerigar",
+                idealIncome: "Low",
+                idealHome: "Apartment",
+                activityLevel: "Moderate",
+                allergyFriendly: true,
+                careTime: "Medium",
+                climatePreference: "Moderate",
+                description: "Small, colorful, and excellent talking ability. Perfect for apartments."
+            },
+            {
+                id: 6,
+                animalType: "Fish",
+                breedName: "Betta",
+                idealIncome: "Low",
+                idealHome: "Apartment",
+                activityLevel: "Low",
+                allergyFriendly: true,
+                careTime: "Low",
+                climatePreference: "Hot",
+                description: "Colorful, territorial, and beautiful flowing fins. Easy to care for."
+            },
+            {
+                id: 7,
+                animalType: "Hamster",
+                breedName: "Syrian Hamster",
+                idealIncome: "Low",
+                idealHome: "Apartment",
+                activityLevel: "Moderate",
+                allergyFriendly: true,
+                careTime: "Low",
+                climatePreference: "Moderate",
+                description: "Solitary, nocturnal, and popular first pet. Easy to care for."
+            },
+            {
+                id: 8,
+                animalType: "Dog",
+                breedName: "Siberian Husky",
+                idealIncome: "Medium",
+                idealHome: "Large House",
+                activityLevel: "High",
+                allergyFriendly: false,
+                careTime: "High",
+                climatePreference: "Cold",
+                description: "Outgoing, mischievous, and energetic sled dog. Needs lots of exercise."
+            }
+        ];
+
+        // DOM Elements
+        const breedsContainer = document.getElementById('breedsContainer');
+        const loadingElement = document.getElementById('loading');
+        const resultsTitle = document.getElementById('resultsTitle');
+        const searchInput = document.getElementById('searchInput');
+        const breedModal = document.getElementById('breedModal');
+        const modalContent = document.getElementById('modalContent');
+        const demoNotice = document.getElementById('demoNotice');
+
+        // Filter elements
+        const animalTypeFilter = document.getElementById('animalType');
+        const idealIncomeFilter = document.getElementById('idealIncome');
+        const idealHomeFilter = document.getElementById('idealHome');
+        const activityLevelFilter = document.getElementById('activityLevel');
+        const careTimeFilter = document.getElementById('careTime');
+        const climatePreferenceFilter = document.getElementById('climatePreference');
+        const allergyFriendlyFilter = document.getElementById('allergyFriendly');
+
+        // Check if backend is available
+        let useMockData = false;
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', async function() {
+            await checkBackendConnection();
+            loadAllBreeds();
+            
+            // Add event listeners for real-time search
+            searchInput.addEventListener('input', debounce(function() {
+                if (searchInput.value.length >= 2) {
+                    searchBreeds();
+                } else if (searchInput.value.length === 0) {
+                    loadAllBreeds();
+                }
+            }, 300));
+            
+            // Add enter key support for search
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchBreeds();
+                }
+            });
+        });
+
+        // Check backend connection
+        async function checkBackendConnection() {
+            try {
+                const response = await axios.get(`${API_BASE_URL}/health`, { timeout: 3000 });
+                demoNotice.classList.add('hidden');
+                useMockData = false;
+            } catch (error) {
+                console.log('Backend not available, using mock data');
+                demoNotice.classList.remove('hidden');
+                useMockData = true;
+            }
+        }
+
+        // Debounce function for search
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Load all breeds
+        async function loadAllBreeds() {
+            showLoading();
+            try {
+                let breeds;
+                if (useMockData) {
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    breeds = MOCK_BREEDS;
+                } else {
+                    const response = await axios.get(API_BASE_URL);
+                    breeds = response.data;
+                }
+                displayBreeds(breeds);
+                resultsTitle.textContent = `All Breeds (${breeds.length})`;
+            } catch (error) {
+                console.error('Error loading breeds:', error);
+                await new Promise(resolve => setTimeout(resolve, 500));
+                const breeds = MOCK_BREEDS;
+                displayBreeds(breeds);
+                resultsTitle.textContent = `All Breeds (${breeds.length}) - Demo Data`;
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Search breeds
+        async function searchBreeds() {
+            const query = searchInput.value.trim();
+            if (!query) {
+                loadAllBreeds();
+                return;
+            }
+            
+            showLoading();
+            try {
+                let breeds;
+                if (useMockData) {
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                    breeds = MOCK_BREEDS.filter(breed => 
+                        breed.breedName.toLowerCase().includes(query.toLowerCase()) ||
+                        breed.description.toLowerCase().includes(query.toLowerCase())
+                    );
+                } else {
+                    const response = await axios.get(`${API_BASE_URL}/search?q=${encodeURIComponent(query)}`);
+                    breeds = response.data;
+                }
+                displayBreeds(breeds);
+                resultsTitle.textContent = `Search Results for "${query}" (${breeds.length})`;
+            } catch (error) {
+                console.error('Error searching breeds:', error);
+                showError('Search failed. Please try again.');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Get recommendations based on ALL filters
+        async function getRecommendations() {
+            const animalType = animalTypeFilter.value;
+            const idealIncome = idealIncomeFilter.value;
+            const idealHome = idealHomeFilter.value;
+            const activityLevel = activityLevelFilter.value;
+            const careTime = careTimeFilter.value;
+            const climatePreference = climatePreferenceFilter.value;
+            const allergyFriendly = allergyFriendlyFilter.checked;
+            
+            if (!animalType && !idealIncome && !idealHome && !activityLevel && !careTime && !climatePreference && !allergyFriendly) {
+                loadAllBreeds();
+                return;
+            }
+            
+            showLoading();
+            
+            try {
+                let breeds;
+                
+                if (useMockData) {
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    breeds = MOCK_BREEDS.filter(breed => {
+                        if (animalType && breed.animalType !== animalType) return false;
+                        if (idealIncome && breed.idealIncome !== idealIncome) return false;
+                        if (idealHome && breed.idealHome !== idealHome) return false;
+                        if (activityLevel && breed.activityLevel !== activityLevel) return false;
+                        if (careTime && breed.careTime !== careTime) return false;
+                        if (climatePreference && breed.climatePreference !== climatePreference) return false;
+                        if (allergyFriendly && !breed.allergyFriendly) return false;
+                        return true;
+                    });
+                } else {
+                    const criteria = {
+                        animalType: animalType || null,
+                        idealIncome: idealIncome || null,
+                        idealHome: idealHome || null,
+                        activityLevel: activityLevel || null,
+                        allergyFriendly: allergyFriendly || null,
+                        careTime: careTime || null,
+                        climatePreference: climatePreference || null
+                    };
+                    
+                    const response = await axios.post(`${API_BASE_URL}/recommend`, criteria);
+                    breeds = response.data;
+                }
+                
+                displayBreeds(breeds);
+                
+                let title = 'Recommended Breeds';
+                if (animalType) title += ` - ${animalType}s`;
+                if (breeds.length > 0) title += ` (${breeds.length})`;
+                resultsTitle.textContent = title;
+                
+            } catch (error) {
+                console.error('Error getting recommendations:', error);
+                showError('Failed to get recommendations. Please try again.');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Display breeds in the container
+        function displayBreeds(breeds) {
+            if (!breeds || breeds.length === 0) {
+                breedsContainer.innerHTML = `
+                    <div class="no-results">
+                        <h3>No breeds found</h3>
+                        <p>Try adjusting your search criteria or filters</p>
+                        <button onclick="clearFilters()" class="btn-primary" style="margin-top: 1rem;">Clear Filters</button>
+                    </div>
+                `;
+                return;
+            }
+            
+            const breedsHTML = breeds.map(breed => `
+                <div class="breed-card" onclick="showBreedDetails(${breed.id})">
+                    <div class="breed-header">
+                        <div>
+                            <div class="breed-name">${breed.breedName}</div>
+                            <span class="animal-type">${breed.animalType}</span>
+                        </div>
+                        ${breed.allergyFriendly ? '<span class="allergy-badge">🌿 Hypoallergenic</span>' : ''}
+                    </div>
+                    
+                    <div class="breed-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Income</span>
+                            <span class="detail-value">${breed.idealIncome}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Home</span>
+                            <span class="detail-value">${breed.idealHome}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Activity</span>
+                            <span class="detail-value">${breed.activityLevel}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Care Time</span>
+                            <span class="detail-value">${breed.careTime}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="breed-description">
+                        ${breed.description}
+                    </div>
+                </div>
+            `).join('');
+            
+            breedsContainer.innerHTML = breedsHTML;
+        }
+
+        // Show breed details in modal
+        async function showBreedDetails(breedId) {
+            showLoading();
+            try {
+                let breed;
+                if (useMockData) {
+                    await new Promise(resolve => setTimeout(resolve, 200));
+                    breed = MOCK_BREEDS.find(b => b.id === breedId) || MOCK_BREEDS[0];
+                } else {
+                    const response = await axios.get(`${API_BASE_URL}/${breedId}`);
+                    breed = response.data;
+                }
+                
+                modalContent.innerHTML = `
+                    <h2 class="modal-breed-name">${breed.breedName}</h2>
+                    <span class="modal-animal-type">${breed.animalType}</span>
+                    
+                    <div class="modal-details">
+                        <div class="modal-detail-item">
+                            <div class="modal-detail-label">Ideal Income</div>
+                            <div class="modal-detail-value">${breed.idealIncome}</div>
+                        </div>
+                        <div class="modal-detail-item">
+                            <div class="modal-detail-label">Ideal Home</div>
+                            <div class="modal-detail-value">${breed.idealHome}</div>
+                        </div>
+                        <div class="modal-detail-item">
+                            <div class="modal-detail-label">Activity Level</div>
+                            <div class="modal-detail-value">${breed.activityLevel}</div>
+                        </div>
+                        <div class="modal-detail-item">
+                            <div class="modal-detail-label">Care Time</div>
+                            <div class="modal-detail-value">${breed.careTime}</div>
+                        </div>
+                        <div class="modal-detail-item">
+                            <div class="modal-detail-label">Climate Preference</div>
+                            <div class="modal-detail-value">${breed.climatePreference}</div>
+                        </div>
+                        <div class="modal-detail-item">
+                            <div class="modal-detail-label">Allergy Friendly</div>
+                            <div class="modal-detail-value">${breed.allergyFriendly ? '✅ Yes' : '❌ No'}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-description">
+                        <strong>Description:</strong><br>
+                        ${breed.description}
+                    </div>
+                `;
+                
+                breedModal.classList.remove('hidden');
+            } catch (error) {
+                console.error('Error loading breed details:', error);
+                showError('Failed to load breed details.');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Close modal
+        function closeModal() {
+            breedModal.classList.add('hidden');
+        }
+
+        // Close modal when clicking outside
+        breedModal.addEventListener('click', function(e) {
+            if (e.target === breedModal) {
+                closeModal();
+            }
+        });
+
+        // Clear all filters
+        function clearFilters() {
+            animalTypeFilter.value = '';
+            idealIncomeFilter.value = '';
+            idealHomeFilter.value = '';
+            activityLevelFilter.value = '';
+            careTimeFilter.value = '';
+            climatePreferenceFilter.value = '';
+            allergyFriendlyFilter.checked = false;
+            searchInput.value = '';
+            loadAllBreeds();
+        }
+
+        // Utility functions
+        function showLoading() {
+            loadingElement.classList.remove('hidden');
+            breedsContainer.classList.add('hidden');
+        }
+
+        function hideLoading() {
+            loadingElement.classList.add('hidden');
+            breedsContainer.classList.remove('hidden');
+        }
+
+        function showError(message) {
+            breedsContainer.innerHTML = `
+                <div class="no-results">
+                    <h3>Error</h3>
+                    <p>${message}</p>
+                    <button onclick="loadAllBreeds()" class="btn-primary" style="margin-top: 1rem;">Try Again</button>
+                </div>
+            `;
+            hideLoading();
+        }
+    </script>
+</body>
+</html>

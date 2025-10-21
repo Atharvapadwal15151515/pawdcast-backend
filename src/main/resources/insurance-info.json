@@ -1,0 +1,53 @@
+{
+  "introduction": "Pet insurance is a special type of insurance for animals that safeguards their health and wellbeing. Just like humans have health insurance, pets too can be protected from high medical and legal costs. With rising expenses for grooming, vaccination, tick treatments, and especially surgeries, pet insurance ensures that pet parents can provide the best care without financial stress.",
+  "whyNeed": [
+    "Ensures Best Health: Pets can receive advanced medical treatments and hospital care when needed.",
+    "Affordable and Saves Extra Expenses: With a small annual premium, major costs are covered.",
+    "Safeguard from Accidents: Protects pets when unexpected accidents occur.",
+    "Legal and Third-Party Coverage: Some policies cover liability if your pet causes damage or injury.",
+    "Peace of Mind: Pet parents can focus on their pet’s recovery instead of financial stress.",
+    "Exclusive Benefits: Depending on the provider, benefits may include overseas cover, show participation coverage, or theft/loss protection."
+  ],
+  "types": [
+    {
+      "type": "Dog Insurance",
+      "description": "Dogs form the largest category of insured pets in India. Covers indigenous, cross-bred, and exotic dogs from diseases, accidents, and theft."
+    },
+    {
+      "type": "Cat Insurance",
+      "description": "Protects cats from accidents, infections, or loss due to theft/straying. Cat insurance policies are gaining popularity in urban India."
+    },
+    {
+      "type": "Exotic Pet Insurance",
+      "description": "Although rare, some insurers are beginning to offer coverage for birds, rabbits, and other exotic pets."
+    }
+  ],
+  "inclusions": [
+    "Surgery Expenses Cover",
+    "Death due to accident or diseases",
+    "Hospitalization and boarding costs",
+    "OPD consultations",
+    "Lost or stolen pets (in some policies)",
+    "Third-party liability cover",
+    "Overseas protection (select policies)"
+  ],
+  "exclusions": [
+    "Surgeries not caused by illness or accident",
+    "Congenital deformities and birth defects",
+    "Pregnancy or whelping-related surgeries",
+    "Cosmetic or elective surgeries not related to health",
+    "Dental surgery not due to accident",
+    "Routine grooming procedures",
+    "Vaccinations and preventive treatments (except add-ons)"
+  ],
+  "eligibility": {
+    "general": "Most insurers allow pet insurance from 8 weeks of age up to 8-10 years depending on breed and size.",
+    "dog": "Dog insurance is available for indigenous, cross-bred, and exotic breeds. Premium varies by breed, size, and age.",
+    "cat": "Cat insurance is available for domestic and pedigree cats within the eligible age bracket."
+  },
+  "laws": [
+    "Pet insurance in India is governed under general insurance policies regulated by IRDAI.",
+    "Some policies also extend coverage to liability cases under the Indian Penal Code if your pet harms another person.",
+    "International travel with pets may require proof of insurance for transit."
+  ]
+}

@@ -1,0 +1,1347 @@
+<!DOCTYPE html> 
+<html lang="en"> 
+<head> 
+    <meta charset="UTF-8" /> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/> 
+    <title>Pet Venue Finder | Find Perfect Spots for Your Furry Friends</title> 
+ 
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/> 
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script> 
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.fullscreen/Control.FullScreen.css" /> 
+    <script src="https://unpkg.com/leaflet.fullscreen/Control.FullScreen.js"></script> 
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" /> 
+    <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script> 
+ 
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"> 
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+ 
+    <style> 
+        /* === DMC COLOR PALETTE THEME === */ 
+        :root{ 
+          --medium-yellow-beige: #D4C5A9;    /* DMC 3046 */
+          --dark-yellow-beige: #B8A082;      /* DMC 3045 */
+          --dark-drab-brown: #8B7355;        /* DMC 610 */
+          --very-dark-mocha: #4A3728;        /* DMC 3031 */
+          --black-brown: #2B1F17;            /* DMC 3371 */
+          --dark-wedgwood: #4A6741;          /* DMC 517 */
+          --directions-blue: #3498DB;
+          --directions-blue-hover: #2980B9;
+          --white: #FFFFFF;
+          
+          /* Gradients */
+          --primary-gradient: linear-gradient(135deg, var(--medium-yellow-beige), var(--dark-yellow-beige));
+          --accent-gradient: linear-gradient(135deg, var(--dark-wedgwood), #5a7d4f);
+          --directions-gradient: linear-gradient(135deg, var(--directions-blue), var(--directions-blue-hover));
+          --dark-gradient: linear-gradient(135deg, var(--very-dark-mocha), var(--black-brown));
+          --light-gradient: linear-gradient(135deg, var(--white), #faf9f5);
+          --bg-main: var(--primary-gradient);
+          
+          --bg-card: rgba(255, 255, 255, 0.95); 
+          --bg-glass: rgba(255, 255, 255, 0.1); 
+          --text-primary: var(--black-brown); 
+          --text-secondary: var(--dark-drab-brown); 
+          --text-white: var(--white); 
+          --shadow-soft: 0 10px 40px rgba(43, 31, 23, 0.1); 
+          --shadow-hover: 0 20px 60px rgba(43, 31, 23, 0.15); 
+          --border-radius: 20px; 
+          --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+        } 
+ 
+        * { 
+          box-sizing: border-box; 
+          margin: 0; 
+          padding: 0; 
+        } 
+ 
+        body{ 
+          font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif; 
+          color: var(--text-primary); 
+          min-height: 100vh; 
+          background: var(--bg-main); 
+          overflow-x: hidden; 
+        } 
+
+        /* Disclaimer Banner */
+        .disclaimer-banner {
+          background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+          color: white;
+          padding: 1rem;
+          text-align: center;
+          font-weight: 600;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          position: relative;
+          z-index: 100;
+          font-size: 0.9rem;
+        }
+
+        .disclaimer-banner i {
+          margin-right: 0.5rem;
+        }
+ 
+        /* Floating shapes animation */ 
+        body::before { 
+          content: ''; 
+          position: fixed; 
+          top: 0; 
+          left: 0; 
+          width: 100%; 
+          height: 100%; 
+          background: 
+            radial-gradient(circle at 20% 80%, rgba(212, 197, 169, 0.2) 0%, transparent 50%), 
+            radial-gradient(circle at 80% 20%, rgba(74, 103, 65, 0.2) 0%, transparent 50%), 
+            radial-gradient(circle at 40% 40%, rgba(184, 160, 130, 0.15) 0%, transparent 50%); 
+          pointer-events: none; 
+          z-index: -1; 
+          animation: floatingShapes 20s ease-in-out infinite; 
+        } 
+ 
+        @keyframes floatingShapes { 
+          0%, 100% { transform: translateY(0px) rotate(0deg); } 
+          33% { transform: translateY(-20px) rotate(120deg); } 
+          66% { transform: translateY(10px) rotate(240deg); } 
+        } 
+ 
+        /* Header Styles */ 
+        header{ 
+          padding: 40px 20px 30px; 
+          text-align: center; 
+          position: relative; 
+          animation: fadeInDown 1s ease-out; 
+        } 
+ 
+        header::before { 
+          content: ''; 
+          position: absolute; 
+          top: 0; 
+          left: 50%; 
+          transform: translateX(-50%); 
+          width: 200px; 
+          height: 4px; 
+          background: var(--accent-gradient); 
+          border-radius: 2px; 
+          animation: expandWidth 1.5s ease-out 0.5s both; 
+        } 
+ 
+        @keyframes expandWidth { 
+          from { width: 0; } 
+          to { width: 200px; } 
+        } 
+
+        /* Logo Styles */
+        .logo-container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 20px;
+          margin-bottom: 20px;
+        }
+
+        .logo-circle {
+          width: 140px;
+          height: 140px;
+          border-radius: 50%;
+          background: var(--white);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 10px 30px rgba(43, 31, 23, 0.2);
+          border: 4px solid var(--dark-yellow-beige);
+          transition: var(--transition);
+          position: relative;
+          overflow: hidden;
+          animation: logoFloat 3s ease-in-out infinite;
+        }
+
+        .logo-circle::before {
+          content: '';
+          position: absolute;
+          top: -4px;
+          left: -4px;
+          right: -4px;
+          bottom: -4px;
+          background: linear-gradient(45deg, var(--dark-wedgwood), var(--medium-yellow-beige), var(--dark-drab-brown));
+          border-radius: 50%;
+          z-index: -1;
+          animation: rotate 8s linear infinite;
+          opacity: 0;
+          transition: var(--transition);
+        }
+
+        @keyframes logoFloat {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
+        }
+
+        @keyframes rotate {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+
+        .logo-circle:hover {
+          transform: scale(1.1) rotate(5deg);
+          box-shadow: 0 15px 40px rgba(74, 103, 65, 0.3);
+          border-color: var(--dark-wedgwood);
+        }
+
+        .logo-circle:hover::before {
+          opacity: 1;
+        }
+
+        .logo-circle img {
+          width: 85%;
+          height: 85%;
+          object-fit: contain;
+          border-radius: 50%;
+          filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+          transition: var(--transition);
+        }
+
+        .logo-circle:hover img {
+          transform: scale(1.05);
+        }
+ 
+        header h1{ 
+          font-weight: 800; 
+          font-size: clamp(2.5rem, 5vw, 4rem); 
+          color: var(--very-dark-mocha);
+          margin-bottom: 16px; 
+          animation: slideInUp 1s ease-out 0.3s both;
+          text-shadow: 2px 4px 8px rgba(43, 31, 23, 0.1);
+          letter-spacing: 1px;
+        } 
+ 
+        header p{ 
+          color: var(--dark-drab-brown); 
+          font-size: 1.2rem; 
+          font-weight: 500; 
+          opacity: 0.9; 
+          max-width: 600px; 
+          margin: 0 auto; 
+          animation: slideInUp 1s ease-out 0.6s both; 
+        } 
+ 
+        @keyframes fadeInDown { 
+          from { opacity: 0; transform: translateY(-30px); } 
+          to { opacity: 1; transform: translateY(0); } 
+        } 
+ 
+        @keyframes slideInUp { 
+          from { opacity: 0; transform: translateY(30px); } 
+          to { opacity: 1; transform: translateY(0); } 
+        } 
+ 
+        /* Controls Section */ 
+        #controls{ 
+          width: min(1200px, 90%); 
+          margin: 0 auto 40px; 
+          background: var(--white); 
+          backdrop-filter: blur(20px); 
+          border: 1px solid var(--dark-yellow-beige); 
+          border-radius: 25px; 
+          box-shadow: var(--shadow-soft); 
+          padding: 40px 30px; 
+          text-align: center; 
+          animation: scaleIn 1s ease-out 0.9s both;
+          position: relative;
+          overflow: hidden;
+        }
+
+        #controls::before {
+          content: '';
+          position: absolute;
+          top: -50%;
+          right: -50%;
+          width: 100%;
+          height: 100%;
+          background: radial-gradient(circle, rgba(212, 197, 169, 0.1) 0%, transparent 70%);
+          pointer-events: none;
+        }
+ 
+        @keyframes scaleIn { 
+          from { opacity: 0; transform: scale(0.9); } 
+          to { opacity: 1; transform: scale(1); } 
+        } 
+ 
+        #controls .title { 
+          font-size: 1.5rem; 
+          font-weight: 700; 
+          margin-bottom: 30px; 
+          color: var(--very-dark-mocha);
+          position: relative;
+          z-index: 1;
+        } 
+ 
+        #controls .row{ 
+          display: flex; 
+          gap: 20px; 
+          justify-content: center; 
+          flex-wrap: wrap; 
+          align-items: end;
+          position: relative;
+          z-index: 1;
+        } 
+ 
+        .form-group { 
+          display: flex; 
+          flex-direction: column; 
+          align-items: center; 
+          gap: 8px; 
+        } 
+ 
+        .form-group label { 
+          font-weight: 600; 
+          color: var(--very-dark-mocha);
+          font-size: 1rem;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .form-group label i {
+          color: var(--dark-wedgwood);
+        }
+ 
+        select, button{ 
+          padding: 16px 20px; 
+          border-radius: 15px; 
+          border: 2px solid var(--dark-yellow-beige); 
+          background: var(--light-gradient); 
+          color: var(--text-primary); 
+          font-size: 1rem; 
+          font-weight: 500; 
+          min-width: 180px; 
+          transition: var(--transition); 
+          box-shadow: 0 4px 15px rgba(43, 31, 23, 0.1);
+          font-family: inherit;
+          outline: none;
+        } 
+ 
+        select:focus { 
+          border-color: var(--dark-wedgwood); 
+          box-shadow: 0 0 0 4px rgba(74, 103, 65, 0.15); 
+          transform: translateY(-2px);
+          background: var(--white);
+        } 
+ 
+        select:disabled { 
+          opacity: 0.5; 
+          cursor: not-allowed; 
+        } 
+ 
+        button{ 
+          border: none; 
+          background: var(--accent-gradient); 
+          color: var(--text-white); 
+          font-weight: 700; 
+          cursor: pointer; 
+          box-shadow: 0 8px 25px rgba(74, 103, 65, 0.3); 
+          transform: translateY(0); 
+          position: relative; 
+          overflow: hidden; 
+        } 
+ 
+        button::before { 
+          content: ''; 
+          position: absolute; 
+          top: 0; 
+          left: -100%; 
+          width: 100%; 
+          height: 100%; 
+          background: linear-gradient(90deg, transparent, 
+rgba(255,255,255,0.3), transparent); 
+          transition: left 0.5s ease; 
+        } 
+ 
+        button:hover::before { 
+          left: 100%; 
+        } 
+ 
+        button:hover{ 
+          transform: translateY(-4px) scale(1.05); 
+          box-shadow: 0 15px 35px rgba(74, 103, 65, 0.4);
+        } 
+ 
+        button:active { 
+          transform: translateY(-2px) scale(1.02); 
+        } 
+ 
+        /* Main Content Layout */ 
+        main{ 
+          width: min(1400px, 95%); 
+          margin: 0 auto 60px; 
+          display: grid; 
+          grid-template-columns: 2fr 1fr; 
+          gap: 30px; 
+          animation: fadeIn 1s ease-out 1.2s both; 
+        } 
+ 
+        @keyframes fadeIn { 
+          from { opacity: 0; } 
+          to { opacity: 1; } 
+        } 
+ 
+        /* Map Container */ 
+        #map-wrap{ 
+          background: var(--white); 
+          border: 1px solid var(--dark-yellow-beige); 
+          border-radius: 25px; 
+          overflow: hidden; 
+          box-shadow: var(--shadow-soft); 
+          position: relative; 
+          transition: var(--transition); 
+        } 
+ 
+        #map-wrap:hover { 
+          transform: translateY(-5px); 
+          box-shadow: var(--shadow-hover); 
+        } 
+ 
+        #map{ 
+          height: 70vh; 
+          width: 100%; 
+          border-radius: 25px; 
+        } 
+ 
+        /* Sidebar Styles */ 
+        #sidebar{ 
+          background: var(--white); 
+          backdrop-filter: blur(20px); 
+          border: 1px solid var(--dark-yellow-beige); 
+          border-radius: 25px; 
+          padding: 30px 20px; 
+          box-shadow: var(--shadow-soft); 
+          overflow: auto; 
+          max-height: 70vh; 
+          transition: var(--transition);
+          position: relative;
+        }
+
+        #sidebar::before {
+          content: '';
+          position: absolute;
+          top: -50%;
+          right: -50%;
+          width: 100%;
+          height: 100%;
+          background: radial-gradient(circle, rgba(212, 197, 169, 0.08) 0%, transparent 70%);
+          pointer-events: none;
+        }
+ 
+        #sidebar:hover { 
+          transform: translateY(-5px); 
+          box-shadow: var(--shadow-hover); 
+        } 
+ 
+        #sidebar h3 { 
+          font-size: 1.5rem; 
+          font-weight: 700; 
+          margin-bottom: 20px; 
+          text-align: center; 
+          color: var(--very-dark-mocha);
+          position: relative;
+          z-index: 1;
+        } 
+ 
+        /* Venue Item Styles */ 
+        .venue-item{ 
+          border: 2px solid transparent; 
+          background: var(--light-gradient); 
+          border-radius: 15px; 
+          padding: 20px; 
+          margin: 15px 0; 
+          cursor: pointer; 
+          transition: var(--transition); 
+          position: relative; 
+          overflow: hidden;
+          z-index: 1;
+        } 
+ 
+        .venue-item::before { 
+          content: ''; 
+          position: absolute; 
+          top: 0; 
+          left: -100%; 
+          width: 100%; 
+          height: 100%; 
+          background: rgba(212, 197, 169, 0.1); 
+          transition: left 0.3s ease; 
+          z-index: 0; 
+        } 
+ 
+        .venue-item:hover::before { 
+          left: 0; 
+        } 
+ 
+        .venue-item:hover{ 
+          transform: translateX(10px) scale(1.02); 
+          border-color: var(--dark-wedgwood); 
+          box-shadow: 0 15px 40px rgba(74, 103, 65, 0.2); 
+        } 
+ 
+        .venue-item > * { 
+          position: relative; 
+          z-index: 1; 
+        } 
+ 
+        .venue-name{ 
+          font-weight: 700; 
+          font-size: 1.1rem; 
+          color: var(--very-dark-mocha); 
+          margin-bottom: 8px; 
+        } 
+ 
+        .venue-area{ 
+          color: var(--dark-drab-brown); 
+          font-size: 0.95rem; 
+          margin-bottom: 12px; 
+          display: flex; 
+          align-items: center; 
+          gap: 5px; 
+        } 
+ 
+        .venue-area i { 
+          color: var(--dark-wedgwood);
+          font-size: 0.9rem; 
+        } 
+ 
+        .venue-type{ 
+          display: inline-block; 
+          padding: 6px 14px; 
+          background: var(--accent-gradient); 
+          color: var(--text-white); 
+          border-radius: 20px; 
+          font-size: 0.85rem; 
+          font-weight: 600; 
+          box-shadow: 0 4px 15px rgba(74, 103, 65, 0.3); 
+          animation: pulse 2s ease-in-out infinite; 
+        } 
+ 
+        @keyframes pulse { 
+          0%, 100% { transform: scale(1); } 
+          50% { transform: scale(1.05); } 
+        } 
+ 
+        /* Loading and Empty States */ 
+        .loading, .empty-state { 
+          text-align: center; 
+          padding: 40px 20px; 
+          color: var(--dark-drab-brown); 
+          font-size: 1.1rem; 
+          position: relative;
+          z-index: 1;
+        } 
+ 
+        .loading::after { 
+          content: ''; 
+          display: inline-block; 
+          width: 20px; 
+          height: 20px; 
+          border: 2px solid transparent; 
+          border-top: 2px solid var(--dark-wedgwood); 
+          border-radius: 50%; 
+          animation: spin 1s linear infinite; 
+          margin-left: 10px; 
+        } 
+ 
+        @keyframes spin { 
+          to { transform: rotate(360deg); } 
+        } 
+ 
+        /* Responsive Design */ 
+        @media (max-width: 1024px) { 
+          main{ 
+            grid-template-columns: 1fr; 
+            gap: 20px; 
+          } 
+          #sidebar{ 
+            max-height: 50vh; 
+          } 
+          #map{ 
+            height: 60vh; 
+          } 
+        } 
+ 
+        @media (max-width: 768px) { 
+          header { 
+            padding: 30px 15px 20px; 
+          } 
+ 
+          .logo-circle {
+            width: 120px;
+            height: 120px;
+          }
+
+          header h1 { 
+            font-size: 2.5rem; 
+          } 
+ 
+          #controls { 
+            padding: 30px 20px; 
+            margin: 0 auto 30px; 
+          } 
+ 
+          #controls .row { 
+            flex-direction: column; 
+            align-items: center; 
+            gap: 15px; 
+          } 
+ 
+          select, button { 
+            min-width: 250px; 
+          } 
+ 
+          main { 
+            width: 95%; 
+            margin: 0 auto 40px; 
+          } 
+ 
+          #map { 
+            height: 50vh; 
+          } 
+ 
+          #sidebar { 
+            max-height: 40vh; 
+            padding: 20px 15px; 
+          } 
+        } 
+
+        @media (max-width: 480px) {
+          .logo-circle {
+            width: 100px;
+            height: 100px;
+          }
+
+          .disclaimer-banner {
+            font-size: 0.8rem;
+            padding: 0.8rem;
+          }
+        }
+ 
+        /* Custom Scrollbar */ 
+        #sidebar::-webkit-scrollbar { 
+          width: 8px; 
+        } 
+ 
+        #sidebar::-webkit-scrollbar-track { 
+          background: rgba(184, 160, 130, 0.2); 
+          border-radius: 10px; 
+        } 
+ 
+        #sidebar::-webkit-scrollbar-thumb { 
+          background: var(--accent-gradient); 
+          border-radius: 10px; 
+        } 
+ 
+        #sidebar::-webkit-scrollbar-thumb:hover { 
+          background: var(--dark-gradient); 
+        } 
+ 
+        /* Success message animation */ 
+        .success-message { 
+          background: rgba(74, 103, 65, 0.1); 
+          color: var(--dark-wedgwood); 
+          border: 1px solid var(--dark-wedgwood);
+          padding: 15px 20px; 
+          border-radius: 15px; 
+          margin: 15px 0; 
+          font-weight: 500; 
+          animation: slideInRight 0.5s ease-out;
+          position: relative;
+          z-index: 1;
+        } 
+ 
+        @keyframes slideInRight { 
+          from { 
+            opacity: 0; 
+            transform: translateX(30px); 
+          } 
+          to { 
+            opacity: 1; 
+            transform: translateX(0); 
+          } 
+        }
+
+        /* Focus indicators for accessibility */
+        select:focus-visible, 
+        button:focus-visible {
+          outline: 3px solid var(--dark-wedgwood);
+          outline-offset: 2px;
+        }
+
+        /* Custom Map Popup Styles */
+        .leaflet-popup-content-wrapper {
+          border-radius: 15px;
+          box-shadow: 0 10px 30px rgba(43, 31, 23, 0.2);
+        }
+
+        .leaflet-popup-content {
+          margin: 0;
+          border-radius: 15px;
+        }
+        
+        /* Location button styles */
+        #location-btn {
+          position: absolute;
+          top: 20px;
+          right: 20px;
+          z-index: 1000;
+          background: var(--accent-gradient);
+          color: white;
+          border: none;
+          border-radius: 50%;
+          width: 50px;
+          height: 50px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          box-shadow: 0 4px 15px rgba(74, 103, 65, 0.3);
+          transition: var(--transition);
+        }
+        
+        #location-btn:hover {
+          transform: scale(1.1);
+          box-shadow: 0 6px 20px rgba(74, 103, 65, 0.4);
+        }
+        
+        /* Distance indicator */
+        .venue-distance {
+          font-size: 0.85rem;
+          color: var(--dark-drab-brown);
+          margin-top: 5px;
+          display: flex;
+          align-items: center;
+          gap: 5px;
+        }
+        
+        /* Venue details */
+        .venue-details {
+          margin-top: 10px;
+          font-size: 0.9rem;
+          color: var(--dark-drab-brown);
+        }
+        
+        /* Pet-friendly indicator */
+        .pet-friendly {
+          display: inline-block;
+          background: var(--accent-gradient);
+          color: white;
+          padding: 4px 10px;
+          border-radius: 12px;
+          font-size: 0.75rem;
+          font-weight: 600;
+          margin-left: 8px;
+        }
+        
+        /* Driving time indicator */
+        .driving-time {
+          font-size: 0.8rem;
+          color: var(--dark-drab-brown);
+          margin-top: 3px;
+          display: flex;
+          align-items: center;
+          gap: 5px;
+        }
+
+        /* Directions Controls */
+        #directions-controls {
+          position: absolute;
+          bottom: 20px;
+          left: 20px;
+          z-index: 1000;
+          background: var(--white);
+          border: 2px solid var(--dark-yellow-beige);
+          border-radius: var(--border-radius);
+          padding: 16px;
+          box-shadow: var(--shadow-soft);
+          max-width: 300px;
+          display: none;
+        }
+
+        #directions-controls.active {
+          display: block;
+        }
+
+        .directions-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 12px;
+        }
+
+        .directions-header h4 {
+          margin: 0;
+          color: var(--text-primary);
+          font-size: 16px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .close-directions {
+          background: none;
+          border: none;
+          font-size: 20px;
+          cursor: pointer;
+          color: var(--text-secondary);
+          min-width: auto;
+          padding: 4px;
+          width: 30px;
+          height: 30px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+        }
+
+        .close-directions:hover {
+          color: var(--dark-wedgwood);
+          background: rgba(74, 103, 65, 0.1);
+          transform: none;
+          box-shadow: none;
+        }
+
+        /* Venue Actions */
+        .venue-actions {
+          display: flex;
+          gap: 8px;
+          margin-top: 12px;
+        }
+
+        .action-btn {
+          padding: 8px 12px;
+          border: none;
+          border-radius: 12px;
+          font-size: 12px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: var(--transition);
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          flex: 1;
+          justify-content: center;
+        }
+
+        .action-btn.directions {
+          background: var(--directions-gradient);
+          color: white;
+        }
+
+        .action-btn.directions:hover {
+          background: var(--directions-blue-hover);
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+
+        .action-btn.view {
+          background: var(--accent-gradient);
+          color: white;
+        }
+
+        .action-btn.view:hover {
+          background: var(--dark-wedgwood);
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(74, 103, 65, 0.3);
+        }
+
+        /* Routing machine customization */
+        .leaflet-routing-container {
+          background: var(--white);
+          border: 2px solid var(--dark-wedgwood);
+          border-radius: var(--border-radius);
+          max-height: 200px;
+          overflow-y: auto;
+        }
+
+        .leaflet-routing-alt {
+          background: var(--light-gradient);
+          border-bottom: 1px solid var(--dark-yellow-beige);
+        }
+
+        .leaflet-routing-alt:last-child {
+          border-bottom: none;
+        }
+
+        .leaflet-routing-alt h2 {
+          color: var(--text-primary);
+          font-size: 14px;
+        }
+
+        .leaflet-routing-alt h3 {
+          color: var(--text-secondary);
+          font-size: 12px;
+        }
+    </style> 
+</head> 
+<body> 
+
+<!-- Disclaimer Banner -->
+<div class="disclaimer-banner">
+    <i class="fas fa-exclamation-triangle"></i>
+    DISCLAIMER: Venues shown are based on available data and may change. Always confirm pet policies before visiting.
+</div>
+ 
+<header> 
+    <div class="logo-container">
+        <div class="logo-circle">
+            <img src="https://res.cloudinary.com/dkuuvasoe/image/upload/v1760186124/pawdcastlogo_cb1l1b.png" 
+                 alt="Pawdcast Logo">
+        </div>
+        <h1>Pet Venue Finder</h1>
+    </div>
+    <p>Discover amazing pet-friendly restaurants, parks, and pet shops for you and your furry companions</p> 
+</header> 
+ 
+<section id="controls"> 
+    <div class="title"><i class="fas fa-search"></i> Find Perfect Venues for Your Pet</div> 
+    <div class="row"> 
+        <div class="form-group"> 
+            <label for="typeSelect">
+              <i class="fas fa-building"></i>
+              Venue Type
+            </label> 
+            <select id="typeSelect"> 
+                <option value="">Choose venue type...</option> 
+                <option value="pet_friendly_cafe">☕ Pet-Friendly Cafe</option> 
+                <option value="pet_friendly_restaurant">🍽️ Pet-Friendly Restaurant</option> 
+                <option value="dog_park">🌳 Dog Park</option> 
+                <option value="pet_shop">🐕 Pet Shop</option>
+                <option value="all">🐾 All Pet-Friendly Venues</option>
+            </select> 
+        </div> 
+ 
+        <div class="form-group"> 
+            <label for="radiusSelect">
+              <i class="fas fa-ruler"></i>
+              Search Radius
+            </label> 
+            <select id="radiusSelect"> 
+                <option value="1000">1 km</option> 
+                <option value="3000" selected>3 km</option> 
+                <option value="5000">5 km</option> 
+                <option value="10000">10 km</option> 
+                <option value="25000">25 km</option>
+                <option value="50000">50 km</option>
+            </select> 
+        </div> 
+ 
+        <div class="form-group"> 
+            <label>&nbsp;</label> 
+            <button onclick="findVenues()">
+              <i class="fas fa-search"></i>
+              Find Venues
+            </button> 
+        </div> 
+    </div> 
+</section> 
+ 
+<main> 
+    <div id="map-wrap">
+        <div id="map"></div>
+        <button id="location-btn" title="Use my location">
+            <i class="fas fa-location-arrow"></i>
+        </button>
+        <div id="directions-controls">
+            <div class="directions-header">
+                <h4><i class="fas fa-route"></i> Directions</h4>
+                <button class="close-directions" onclick="hideDirections()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="directions-info"></div>
+        </div>
+    </div> 
+    <aside id="sidebar"> 
+        <h3><i class="fas fa-heart"></i> Available Venues</h3> 
+        <div id="venueList" class="empty-state"> 
+            <i class="fas fa-paw" style="font-size: 2rem; color: var(--dark-yellow-beige); margin-bottom: 1rem;"></i><br>
+            Use your location or search to discover amazing pet-friendly spots! 
+        </div> 
+    </aside> 
+</main> 
+ 
+<script> 
+    // Map setup with custom styling 
+    const map = L.map('map', { 
+        fullscreenControl: true, 
+        zoomControl: true, 
+        scrollWheelZoom: true 
+    }).setView([20.5937, 78.9629], 5); // Default India view
+ 
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { 
+        maxZoom: 19, 
+        attribution: '© OpenStreetMap contributors' 
+    }).addTo(map); 
+ 
+    let markers = [];
+    let userLocation = null;
+    let userMarker = null;
+    let allVenues = [];
+    let routingControl = null;
+    
+    // Location button handler
+    document.getElementById('location-btn').addEventListener('click', getUserLocation);
+    
+    // Get user's location
+    function getUserLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                position => {
+                    userLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    
+                    // Center map on user location
+                    map.setView([userLocation.lat, userLocation.lng], 14);
+                    
+                    // Add or update user marker
+                    if (userMarker) {
+                        map.removeLayer(userMarker);
+                    }
+                    
+                    userMarker = L.marker([userLocation.lat, userLocation.lng])
+                        .addTo(map)
+                        .bindPopup("<b>📍 You are here</b>")
+                        .openPopup();
+                        
+                    // Add a circle to show accuracy
+                    L.circle([userLocation.lat, userLocation.lng], {
+                        color: 'var(--dark-wedgwood)',
+                        fillColor: 'var(--dark-wedgwood)',
+                        fillOpacity: 0.1,
+                        radius: position.coords.accuracy / 2
+                    }).addTo(map);
+                    
+                    // Update UI
+                    document.getElementById('venueList').innerHTML = 
+                        '<div class="success-message"><i class="fas fa-check-circle"></i> Location found! Click "Find Venues" to discover pet-friendly places nearby.</div>';
+                },
+                error => {
+                    let errorMsg = "Unable to retrieve your location. ";
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMsg += "Location access was denied.";
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMsg += "Location information is unavailable.";
+                            break;
+                        case error.TIMEOUT:
+                            errorMsg += "Location request timed out.";
+                            break;
+                        default:
+                            errorMsg += "An unknown error occurred.";
+                            break;
+                    }
+                    alert(errorMsg);
+                }
+            );
+        } else {
+            alert("Geolocation is not supported by this browser.");
+        }
+    }
+    
+    // Calculate distance between two coordinates
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371; // Earth's radius in km
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = 
+            Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        const distance = R * c;
+        return distance;
+    }
+    
+    // Calculate travel time based on distance
+    function calculateTravelTime(distance) {
+        // Walking speed: 5 km/h
+        const walkingTime = Math.round((distance / 5) * 60);
+        
+        // Driving speed: 40 km/h (average city speed)
+        const drivingTime = Math.round((distance / 40) * 60);
+        
+        return {
+            walking: walkingTime,
+            driving: drivingTime
+        };
+    }
+ 
+    // Fetch real pet-friendly venues from OpenStreetMap
+    async function findVenues() {
+        // Clear existing markers 
+        markers.forEach(m => map.removeLayer(m)); 
+        markers = []; 
+ 
+        const list = document.getElementById('venueList'); 
+        list.innerHTML = '<div class="loading"><i class="fas fa-search"></i> Finding amazing venues for your pet...</div>'; 
+ 
+        const type = document.getElementById('typeSelect').value; 
+        const radius = document.getElementById('radiusSelect').value; 
+ 
+        if (!type) { 
+            list.innerHTML = '<div class="empty-state"><i class="fas fa-paw" style="font-size: 2rem; color: var(--dark-yellow-beige); margin-bottom: 1rem;"></i><br>Please select a venue type to discover amazing pet-friendly spots!</div>'; 
+            return; 
+        }
+        
+        // If no user location, try to get it
+        if (!userLocation) {
+            await getUserLocation();
+            if (!userLocation) {
+                list.innerHTML = '<div class="empty-state"><i class="fas fa-map-marker-alt" style="font-size: 2rem; color: var(--dark-yellow-beige); margin-bottom: 1rem;"></i><br>Please allow location access or use the location button to find venues near you.</div>';
+                return;
+            }
+        }
+        
+        // Define OSM queries based on venue type - using pet-friendly tags
+        let osmQuery = '';
+        let venueTypeName = '';
+        
+        switch(type) {
+            case 'pet_friendly_cafe':
+                // Search for cafes that explicitly allow dogs
+                osmQuery = `node["amenity"="cafe"]["dogs"="yes"](around:${radius},${userLocation.lat},${userLocation.lng});`;
+                venueTypeName = 'Pet-Friendly Cafe';
+                break;
+            case 'pet_friendly_restaurant':
+                // Search for restaurants that explicitly allow dogs
+                osmQuery = `node["amenity"="restaurant"]["dogs"="yes"](around:${radius},${userLocation.lat},${userLocation.lng});`;
+                venueTypeName = 'Pet-Friendly Restaurant';
+                break;
+            case 'dog_park':
+                // Search for dog parks and parks with dog areas
+                osmQuery = `(
+                  node["leisure"="dog_park"](around:${radius},${userLocation.lat},${userLocation.lng});
+                  node["leisure"="park"]["dog"~"yes|designated"](around:${radius},${userLocation.lat},${userLocation.lng});
+                );`;
+                venueTypeName = 'Dog Park';
+                break;
+            case 'pet_shop':
+                // Search for pet shops and pet supply stores
+                osmQuery = `node["shop"="pet"](around:${radius},${userLocation.lat},${userLocation.lng});`;
+                venueTypeName = 'Pet Shop';
+                break;
+            case 'all':
+                // Search for all pet-friendly venues (excluding veterinary)
+                osmQuery = `(
+                  node["amenity"="cafe"]["dogs"="yes"](around:${radius},${userLocation.lat},${userLocation.lng});
+                  node["amenity"="restaurant"]["dogs"="yes"](around:${radius},${userLocation.lat},${userLocation.lng});
+                  node["leisure"="dog_park"](around:${radius},${userLocation.lat},${userLocation.lng});
+                  node["leisure"="park"]["dog"~"yes|designated"](around:${radius},${userLocation.lat},${userLocation.lng});
+                  node["shop"="pet"](around:${radius},${userLocation.lat},${userLocation.lng});
+                );`;
+                venueTypeName = 'Pet-Friendly Venue';
+                break;
+        }
+        
+        // Build the full Overpass query
+        const fullQuery = `[out:json];${osmQuery}out;`;
+        
+        try {
+            const url = "https://overpass-api.de/api/interpreter?data=" + encodeURIComponent(fullQuery);
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            if (!data.elements || data.elements.length === 0) {
+                list.innerHTML = `<div class="empty-state"><i class="fas fa-dog" style="font-size: 2rem; color: var(--dark-yellow-beige); margin-bottom: 1rem;"></i><br>No ${venueTypeName.toLowerCase()} venues found within ${parseInt(radius)/1000} km. Try increasing the search radius.</div>`;
+                return;
+            }
+            
+            // Process and display venues
+            list.innerHTML = '';
+            allVenues = data.elements
+                .filter(venue => venue.tags && venue.tags.name) // Only include venues with names
+                .map(venue => {
+                    const distance = calculateDistance(userLocation.lat, userLocation.lng, venue.lat, venue.lon);
+                    const travelTime = calculateTravelTime(distance);
+                    
+                    return {
+                        ...venue,
+                        distance: distance,
+                        travelTime: travelTime
+                    };
+                })
+                .sort((a, b) => a.distance - b.distance); // Sort by distance
+            
+            if (allVenues.length === 0) {
+                list.innerHTML = `<div class="empty-state"><i class="fas fa-dog" style="font-size: 2rem; color: var(--dark-yellow-beige); margin-bottom: 1rem;"></i><br>No named ${venueTypeName.toLowerCase()} venues found within ${parseInt(radius)/1000} km. Try increasing the search radius.</div>`;
+                return;
+            }
+            
+            allVenues.forEach((venue, idx) => {
+                // Determine the specific type for display
+                let displayType = venueTypeName;
+                if (type === 'all') {
+                    // For "all" search, determine the specific type
+                    if (venue.tags.amenity === 'cafe' && venue.tags.dogs === 'yes') {
+                        displayType = 'Pet-Friendly Cafe';
+                    } else if (venue.tags.amenity === 'restaurant' && venue.tags.dogs === 'yes') {
+                        displayType = 'Pet-Friendly Restaurant';
+                    } else if (venue.tags.leisure === 'dog_park' || venue.tags.dog) {
+                        displayType = 'Dog Park';
+                    } else if (venue.tags.shop === 'pet') {
+                        displayType = 'Pet Shop';
+                    }
+                }
+                
+                // Create venue list item
+                const item = document.createElement('div');
+                item.className = 'venue-item';
+                
+                let timeInfo = '';
+                if (venue.distance <= 5) {
+                    timeInfo = `<div class="venue-distance"><i class="fas fa-walking"></i> About ${venue.travelTime.walking} min walk</div>`;
+                } else {
+                    timeInfo = `
+                        <div class="venue-distance"><i class="fas fa-walking"></i> About ${venue.travelTime.walking} min walk</div>
+                        <div class="driving-time"><i class="fas fa-car"></i> About ${venue.travelTime.driving} min drive</div>
+                    `;
+                }
+                
+                item.innerHTML = `
+                  <div class="venue-name">${venue.tags.name} <span class="pet-friendly">Pet-Friendly</span></div>
+                  <div class="venue-area"><i class="fas fa-map-marker-alt"></i> ${venue.distance.toFixed(1)} km away</div>
+                  ${timeInfo}
+                  <span class="venue-type">${getVenueIcon(displayType)} ${displayType}</span>
+                  ${venue.tags['opening_hours'] ? `<div class="venue-details"><i class="fas fa-clock"></i> ${venue.tags['opening_hours']}</div>` : ''}
+                  ${venue.tags['phone'] ? `<div class="venue-details"><i class="fas fa-phone"></i> ${venue.tags['phone']}</div>` : ''}
+                  <div class="venue-actions">
+                    <button class="action-btn view" onclick="focusOnVenue(${idx})">
+                        <i class="fas fa-eye"></i> View
+                    </button>
+                    <button class="action-btn directions" onclick="showDirections(${idx})">
+                        <i class="fas fa-route"></i> Directions
+                    </button>
+                  </div>
+                `;
+                list.appendChild(item);
+                
+                // Add marker to map
+                const marker = L.marker([venue.lat, venue.lon]).addTo(map);
+                let popupContent = `
+                  <b>${venue.tags.name}</b><br>
+                  <span class="pet-friendly">Pet-Friendly</span><br>
+                  ${displayType}<br>
+                  ${venue.distance.toFixed(1)} km from your location
+                  ${venue.tags['opening_hours'] ? `<br><i class="fas fa-clock"></i> ${venue.tags['opening_hours']}` : ''}
+                  ${venue.tags['phone'] ? `<br><i class="fas fa-phone"></i> ${venue.tags['phone']}` : ''}
+                  ${venue.tags['website'] ? `<br><a href="${venue.tags['website']}" target="_blank"><i class="fas fa-globe"></i> Website</a>` : ''}
+                  <br><button class="action-btn directions" onclick="showDirections(${idx})" style="margin-top: 8px; padding: 6px 10px; font-size: 11px; width: 100%;">
+                    <i class="fas fa-route"></i> Get Directions
+                  </button>
+                `;
+                marker.bindPopup(popupContent);
+                markers.push(marker);
+            });
+            
+            // Show success message
+            const successMsg = document.createElement('div');
+            successMsg.className = 'success-message';
+            successMsg.innerHTML = `<i class="fas fa-check-circle"></i> Found ${allVenues.length} ${venueTypeName.toLowerCase()}${allVenues.length !== 1 ? 's' : ''} within ${parseInt(radius)/1000} km`;
+            list.insertBefore(successMsg, list.firstChild);
+            
+        } catch (error) {
+            console.error('Error fetching venues:', error);
+            list.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: var(--dark-yellow-beige); margin-bottom: 1rem;"></i><br>Sorry, we encountered an error while searching for venues. Please try again later.</div>';
+        }
+    }
+    
+    // Helper function to get venue icons
+    function getVenueIcon(type) {
+        if (type.includes('Cafe')) return '☕';
+        if (type.includes('Restaurant')) return '🍽️';
+        if (type.includes('Park')) return '🌳';
+        if (type.includes('Pet Shop')) return '🐕';
+        return '🐾';
+    }
+
+    function focusOnVenue(index) {
+        if (allVenues[index]) {
+            const venue = allVenues[index];
+            map.setView([venue.lat, venue.lon], 16);
+            markers[index].openPopup();
+        }
+    }
+
+    function showDirections(index) {
+        if (!userLocation) {
+            alert("Please enable location services first.");
+            return;
+        }
+
+        const venue = allVenues[index];
+        
+        if (!venue) return;
+
+        // Remove existing routing control
+        if (routingControl) {
+            map.removeControl(routingControl);
+        }
+
+        // Create routing control
+        routingControl = L.Routing.control({
+            waypoints: [
+                L.latLng(userLocation.lat, userLocation.lng),
+                L.latLng(venue.lat, venue.lon)
+            ],
+            routeWhileDragging: false,
+            showAlternatives: false,
+            lineOptions: {
+                styles: [{color: 'var(--directions-blue)', weight: 6}]
+            },
+            createMarker: function() { return null; }, // Don't create default markers
+            formatter: new L.Routing.Formatter({
+                language: 'en',
+                units: 'metric'
+            })
+        }).addTo(map);
+
+        // Show directions panel
+        document.getElementById('directions-controls').classList.add('active');
+        document.getElementById('directions-info').innerHTML = `
+            <div style="margin-bottom: 10px;">
+                <strong>Route to:</strong> ${venue.tags.name}<br>
+                <strong>Distance:</strong> ${venue.distance.toFixed(1)} km<br>
+                <strong>Estimated time:</strong> ${venue.travelTime.driving} min drive
+            </div>
+            <div style="font-size: 12px; color: var(--text-secondary);">
+                <i class="fas fa-info-circle"></i> Turn-by-turn directions will appear here
+            </div>
+        `;
+
+        // Fit map to show entire route
+        routingControl.on('routesfound', function(e) {
+            const routes = e.routes;
+            const bounds = new L.LatLngBounds();
+            routes[0].coordinates.forEach(coord => {
+                bounds.extend(coord);
+            });
+            map.fitBounds(bounds, { padding: [20, 20] });
+        });
+    }
+
+    function hideDirections() {
+        if (routingControl) {
+            map.removeControl(routingControl);
+            routingControl = null;
+        }
+        document.getElementById('directions-controls').classList.remove('active');
+    }
+
+    // Accessibility: enable keyboard navigation
+    document.addEventListener('DOMContentLoaded', () => {
+        // Add Enter key support for form controls
+        document.getElementById('typeSelect').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') findVenues();
+        });
+        document.getElementById('radiusSelect').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') findVenues();
+        });
+    });
+</script>
+
+</body>
+</html>

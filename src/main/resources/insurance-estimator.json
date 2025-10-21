@@ -1,0 +1,95 @@
+{
+  "providers": [
+    {
+      "name": "Bajaj Allianz General Insurance",
+      "petType": "Dog",
+      "minAge": 0.25,
+      "maxAge": 10,
+      "premiumRange": "₹5,000 - ₹20,000 annually",
+      "benefits": [
+        "Mortality Benefit due to accident or disease",
+        "Surgery Expenses up to ₹50,000",
+        "Third Party Liability Cover up to ₹1,00,000",
+        "Theft/Loss/Straying Cover with FIR proof"
+      ]
+    },
+    {
+      "name": "New India Assurance",
+      "petType": "Dog",
+      "minAge": 0.15,
+      "maxAge": 8,
+      "premiumRange": "₹3,500 - ₹15,000 annually",
+      "benefits": [
+        "Death cover due to accident/disease",
+        "Lost or stolen dogs (house break-in or burglary)",
+        "Liability for injuries or damage to property",
+        "Transit accident cover"
+      ]
+    },
+    {
+      "name": "Oriental Insurance",
+      "petType": "Dog",
+      "minAge": 0.15,
+      "maxAge": 8,
+      "premiumRange": "₹4,000 - ₹18,000 annually",
+      "benefits": [
+        "Death during transit accidents",
+        "Lost or stolen dogs",
+        "Loss of value after accident (if pet used in shows)",
+        "Hospitalization and treatment charges"
+      ]
+    },
+    {
+      "name": "Go Digit General Insurance",
+      "petType": "Dog",
+      "minAge": 0.2,
+      "maxAge": 9,
+      "premiumRange": "₹6,000 - ₹25,000 annually",
+      "benefits": [
+        "Accident & illness coverage",
+        "OPD consultations and vaccination cover (optional add-on)",
+        "Boarding and hospitalization expenses",
+        "Third-party damages including car accidents caused by pets"
+      ]
+    },
+    {
+      "name": "Future Generali Pet Insurance",
+      "petType": "Cat",
+      "minAge": 0.25,
+      "maxAge": 8,
+      "premiumRange": "₹3,000 - ₹12,000 annually",
+      "benefits": [
+        "Death due to accident or illness",
+        "Lost or stolen cats",
+        "Hospitalization and OPD cover",
+        "Optional add-on for international travel insurance"
+      ]
+    },
+    {
+      "name": "ICICI Lombard Pet Protection",
+      "petType": "Dog",
+      "minAge": 0.25,
+      "maxAge": 10,
+      "premiumRange": "₹5,500 - ₹22,000 annually",
+      "benefits": [
+        "Surgery expenses due to accident/disease",
+        "Hospitalization charges up to ₹40,000",
+        "Third-party legal liability cover",
+        "Lost or stolen pet cover"
+      ]
+    },
+    {
+      "name": "HDFC Ergo Pet Health Plan",
+      "petType": "Dog",
+      "minAge": 0.2,
+      "maxAge": 9,
+      "premiumRange": "₹4,800 - ₹19,000 annually",
+      "benefits": [
+        "Accident and disease-related medical expenses",
+        "Emergency hospitalization",
+        "Third-party damages",
+        "Custom add-ons for grooming and wellness packages"
+      ]
+    }
+  ]
+}

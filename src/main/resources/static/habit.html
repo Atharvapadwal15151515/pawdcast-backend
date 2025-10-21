@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pawdcast - Pet Habit Tracker</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Chart.js for Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --medium-yellow-beige: #E8DABE;
+            --dark-yellow-beige: #C9A961;
+            --dark-drab-brown: #8B7355;
+            --very-dark-mocha: #4A3728;
+            --black-brown: #2D1B12;
+            --dark-wedgwood: #3E5F6F;
+            --white: #FFFFFF;
+            --card-shadow: rgba(45, 27, 18, 0.1);
+            --hover-shadow: rgba(62, 95, 111, 0.2);
+            --light-wedgwood: #E8EEF2;
+        }
+        
+        .bg-primary { background-color: var(--dark-wedgwood); }
+        .bg-secondary { background-color: var(--medium-yellow-beige); }
+        .bg-accent { background-color: var(--dark-drab-brown); }
+        .bg-dark { background-color: var(--black-brown); }
+        .bg-light { background-color: var(--white); }
+        
+        .text-primary { color: var(--dark-wedgwood); }
+        .text-secondary { color: var(--dark-yellow-beige); }
+        .text-accent { color: var(--dark-drab-brown); }
+        .text-dark { color: var(--black-brown); }
+        .text-light { color: var(--white); }
+        
+        .border-primary { border-color: var(--dark-wedgwood); }
+        .border-secondary { border-color: var(--medium-yellow-beige); }
+        
+        .habit-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--dark-wedgwood);
+            background: var(--white);
+            box-shadow: 0 2px 8px var(--card-shadow);
+        }
+        
+        .habit-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px var(--hover-shadow);
+        }
+        
+        .calendar-day {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 0.75rem;
+            cursor: pointer;
+            background: var(--white);
+            border: 1px solid var(--medium-yellow-beige);
+        }
+        
+        .calendar-day.completed {
+            background-color: var(--dark-wedgwood);
+            color: var(--white);
+            border-color: var(--dark-wedgwood);
+        }
+        
+        .calendar-day.missed {
+            background-color: var(--dark-drab-brown);
+            color: var(--white);
+            border-color: var(--dark-drab-brown);
+        }
+        
+        .calendar-day.future {
+            background-color: var(--medium-yellow-beige);
+            color: var(--black-brown);
+            border-color: var(--dark-yellow-beige);
+        }
+        
+        .calendar-day.today {
+            border: 2px solid var(--dark-wedgwood);
+        }
+        
+        .progress-bar {
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            background-color: var(--medium-yellow-beige);
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--dark-wedgwood), var(--dark-drab-brown));
+            transition: width 0.5s ease;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--dark-wedgwood), #2a4a5a);
+            color: var(--white);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2a4a5a, var(--dark-wedgwood));
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(62, 95, 111, 0.3);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--medium-yellow-beige), var(--dark-yellow-beige));
+            color: var(--black-brown);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, var(--dark-yellow-beige), var(--medium-yellow-beige));
+            transform: translateY(-2px);
+        }
+        
+        .nav-tab.active {
+            background-color: var(--white);
+            color: var(--dark-wedgwood);
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, var(--white) 0%, var(--light-wedgwood) 100%);
+            border: 1px solid var(--dark-yellow-beige);
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px var(--hover-shadow);
+        }
+        
+        .login-container {
+            background: linear-gradient(135deg, var(--dark-wedgwood) 0%, var(--dark-drab-brown) 100%);
+        }
+        
+        .pet-card {
+            border: 2px solid var(--medium-yellow-beige);
+            transition: all 0.3s ease;
+        }
+        
+        .pet-card:hover, .pet-card.selected {
+            border-color: var(--dark-wedgwood);
+            background-color: rgba(62, 95, 111, 0.1);
+            transform: translateY(-3px);
+        }
+        
+        .logo {
+            height: 60px;
+            width: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+            border: 3px solid var(--medium-yellow-beige);
+        }
+        
+        .logo:hover {
+            transform: scale(1.05);
+        }
+        
+        .footer-logo {
+            height: 40px;
+            width: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+            border: 2px solid var(--medium-yellow-beige);
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, var(--light-wedgwood) 0%, var(--white) 100%);
+            padding: 20px 0;
+            border-bottom: 1px solid var(--medium-yellow-beige);
+            margin-bottom: 30px;
+        }
+        
+        .welcome-text {
+            color: var(--dark-wedgwood);
+            font-weight: 600;
+        }
+        
+        /* Animation for cards */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-in-up {
+            animation: fadeInUp 0.5s ease forwards;
+        }
+        
+        /* Footer Styles */
+        .footer {
+            background-color: var(--very-dark-mocha);
+            color: var(--white);
+            padding: 20px 0;
+            margin-top: 40px;
+            border-top: 3px solid var(--medium-yellow-beige);
+        }
+        
+        .footer a {
+            color: var(--dark-yellow-beige);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .footer a:hover {
+            color: var(--white);
+        }
+        
+        /* Modal Styles */
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-content {
+            background-color: var(--white);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        /* Notification Styles */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: var(--white);
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            background-color: var(--dark-wedgwood);
+        }
+        
+        .notification.error {
+            background-color: var(--dark-drab-brown);
+        }
+        
+        /* Twitter/X Logo Styles */
+        .twitter-x-logo {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background-color: currentColor;
+            -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z'/%3E%3C/svg%3E") no-repeat center;
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z'/%3E%3C/svg%3E") no-repeat center;
+            -webkit-mask-size: contain;
+            mask-size: contain;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .logo {
+                height: 50px;
+                width: 50px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-light text-dark">
+    <!-- Notification Container -->
+    <div id="notificationContainer"></div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="fixed inset-0 flex items-center justify-center z-50">
+        <div class="login-container rounded-xl shadow-2xl w-full max-w-md mx-4 p-8 text-light">
+            <div class="text-center mb-6">
+                <div class="flex justify-center mb-4">
+                    <img src="https://res.cloudinary.com/dkuuvasoe/image/upload/v1760186124/pawdcastlogo_cb1l1b.png" alt="Pawdcast Logo" class="logo">
+                </div>
+                <h2 class="text-2xl font-bold">Welcome to Pawdcast</h2>
+                <p class="text-secondary">Track your pet's habits with love</p>
+            </div>
+            
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <label class="block mb-2">Email</label>
+                    <input type="email" id="loginEmail" class="w-full px-4 py-2 rounded-lg border border-secondary text-dark" required>
+                </div>
+                
+                <div>
+                    <label class="block mb-2">Password</label>
+                    <input type="password" id="loginPassword" class="w-full px-4 py-2 rounded-lg border border-secondary text-dark" required>
+                </div>
+                
+                <button type="submit" class="btn-secondary w-full py-2 rounded-lg font-semibold">
+                    <i class="bi bi-box-arrow-in-right"></i> Login
+                </button>
+            </form>
+            
+            <div class="text-center mt-6">
+                <p class="text-secondary">Don't have an account? <a href="#" id="showSignup" class="text-light font-semibold underline">Sign up</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div id="signupModal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+        <div class="login-container rounded-xl shadow-2xl w-full max-w-md mx-4 p-8 text-light">
+            <div class="text-center mb-6">
+                <div class="flex justify-center mb-4">
+                    <img src="https://res.cloudinary.com/dkuuvasoe/image/upload/v1760186124/pawdcastlogo_cb1l1b.png" alt="Pawdcast Logo" class="logo">
+                </div>
+                <h2 class="text-2xl font-bold">Create Account</h2>
+                <p class="text-secondary">Join Pawdcast today</p>
+            </div>
+            
+            <form id="signupForm" class="space-y-4">
+                <div>
+                    <label class="block mb-2">Full Name</label>
+                    <input type="text" id="signupName" class="w-full px-4 py-2 rounded-lg border border-secondary text-dark" required>
+                </div>
+                
+                <div>
+                    <label class="block mb-2">Email</label>
+                    <input type="email" id="signupEmail" class="w-full px-4 py-2 rounded-lg border border-secondary text-dark" required>
+                </div>
+                
+                <div>
+                    <label class="block mb-2">Password</label>
+                    <input type="password" id="signupPassword" class="w-full px-4 py-2 rounded-lg border border-secondary text-dark" required>
+                </div>
+                
+                <div>
+                    <label class="block mb-2">Phone</label>
+                    <input type="tel" id="signupPhone" class="w-full px-4 py-2 rounded-lg border border-secondary text-dark" required>
+                </div>
+                
+                <div>
+                    <label class="block text-light mb-2" for="signupAddress">Address</label>
+                    <textarea id="signupAddress" class="w-full px-4 py-2 rounded-lg border border-secondary text-dark" rows="2" required></textarea>
+                </div>
+                
+                <button type="submit" class="btn-secondary w-full py-2 rounded-lg font-semibold">
+                    <i class="bi bi-person-plus"></i> Create Account
+                </button>
+            </form>
+            
+            <div class="text-center mt-6">
+                <p class="text-secondary">Already have an account? <a href="#" id="showLogin" class="text-light font-semibold underline">Login</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy Policy Modal -->
+    <div id="privacyModal" class="fixed inset-0 modal-overlay flex items-center justify-center z-50 hidden">
+        <div class="modal-content rounded-xl shadow-2xl w-full max-w-2xl mx-4 p-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-primary">Privacy Policy</h2>
+                <button id="closePrivacy" class="text-accent hover:text-primary text-2xl">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-4 text-dark">
+                <section>
+                    <h3 class="text-lg font-semibold text-primary mb-2">1. Information We Collect</h3>
+                    <p>We collect personal information that you provide when creating an account, including your name, email, phone number, and address. We also collect information about your pets and their habit tracking data.</p>
+                </section>
+                
+                <section>
+                    <h3 class="text-lg font-semibold text-primary mb-2">2. How We Use Your Information</h3>
+                    <p>Your information is used to provide and improve our pet habit tracking services, send notifications about your pet's habits, and communicate with you about our services.</p>
+                </section>
+                
+                <section>
+                    <h3 class="text-lg font-semibold text-primary mb-2">3. Data Security</h3>
+                    <p>We implement industry-standard security measures to protect your personal information. Your data is stored securely and encrypted during transmission.</p>
+                </section>
+                
+                <section>
+                    <h3 class="text-lg font-semibold text-primary mb-2">4. Information Sharing</h3>
+                    <p>We do not sell, trade, or share your personal information with third parties except as necessary to provide our services or as required by law.</p>
+                </section>
+                
+                <section>
+                    <h3 class="text-lg font-semibold text-primary mb-2">5. Your Rights</h3>
+                    <p>You have the right to access, update, or delete your personal information at any time. You can manage your account settings or contact us for assistance.</p>
+                </section>
+                
+                <section>
+                    <h3 class="text-lg font-semibold text-primary mb-2">6. Cookies</h3>
+                    <p>We use cookies to enhance your experience and maintain your session. You can disable cookies in your browser settings, but this may affect functionality.</p>
+                </section>
+                
+                <section>
+                    <h3 class="text-lg font-semibold text-primary mb-2">7. Updates to This Policy</h3>
+                    <p>We may update this privacy policy from time to time. We will notify you of any significant changes via email or through our platform.</p>
+                </section>
+                
+                <p class="text-sm text-accent mt-6">Last updated: October 20, 2025</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Center Modal -->
+    <div id="helpModal" class="fixed inset-0 modal-overlay flex items-center justify-center z-50 hidden">
+        <div class="modal-content rounded-xl shadow-2xl w-full max-w-2xl mx-4 p-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-primary">Help Center</h2>
+                <button id="closeHelp" class="text-accent hover:text-primary text-2xl">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-4 text-dark">
+                <section>
+                    <h3 class="text-lg font-semibold text-primary mb-2">Getting Started</h3>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li>Create an account by clicking Sign Up</li>
+                        <li>Add your pet's information in the Pet Selection section</li>
+                        <li>Start tracking habits by clicking "Add Habit"</li>
+                    </ul>
+                </section>
+                
+                <section>
+                    <h3 class="text-lg font-semibold text-primary mb-2">Managing Habits</h3>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li>Mark habits as complete by clicking the checkmark button</li>
+                        <li>View your progress on the Analytics tab</li>
+                        <li>Track your calendar to see completion patterns</li>
+                    </ul>
+                </section>
+                
+                <section>
+                    <h3 class="text-lg font-semibold text-primary mb-2">Understanding Analytics</h3>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li>Completion Rate: Percentage of habits completed</li>
+                        <li>Current Streak: Consecutive days of completing habits</li>
+                        <li>Longest Streak: Your best streak record</li>
+                    </ul>
+                </section>
+                
+                <section>
+                    <h3 class="text-lg font-semibold text-primary mb-2">Frequently Asked Questions</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <p class="font-semibold">Q: Can I track multiple pets?</p>
+                            <p class="text-accent">A: Yes! You can add multiple pets and switch between them.</p>
+                        </div>
+                        <div>
+                            <p class="font-semibold">Q: How do streaks work?</p>
+                            <p class="text-accent">A: Streaks count consecutive days of completing your habits.</p>
+                        </div>
+                        <div>
+                            <p class="font-semibold">Q: Can I edit habits?</p>
+                            <p class="text-accent">A: Currently, you can add and complete habits. Edit functionality is coming soon!</p>
+                        </div>
+                    </div>
+                </section>
+                
+                <section>
+                    <h3 class="text-lg font-semibold text-primary mb-2">Need More Help?</h3>
+                    <p>Contact our support team at <a href="mailto:Info.pawdcast@gmail.com" class="text-primary underline">Info.pawdcast@gmail.com</a></p>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application (Hidden until login) -->
+    <div id="app" class="hidden">
+        <!-- Navigation -->
+        <nav class="bg-primary text-light shadow-lg">
+            <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <img src="https://res.cloudinary.com/dkuuvasoe/image/upload/v1760186124/pawdcastlogo_cb1l1b.png" alt="Pawdcast Logo" class="logo">
+                    <div class="flex flex-col">
+                        <h1 class="text-xl font-bold">Pawdcast</h1>
+                        <span class="text-xs text-secondary">Pet Habit Tracker</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="habitsTab" class="nav-tab active px-3 py-2 rounded-lg font-medium">Habits</button>
+                    <button id="analyticsTab" class="nav-tab px-3 py-2 rounded-lg font-medium">Analytics</button>
+                    <button id="calendarTab" class="nav-tab px-3 py-2 rounded-lg font-medium">Calendar</button>
+                    <!-- Removed user profile and logout options -->
+                </div>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <div class="container mx-auto px-4">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div>
+                        <h2 class="welcome-text text-2xl mb-2">Welcome back, <span id="userFirstName">Pet Parent</span>!</h2>
+                        <p class="text-accent">Track your pet's habits and build healthy routines together.</p>
+                    </div>
+                    <div class="mt-4 md:mt-0">
+                        <span id="currentDate" class="text-accent"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="container mx-auto px-4 py-8">
+            <!-- Pet Selection -->
+            <div class="mb-8 stat-card rounded-xl p-6 fade-in-up">
+                <h2 class="text-xl font-bold mb-4 text-primary">Select Your Pet</h2>
+                <div class="flex flex-wrap gap-4" id="petSelection">
+                    <!-- Pets will be dynamically loaded here -->
+                </div>
+                <div class="mt-4">
+                    <button id="addPetBtn" class="btn-primary px-4 py-2 rounded-lg flex items-center space-x-2">
+                        <i class="bi bi-plus-lg"></i>
+                        <span>Add New Pet</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Habits Section -->
+            <div id="habitsSection" class="content-section">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-primary">Habit Tracking</h2>
+                    <button id="addHabitBtn" class="btn-primary px-4 py-2 rounded-lg flex items-center space-x-2">
+                        <i class="bi bi-plus-lg"></i>
+                        <span>Add Habit</span>
+                    </button>
+                </div>
+
+                <div id="habitsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Habits will be dynamically loaded here -->
+                </div>
+            </div>
+
+            <!-- Analytics Section -->
+            <div id="analyticsSection" class="content-section hidden">
+                <h2 class="text-2xl font-bold mb-6 text-primary">Habit Analytics</h2>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <div class="stat-card rounded-xl p-6 fade-in-up" style="animation-delay: 0.1s;">
+                        <h3 class="text-lg font-semibold mb-2 text-primary">Completion Rate</h3>
+                        <div class="text-3xl font-bold text-accent" id="completionRate">0%</div>
+                        <div class="progress-bar mt-2">
+                            <div id="completionProgress" class="progress-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card rounded-xl p-6 fade-in-up" style="animation-delay: 0.2s;">
+                        <h3 class="text-lg font-semibold mb-2 text-primary">Current Streak</h3>
+                        <div class="text-3xl font-bold text-accent" id="currentStreak">0 days</div>
+                        <p class="text-sm text-dark-drab-brown mt-1">Keep it up!</p>
+                    </div>
+                    
+                    <div class="stat-card rounded-xl p-6 fade-in-up" style="animation-delay: 0.3s;">
+                        <h3 class="text-lg font-semibold mb-2 text-primary">Longest Streak</h3>
+                        <div class="text-3xl font-bold text-accent" id="longestStreak">0 days</div>
+                        <p class="text-sm text-dark-drab-brown mt-1">Your personal best</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card rounded-xl p-6 fade-in-up" style="animation-delay: 0.4s;">
+                    <h3 class="text-lg font-semibold mb-4 text-primary">Habit Performance</h3>
+                    <canvas id="habitsChart" height="100"></canvas>
+                </div>
+            </div>
+
+            <!-- Calendar Section -->
+            <div id="calendarSection" class="content-section hidden">
+                <h2 class="text-2xl font-bold mb-6 text-primary">Habit Calendar</h2>
+                
+                <div class="stat-card rounded-xl p-6 fade-in-up">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 id="calendarMonth" class="text-xl font-semibold text-primary">October 2025</h3>
+                        <div class="flex space-x-2">
+                            <button id="prevMonth" class="p-2 rounded-full hover:bg-secondary">
+                                <i class="bi bi-chevron-left text-primary"></i>
+                            </button>
+                            <button id="nextMonth" class="p-2 rounded-full hover:bg-secondary">
+                                <i class="bi bi-chevron-right text-primary"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-7 gap-2 mb-4">
+                        <div class="text-center font-medium text-accent">Sun</div>
+                        <div class="text-center font-medium text-accent">Mon</div>
+                        <div class="text-center font-medium text-accent">Tue</div>
+                        <div class="text-center font-medium text-accent">Wed</div>
+                        <div class="text-center font-medium text-accent">Thu</div>
+                        <div class="text-center font-medium text-accent">Fri</div>
+                        <div class="text-center font-medium text-accent">Sat</div>
+                    </div>
+                    
+                    <div id="calendarDays" class="grid grid-cols-7 gap-2">
+                        <!-- Calendar days will be dynamically loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container mx-auto px-4">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                    <div class="md:col-span-2">
+                        <div class="flex items-center mb-4">
+                            <img src="https://res.cloudinary.com/dkuuvasoe/image/upload/v1760186124/pawdcastlogo_cb1l1b.png" alt="Pawdcast Logo" class="footer-logo">
+                            <h3 class="text-xl font-bold">Pawdcast</h3>
+                        </div>
+                        <p class="mb-4">Track your pet's habits, build healthy routines, and strengthen your bond with your furry friend.</p>
+                        <div class="flex space-x-4">
+                            <a href="https://www.facebook.com/share/14KY5XC9Euo/" target="_blank" class="text-2xl"><i class="bi bi-facebook"></i></a>
+                            <a href="https://x.com/Pawdcast173798?t=1h5gI956LBmTHeE2w5irWg&s=09" target="_blank" class="text-2xl">
+                                <span class="twitter-x-logo"></span>
+                            </a>
+                            <a href="https://www.instagram.com/pawdcast_india/?utm_source=ig_web_button_share_sheet" target="_blank" class="text-2xl"><i class="bi bi-instagram"></i></a>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
+                        <ul class="space-y-2">
+                            <li><a href="#" id="dashboardLink"><i class="bi bi-arrow-right me-2"></i> Dashboard</a></li>
+                            <li><a href="#" id="analyticsLink"><i class="bi bi-arrow-right me-2"></i> Analytics</a></li>
+                            <li><a href="#" id="calendarLink"><i class="bi bi-arrow-right me-2"></i> Calendar</a></li>
+                            <li><a href="#" id="settingsLink"><i class="bi bi-arrow-right me-2"></i> Settings</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-semibold mb-4">Contact & Support</h4>
+                        <ul class="space-y-2">
+                            <li><a href="#" id="helpCenterLink"><i class="bi bi-question-circle me-2"></i> Help Center</a></li>
+                            <li><a href="mailto:Info.pawdcast@gmail.com"><i class="bi bi-envelope me-2"></i> Info.pawdcast@gmail.com</a></li>
+                            <li><i class="bi bi-telephone me-2"></i> +91-9321696332 (CEO: Atharva Padwal)</li>
+                            <li><i class="bi bi-telephone me-2"></i> +91-9137008297 (Co-CEO: Sahil Pote)</li>
+                            <li><i class="bi bi-telephone me-2"></i> +91-88283 88621 (Head HR: Parth Nikam)</li>
+                            <li><a href="#" id="privacyLink"><i class="bi bi-shield-check me-2"></i> Privacy Policy</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="border-t border-secondary mt-8 pt-6 text-center">
+                    <p>&copy; 2025 Pawdcast. All rights reserved.</p>
+                </div>
+            </div>
+        </footer>
+
+        <!-- Add Habit Modal -->
+        <div id="addHabitModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+            <div class="bg-light rounded-xl shadow-xl w-full max-w-md mx-4">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold text-primary">Add New Habit</h3>
+                        <button id="closeModal" class="text-accent hover:text-primary">
+                            <i class="bi bi-x-lg text-xl"></i>
+                        </button>
+                    </div>
+                    
+                    <form id="habitForm">
+                        <div class="mb-4">
+                            <label class="block text-dark mb-2" for="habitName">Habit Name</label>
+                            <input type="text" id="habitName" class="w-full px-4 py-2 border border-secondary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-dark" required>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-dark mb-2" for="habitDescription">Description</label>
+                            <textarea id="habitDescription" class="w-full px-4 py-2 border border-secondary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-dark" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-dark mb-2" for="habitFrequency">Frequency</label>
+                            <select id="habitFrequency" class="w-full px-4 py-2 border border-secondary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-dark">
+                                <option value="Daily">Daily</option>
+                                <option value="Weekly">Weekly</option>
+                                <option value="Monthly">Monthly</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label class="block text-dark mb-2" for="startDate">Start Date</label>
+                            <input type="date" id="startDate" class="w-full px-4 py-2 border border-secondary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-dark" required>
+                        </div>
+                        
+                        <div class="flex justify-end space-x-3">
+                            <button type="button" id="cancelHabit" class="px-4 py-2 border border-secondary rounded-lg text-dark hover:bg-secondary">Cancel</button>
+                            <button type="submit" class="btn-primary px-4 py-2 rounded-lg">Add Habit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Base URL
+        const API_BASE_URL = 'http://localhost:8080';
+        
+        // Global state
+        let currentUser = null;
+        let currentPetId = null;
+        let currentHabits = [];
+        let currentPets = [];
+        let currentDate = new Date();
+        let selectedHabitId = null;
+        let habitsChart = null;
+
+        // DOM Elements
+        const loginModal = document.getElementById('loginModal');
+        const signupModal = document.getElementById('signupModal');
+        const privacyModal = document.getElementById('privacyModal');
+        const helpModal = document.getElementById('helpModal');
+        const app = document.getElementById('app');
+        const habitsSection = document.getElementById('habitsSection');
+        const analyticsSection = document.getElementById('analyticsSection');
+        const calendarSection = document.getElementById('calendarSection');
+        const habitsContainer = document.getElementById('habitsContainer');
+        const petSelection = document.getElementById('petSelection');
+        const addHabitModal = document.getElementById('addHabitModal');
+        const loginForm = document.getElementById('loginForm');
+        const signupForm = document.getElementById('signupForm');
+        const habitForm = document.getElementById('habitForm');
+        const calendarDays = document.getElementById('calendarDays');
+        const calendarMonth = document.getElementById('calendarMonth');
+        const userFirstName = document.getElementById('userFirstName');
+        const currentDateElement = document.getElementById('currentDate');
+        
+        // Check authentication on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            await checkAuthentication();
+            
+            // Set today's date as default in forms
+            document.getElementById('startDate').valueAsDate = new Date();
+            
+            // Set current date in hero section
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            currentDateElement.textContent = new Date().toLocaleDateString('en-US', options);
+            
+            // Modal event listeners
+            document.getElementById('closePrivacy').addEventListener('click', () => {
+                privacyModal.classList.add('hidden');
+            });
+            
+            document.getElementById('closeHelp').addEventListener('click', () => {
+                helpModal.classList.add('hidden');
+            });
+            
+            document.getElementById('privacyLink').addEventListener('click', (e) => {
+                e.preventDefault();
+                privacyModal.classList.remove('hidden');
+            });
+            
+            document.getElementById('helpCenterLink').addEventListener('click', (e) => {
+                e.preventDefault();
+                helpModal.classList.remove('hidden');
+            });
+            
+            // Footer navigation links
+            document.getElementById('dashboardLink').addEventListener('click', (e) => {
+                e.preventDefault();
+                switchTab('habits');
+            });
+            
+            document.getElementById('analyticsLink').addEventListener('click', (e) => {
+                e.preventDefault();
+                switchTab('analytics');
+            });
+            
+            document.getElementById('calendarLink').addEventListener('click', (e) => {
+                e.preventDefault();
+                switchTab('calendar');
+            });
+
+            // Add Pet Button - Redirect to petprofile.html
+            document.getElementById('addPetBtn').addEventListener('click', () => {
+                window.location.href = 'petprofile.html';
+            });
+        });
+        
+        // Authentication Functions
+        async function checkAuthentication() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/check`);
+                const data = await response.json();
+                
+                if (data.authenticated) {
+                    currentUser = data;
+                    await loadUserProfile();
+                    app.classList.remove('hidden');
+                    loginModal.classList.add('hidden');
+                    await loadUserPets();
+                } else {
+                    app.classList.add('hidden');
+                    loginModal.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                app.classList.add('hidden');
+                loginModal.classList.remove('hidden');
+            }
+        }
+        
+        // Load user profile with photo
+        async function loadUserProfile() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/me`);
+                if (response.ok) {
+                    const userData = await response.json();
+                    currentUser = { ...currentUser, ...userData };
+                    renderUserProfile();
+                }
+            } catch (error) {
+                console.error('Error loading user profile:', error);
+            }
+        }
+        
+        // Render user profile in navigation
+        function renderUserProfile() {
+            // Update welcome message with first name
+            if (currentUser.fullName) {
+                const firstName = currentUser.fullName.split(' ')[0];
+                userFirstName.textContent = firstName;
+            }
+        }
+        
+        // Login Form
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            formData.append('email', document.getElementById('loginEmail').value);
+            formData.append('password', document.getElementById('loginPassword').value);
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const userData = await response.json();
+                    currentUser = userData;
+                    await loadUserProfile();
+                    app.classList.remove('hidden');
+                    loginModal.classList.add('hidden');
+                    await loadUserPets();
+                    showNotification('Login successful!', 'success');
+                } else {
+                    throw new Error('Login failed');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showNotification('Login failed. Please try again.', 'error');
+            }
+        });
+        
+        // Signup Form
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            formData.append('fullName', document.getElementById('signupName').value);
+            formData.append('email', document.getElementById('signupEmail').value);
+            formData.append('password', document.getElementById('signupPassword').value);
+            formData.append('phone', document.getElementById('signupPhone').value);
+            formData.append('address', document.getElementById('signupAddress').value);
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/signup`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    signupModal.classList.add('hidden');
+                    loginModal.classList.remove('hidden');
+                    showNotification('Account created successfully! Please login.', 'success');
+                    signupForm.reset();
+                } else {
+                    throw new Error('Signup failed');
+                }
+            } catch (error) {
+                console.error('Signup error:', error);
+                showNotification('Signup failed. Please try again.', 'error');
+            }
+        });
+        
+        // Modal Navigation
+        document.getElementById('showSignup').addEventListener('click', (e) => {
+            e.preventDefault();
+            loginModal.classList.add('hidden');
+            signupModal.classList.remove('hidden');
+        });
+        
+        document.getElementById('showLogin').addEventListener('click', (e) => {
+            e.preventDefault();
+            signupModal.classList.add('hidden');
+            loginModal.classList.remove('hidden');
+        });
+        
+        // Tab Navigation
+        document.getElementById('habitsTab').addEventListener('click', () => switchTab('habits'));
+        document.getElementById('analyticsTab').addEventListener('click', () => switchTab('analytics'));
+        document.getElementById('calendarTab').addEventListener('click', () => switchTab('calendar'));
+        
+        // Modal Controls
+        document.getElementById('addHabitBtn').addEventListener('click', () => addHabitModal.classList.remove('hidden'));
+        document.getElementById('closeModal').addEventListener('click', () => addHabitModal.classList.add('hidden'));
+        document.getElementById('cancelHabit').addEventListener('click', () => addHabitModal.classList.add('hidden'));
+        
+        // Calendar Navigation
+        document.getElementById('prevMonth').addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar();
+        });
+        
+        document.getElementById('nextMonth').addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar();
+        });
+        
+        // Form Submissions
+        habitForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!currentPetId) {
+                showNotification('Please select a pet first!', 'error');
+                return;
+            }
+            
+            const habitData = {
+                petId: currentPetId,
+                habitName: document.getElementById('habitName').value,
+                description: document.getElementById('habitDescription').value,
+                frequency: document.getElementById('habitFrequency').value,
+                startDate: document.getElementById('startDate').value
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/habits`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(habitData)
+                });
+                
+                if (response.ok) {
+                    const newHabit = await response.json();
+                    addHabitModal.classList.add('hidden');
+                    habitForm.reset();
+                    await loadHabits();
+                    showNotification('Habit added successfully!', 'success');
+                } else {
+                    throw new Error('Failed to add habit');
+                }
+            } catch (error) {
+                console.error('Error adding habit:', error);
+                showNotification('Failed to add habit. Please try again.', 'error');
+            }
+        });
+        
+        // Load user's pets from PetProfileController
+        async function loadUserPets() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/pet-profiles/my-pets`);
+                if (response.ok) {
+                    currentPets = await response.json();
+                    renderPets();
+                    
+                    // Auto-select first pet if available
+                    if (currentPets.length > 0 && !currentPetId) {
+                        currentPetId = currentPets[0].petId;
+                        document.querySelector(`[data-pet-id="${currentPetId}"]`).classList.add('selected');
+                        await loadHabits();
+                    }
+                } else {
+                    throw new Error('Failed to load pets');
+                }
+            } catch (error) {
+                console.error('Error loading pets:', error);
+                showNotification('Failed to load pets. Please try again.', 'error');
+                currentPets = [];
+                renderPets();
+            }
+        }
+        
+        // Render pets in the UI
+        function renderPets() {
+            petSelection.innerHTML = '';
+            
+            if (currentPets.length === 0) {
+                petSelection.innerHTML = `
+                    <div class="col-span-full text-center py-4">
+                        <p class="text-accent">No pets yet. Add your first pet to get started!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            currentPets.forEach(pet => {
+                const petCard = document.createElement('div');
+                petCard.className = `pet-card rounded-lg p-4 cursor-pointer transition ${currentPetId === pet.petId ? 'selected' : ''}`;
+                petCard.setAttribute('data-pet-id', pet.petId);
+                petCard.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-light">
+                            <i class="bi bi-${getPetIcon(pet.type)}"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-dark">${pet.name}</h3>
+                            <p class="text-sm text-accent">${pet.breed || pet.type} • ${pet.dob ? new Date(pet.dob).toLocaleDateString() : 'No DOB'}</p>
+                        </div>
+                    </div>
+                `;
+                
+                petCard.addEventListener('click', async () => {
+                    currentPetId = pet.petId;
+                    document.querySelectorAll('.pet-card').forEach(card => card.classList.remove('selected'));
+                    petCard.classList.add('selected');
+                    await loadHabits();
+                });
+                
+                petSelection.appendChild(petCard);
+            });
+        }
+        
+        // Helper function to get pet icon
+        function getPetIcon(petType) {
+            switch(petType.toLowerCase()) {
+                case 'dog': return 'emoji-smile';
+                case 'cat': return 'emoji-smile-upside-down';
+                case 'bird': return 'emoji-heart-eyes';
+                default: return 'emoji-heart-eyes';
+            }
+        }
+        
+        // Tab switching function
+        function switchTab(tab) {
+            // Update active tab styling
+            document.querySelectorAll('.nav-tab').forEach(t => {
+                t.classList.remove('active');
+            });
+            document.getElementById(`${tab}Tab`).classList.add('active');
+            
+            // Show the selected section
+            habitsSection.classList.add('hidden');
+            analyticsSection.classList.add('hidden');
+            calendarSection.classList.add('hidden');
+            
+            document.getElementById(`${tab}Section`).classList.remove('hidden');
+            
+            // Load data if needed
+            if (tab === 'analytics') {
+                loadAnalytics();
+            } else if (tab === 'calendar') {
+                renderCalendar();
+            }
+        }
+        
+        // Load habits from API
+        async function loadHabits() {
+            if (!currentPetId) return;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/habits/pet/${currentPetId}`);
+                if (response.ok) {
+                    currentHabits = await response.json();
+                    renderHabits();
+                } else {
+                    throw new Error('Failed to load habits');
+                }
+            } catch (error) {
+                console.error('Error loading habits:', error);
+                showNotification('Failed to load habits. Please try again.', 'error');
+                currentHabits = [];
+                renderHabits();
+            }
+        }
+        
+        // Render habits in the UI
+        function renderHabits() {
+            habitsContainer.innerHTML = '';
+            
+            if (currentHabits.length === 0) {
+                habitsContainer.innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <i class="bi bi-inbox text-5xl text-accent mb-4"></i>
+                        <h3 class="text-xl font-medium text-accent mb-2">No habits yet</h3>
+                        <p class="text-dark-drab-brown mb-4">Start by adding your first habit!</p>
+                        <button id="addFirstHabit" class="btn-primary px-4 py-2 rounded-lg">
+                            Add Your First Habit
+                        </button>
+                    </div>
+                `;
+                document.getElementById('addFirstHabit').addEventListener('click', () => {
+                    addHabitModal.classList.remove('hidden');
+                });
+                return;
+            }
+            
+            currentHabits.forEach(habit => {
+                const completionRate = habit.totalCompleted + habit.totalMissed > 0 
+                    ? Math.round((habit.totalCompleted / (habit.totalCompleted + habit.totalMissed)) * 100) 
+                    : 0;
+                
+                const habitCard = document.createElement('div');
+                habitCard.className = 'habit-card rounded-xl p-6 fade-in-up';
+                habitCard.innerHTML = `
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-lg font-semibold text-primary">${habit.habitName}</h3>
+                        <span class="text-xs px-2 py-1 rounded-full ${habit.frequency === 'Daily' ? 'bg-primary text-light' : 
+                                                                      habit.frequency === 'Weekly' ? 'bg-secondary text-dark' : 
+                                                                      'bg-accent text-light'}">${habit.frequency}</span>
+                    </div>
+                    
+                    <p class="text-accent text-sm mb-4">${habit.description || 'No description provided'}</p>
+                    
+                    <div class="mb-4">
+                        <div class="flex justify-between text-sm mb-1">
+                            <span class="text-accent">Progress</span>
+                            <span class="font-medium text-primary">${completionRate}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${completionRate}%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between items-center">
+                        <div class="flex space-x-4 text-sm">
+                            <div class="text-center">
+                                <div class="font-bold text-primary">${habit.streak}</div>
+                                <div class="text-accent">Current</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="font-bold text-primary">${habit.longestStreak}</div>
+                                <div class="text-accent">Longest</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex space-x-2">
+                            <button class="complete-habit p-2 text-accent hover:text-primary rounded-full" data-habit-id="${habit.habitId}">
+                                <i class="bi bi-check-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                habitsContainer.appendChild(habitCard);
+            });
+            
+            // Add event listeners to complete buttons
+            document.querySelectorAll('.complete-habit').forEach(button => {
+                button.addEventListener('click', async (e) => {
+                    const habitId = e.currentTarget.getAttribute('data-habit-id');
+                    await markHabitComplete(habitId);
+                });
+            });
+        }
+        
+        // Mark habit as completed
+        async function markHabitComplete(habitId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/habits/${habitId}/complete`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    await loadHabits();
+                    showNotification('Habit marked as completed!', 'success');
+                } else {
+                    throw new Error('Failed to mark habit as completed');
+                }
+            } catch (error) {
+                console.error('Error completing habit:', error);
+                showNotification('Failed to mark habit as completed. Please try again.', 'error');
+            }
+        }
+        
+        // Load analytics data
+        async function loadAnalytics() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/habits/user/analytics`);
+                if (response.ok) {
+                    const analytics = await response.json();
+                    updateAnalyticsUI(analytics);
+                } else {
+                    throw new Error('Failed to load analytics');
+                }
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+                showNotification('Failed to load analytics. Please try again.', 'error');
+            }
+        }
+        
+        // Update analytics UI with data
+        function updateAnalyticsUI(analytics) {
+            // Update completion rate
+            const completionRate = Math.round(analytics.averageCompletionRate || 0);
+            document.getElementById('completionRate').textContent = `${completionRate}%`;
+            document.getElementById('completionProgress').style.width = `${completionRate}%`;
+            
+            // Update streaks
+            document.getElementById('currentStreak').textContent = `${analytics.highestStreak || 0} days`;
+            document.getElementById('longestStreak').textContent = `${analytics.highestStreak || 0} days`;
+            
+            // Render chart
+            renderHabitsChart();
+        }
+        
+        // Render habits chart
+        function renderHabitsChart() {
+            const ctx = document.getElementById('habitsChart').getContext('2d');
+            
+            // Destroy existing chart if it exists
+            if (habitsChart) {
+                habitsChart.destroy();
+            }
+            
+            // Use actual habit data
+            const habitNames = currentHabits.map(h => h.habitName);
+            const completionRates = currentHabits.map(h => {
+                return h.totalCompleted + h.totalMissed > 0 
+                    ? Math.round((h.totalCompleted / (h.totalCompleted + h.totalMissed)) * 100) 
+                    : 0;
+            });
+            
+            habitsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: habitNames,
+                    datasets: [{
+                        label: 'Completion Rate (%)',
+                        data: completionRates,
+                        backgroundColor: [
+                            'rgba(62, 95, 111, 0.7)',
+                            'rgba(232, 218, 190, 0.7)',
+                            'rgba(201, 169, 97, 0.7)',
+                            'rgba(139, 115, 85, 0.7)',
+                            'rgba(74, 55, 40, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgb(62, 95, 111)',
+                            'rgb(232, 218, 190)',
+                            'rgb(201, 169, 97)',
+                            'rgb(139, 115, 85)',
+                            'rgb(74, 55, 40)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Render calendar
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            // Update calendar header
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                                'July', 'August', 'September', 'October', 'November', 'December'];
+            calendarMonth.textContent = `${monthNames[month]} ${year}`;
+            
+            // Get first day of month and number of days
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            
+            // Clear previous calendar
+            calendarDays.innerHTML = '';
+            
+            // Add empty cells for days before the first day of the month
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day';
+                calendarDays.appendChild(emptyDay);
+            }
+            
+            // Add days of the month
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.textContent = day;
+                
+                const currentDay = new Date(year, month, day);
+                
+                // Check if this is today
+                if (currentDay.getTime() === today.getTime()) {
+                    dayElement.classList.add('today');
+                }
+                
+                // For demo purposes, randomly assign status
+                if (currentDay < today) {
+                    const randomStatus = Math.random();
+                    if (randomStatus > 0.7) {
+                        dayElement.classList.add('completed');
+                    } else if (randomStatus > 0.4) {
+                        dayElement.classList.add('missed');
+                    }
+                } else if (currentDay > today) {
+                    dayElement.classList.add('future');
+                }
+                
+                calendarDays.appendChild(dayElement);
+            }
+        }
+        
+        // Show notification
+        function showNotification(message, type) {
+            const notificationContainer = document.getElementById('notificationContainer');
+            
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification ${type === 'success' ? 'success' : 'error'}`;
+            notification.textContent = message;
+            
+            // Add to page
+            notificationContainer.appendChild(notification);
+            
+            // Show notification
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 100);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    notificationContainer.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

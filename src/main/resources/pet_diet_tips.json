@@ -1,0 +1,95 @@
+{ 
+  "generalTips": [ 
+    { 
+      "category": "Portion Control", 
+      "tips": [ 
+        "Use a measuring cup for consistent portions", 
+        "Adjust food based on activity level and age", 
+        "Avoid free-feeding to prevent obesity", 
+        "Follow feeding guidelines on pet food packaging" 
+      ] 
+    }, 
+    { 
+      "category": "Feeding Schedule", 
+      "tips": [ 
+        "Establish consistent feeding times", 
+        "Feed 2-3 times daily for adult pets", 
+        "Allow 1-2 hours between meals and exercise", 
+        "Don't feed immediately before or after vigorous activity" 
+      ] 
+    }, 
+    { 
+      "category": "Hydration", 
+      "tips": [ 
+        "Always provide fresh, clean water", 
+        "Consider water fountains for cats", 
+        "Monitor water intake daily", 
+        "Add water to dry food for extra hydration" 
+      ] 
+    }, 
+    { 
+      "category": "Weight Management", 
+      "tips": [ 
+        "Regularly monitor your pet's weight", 
+        "Feel for ribs - you should be able to feel them easily", 
+        "Adjust portions if weight gain/loss occurs", 
+        "Consult vet for ideal weight range" 
+      ] 
+    } 
+  ], 
+  "specialConsiderations": [ 
+    { 
+      "category": "Puppies/Kittens", 
+      "tips": [ 
+        "Feed specially formulated growth food", 
+        "Provide 3-4 small meals daily", 
+        "Ensure proper calcium-phosphorus balance", 
+        "Monitor growth rate regularly" 
+      ] 
+    }, 
+    { 
+      "category": "Senior Pets", 
+      "tips": [ 
+        "Consider senior-specific formulas", 
+        "Monitor for dental issues", 
+        "Adjust for decreased activity level", 
+        "Watch for weight gain and joint health" 
+      ] 
+    }, 
+    { 
+      "category": "Pets with Health Issues", 
+      "tips": [ 
+        "Follow veterinary dietary recommendations", 
+        "Consider prescription diets when needed", 
+        "Monitor for food allergies or sensitivities", 
+        "Keep a food diary to track reactions" 
+      ] 
+    } 
+  ], 
+  "treatGuidelines": [ 
+    { 
+      "tip": "Treats should not exceed 10% of daily calories", 
+      "explanation": "Too many treats can unbalance the diet" 
+    }, 
+    { 
+      "tip": "Use healthy treat options", 
+      "explanation": "Choose low-calorie, nutritious treats" 
+    }, 
+    { 
+      "tip": "Incorporate treats into training", 
+      "explanation": "Use small pieces for effective training" 
+    }, 
+    { 
+      "tip": "Avoid table scraps", 
+      "explanation": "Human food can cause digestive issues" 
+    } 
+  ], 
+  "emergencySigns": [ 
+    "Sudden loss of appetite", 
+    "Vomiting or diarrhea lasting more than 24 hours", 
+    "Difficulty swallowing", 
+    "Lethargy after eating", 
+    "Signs of abdominal pain", 
+    "Unusual weight loss or gain" 
+  ] 
+} 

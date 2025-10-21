@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pet Giver Form - Pawdcast</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            /* DMC Color Palette */
+            --medium-yellow-beige: #E8DCC6;      /* DMC 3046 */
+            --dark-yellow-beige: #D4C2A0;        /* DMC 3045 */
+            --dark-drab-brown: #8B7355;          /* DMC 610 */
+            --very-dark-mocha: #4A3728;          /* DMC 3031 */
+            --black-brown: #2C1810;              /* DMC 3371 */
+            --dark-wedgwood: #1E3A5F;            /* DMC 517 */
+            --pure-white: #FFFFFF;
+
+            /* Design System Variables */
+            --primary: var(--dark-wedgwood);
+            --primary-light: #2B4A6B;
+            --secondary: var(--dark-drab-brown);
+            --accent: var(--very-dark-mocha);
+            --neutral-light: var(--medium-yellow-beige);
+            --neutral: var(--dark-yellow-beige);
+            --text-primary: var(--black-brown);
+            --text-secondary: var(--very-dark-mocha);
+            --success: var(--accent);
+            --error: #B85450;
+
+            --border-radius: 12px;
+            --shadow: 0 4px 16px rgba(28, 24, 16, 0.12);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: linear-gradient(135deg, var(--pure-white) 0%, var(--neutral-light) 50%, var(--neutral) 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 50%, var(--accent) 100%);
+            color: var(--pure-white);
+            padding: 3rem 2rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .logo-container {
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .logo-circle {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: var(--pure-white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 6px solid var(--neutral-light);
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .logo-circle:hover {
+            transform: scale(1.08) rotate(5deg);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+            border-color: var(--dark-yellow-beige);
+        }
+
+        .logo-circle::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 50%, var(--accent) 100%);
+            border-radius: 50%;
+            z-index: -1;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .logo-circle:hover::before {
+            opacity: 0.1;
+            transform: scale(1.1);
+        }
+
+        .logo-image {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+
+        .logo-circle:hover .logo-image {
+            transform: scale(1.05);
+        }
+
+        .logo-text {
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--pure-white);
+            color: var(--primary);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .logo-circle:hover .logo-text {
+            bottom: -30px;
+            opacity: 1;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .form-container {
+            background: var(--pure-white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .form-header {
+            background: var(--neutral-light);
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--neutral);
+        }
+
+        .form-body {
+            padding: 2rem;
+        }
+
+        .form-section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: var(--neutral-light);
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--primary);
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            color: var(--text-primary);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .required {
+            color: var(--error);
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid var(--neutral);
+            border-radius: var(--border-radius);
+            background: var(--pure-white);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: var(--transition);
+            font-family: inherit;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input {
+            opacity: 0;
+            position: absolute;
+            z-index: -1;
+        }
+
+        .file-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            border: 2px dashed var(--neutral);
+            border-radius: var(--border-radius);
+            background: var(--pure-white);
+            cursor: pointer;
+            transition: var(--transition);
+            min-height: 60px;
+        }
+
+        .file-label:hover {
+            border-color: var(--primary);
+            background: var(--neutral-light);
+        }
+
+        .file-name {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 0.3rem;
+            text-align: center;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            background: var(--secondary);
+            color: var(--pure-white);
+            text-decoration: none;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            font-size: 1rem;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success) 0%, var(--accent) 100%);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .loading i {
+            font-size: 2rem;
+            color: var(--primary);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+            background: var(--neutral-light);
+            border-radius: var(--border-radius);
+            border: 2px solid var(--success);
+        }
+
+        .success-icon {
+            font-size: 3rem;
+            color: var(--success);
+            margin-bottom: 1rem;
+        }
+
+        .error-message {
+            background: rgba(184, 84, 80, 0.1);
+            border: 2px solid var(--error);
+            color: var(--error);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .header h1 {
+                font-size: 2rem;
+                flex-direction: column;
+            }
+            .form-body {
+                padding: 1rem;
+            }
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            .logo-circle {
+                width: 140px;
+                height: 140px;
+            }
+            .logo-image {
+                width: 110px;
+                height: 110px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <div class="logo-container">
+                    <div class="logo-circle">
+                        <img src="https://res.cloudinary.com/dkuuvasoe/image/upload/v1760186124/pawdcastlogo_cb1l1b.png" alt="Pawdcast Logo" class="logo-image">
+                        <div class="logo-text">Pawdcast</div>
+                    </div>
+                </div>
+                <h1><i class="fas fa-heart"></i> Give Your Pet for Adoption</h1>
+                <p>Help your beloved pet find a new loving home</p>
+            </div>
+        </div>
+
+        <div class="form-container">
+            <div class="form-header">
+                <h2>Pet Information Form</h2>
+                <p>Please provide detailed information about your pet</p>
+            </div>
+
+            <div class="form-body">
+                <div class="error-message" id="errorMessage">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span id="errorText"></span>
+                </div>
+
+                <form id="petForm" enctype="multipart/form-data">
+                    <div class="form-section">
+                        <div class="section-title">
+                            <i class="fas fa-paw"></i>
+                            Basic Pet Information
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Pet Name <span class="required">*</span></label>
+                                <input type="text" name="petName" class="form-input" placeholder="Enter your pet's name" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Pet Type <span class="required">*</span></label>
+                                <select name="petType" class="form-select" required>
+                                    <option value="">Select pet type</option>
+                                    <option value="Dog">Dog</option>
+                                    <option value="Cat">Cat</option>
+                                    <option value="Bird">Bird</option>
+                                    <option value="Rabbit">Rabbit</option>
+                                    <option value="Fish">Fish</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Breed</label>
+                                <input type="text" name="breed" class="form-input" placeholder="Enter breed">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Age</label>
+                                <input type="number" name="age" class="form-input" placeholder="Enter age">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Health Status</label>
+                            <textarea name="healthStatus" class="form-input form-textarea" placeholder="Describe your pet's health condition"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="section-title">
+                            <i class="fas fa-file-medical"></i>
+                            Required Documents
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Pet Photo <span class="required">*</span></label>
+                                <div class="file-upload">
+                                    <input type="file" name="petPhoto" class="file-input" id="petPhoto" accept="image/*" required>
+                                    <label for="petPhoto" class="file-label">
+                                        <i class="fas fa-camera"></i>
+                                        <span>Choose pet photo</span>
+                                    </label>
+                                    <div class="file-name" id="petPhotoName"></div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Medical Records</label>
+                                <div class="file-upload">
+                                    <input type="file" name="medicalRecords" class="file-input" id="medicalRecords">
+                                    <label for="medicalRecords" class="file-label">
+                                        <i class="fas fa-file-medical"></i>
+                                        <span>Upload medical records</span>
+                                    </label>
+                                    <div class="file-name" id="medicalRecordsName"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Vaccination Certificate</label>
+                                <div class="file-upload">
+                                    <input type="file" name="vaccinationCertificate" class="file-input" id="vaccinationCertificate">
+                                    <label for="vaccinationCertificate" class="file-label">
+                                        <i class="fas fa-syringe"></i>
+                                        <span>Upload vaccination certificate</span>
+                                    </label>
+                                    <div class="file-name" id="vaccinationCertificateName"></div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Ownership Proof</label>
+                                <div class="file-upload">
+                                    <input type="file" name="ownershipProof" class="file-input" id="ownershipProof">
+                                    <label for="ownershipProof" class="file-label">
+                                        <i class="fas fa-certificate"></i>
+                                        <span>Upload ownership proof</span>
+                                    </label>
+                                    <div class="file-name" id="ownershipProofName"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Residence Proof</label>
+                                <div class="file-upload">
+                                    <input type="file" name="residenceProof" class="file-input" id="residenceProof">
+                                    <label for="residenceProof" class="file-label">
+                                        <i class="fas fa-home"></i>
+                                        <span>Upload residence proof</span>
+                                    </label>
+                                    <div class="file-name" id="residenceProofName"></div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Surrender Agreement</label>
+                                <div class="file-upload">
+                                    <input type="file" name="surrenderAgreement" class="file-input" id="surrenderAgreement">
+                                    <label for="surrenderAgreement" class="file-label">
+                                        <i class="fas fa-file-contract"></i>
+                                        <span>Upload surrender agreement</span>
+                                    </label>
+                                    <div class="file-name" id="surrenderAgreementName"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-heart"></i>
+                            Submit for Adoption
+                        </button>
+                    </div>
+                </form>
+
+                <div class="loading" id="loadingState">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Submitting your pet for adoption...</p>
+                </div>
+
+                <div class="success-message" id="successMessage">
+                    <i class="fas fa-check-circle success-icon"></i>
+                    <h3>Pet Successfully Submitted!</h3>
+                    <p>Your pet has been added to our adoption database.</p>
+                    <div class="form-actions">
+                        <a href="adoption.html" class="btn btn-success">
+                            <i class="fas fa-list"></i>
+                            Check Adoption List
+                        </a>
+                        <button type="button" class="btn btn-primary" onclick="resetForm()">
+                            <i class="fas fa-plus"></i>
+                            Add Another Pet
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('petForm');
+        const loadingState = document.getElementById('loadingState');
+        const successMessage = document.getElementById('successMessage');
+        const errorMessage = document.getElementById('errorMessage');
+        const errorText = document.getElementById('errorText');
+
+        // File input handlers
+        const fileInputs = document.querySelectorAll('.file-input');
+        fileInputs.forEach(input => {
+            input.addEventListener('change', function() {
+                const fileName = this.files[0] ? this.files[0].name : '';
+                const nameDisplay = document.getElementById(this.id + 'Name');
+                nameDisplay.textContent = fileName;
+            });
+        });
+
+        // Form submission
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            hideError();
+            form.style.display = 'none';
+            loadingState.style.display = 'block';
+
+            let formData = new FormData(this);
+
+            fetch('http://localhost:8080/pets/add', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Success:', data);
+                loadingState.style.display = 'none';
+                successMessage.style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                loadingState.style.display = 'none';
+                form.style.display = 'block';
+                showError('Failed to submit pet information. Please try again.');
+            });
+        });
+
+        function showError(message) {
+            errorText.textContent = message;
+            errorMessage.style.display = 'block';
+        }
+
+        function hideError() {
+            errorMessage.style.display = 'none';
+        }
+
+        function resetForm() {
+            form.reset();
+            successMessage.style.display = 'none';
+            form.style.display = 'block';
+            
+            fileInputs.forEach(input => {
+                const nameDisplay = document.getElementById(input.id + 'Name');
+                nameDisplay.textContent = '';
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pet Gallery - Pawdcast</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'yellow-beige': '#F4E4BC',      // DMC 3046 - Medium Yellow Beige
+                        'dark-yellow-beige': '#E6D4A3', // DMC 3045 - Dark Yellow Beige  
+                        'drab-brown': '#8B7355',        // DMC 610 - Dark Drab Brown
+                        'mocha-brown': '#5D4E37',       // DMC 3031 - Very Dark Mocha Brown
+                        'black-brown': '#2F261A',       // DMC 3371 - Black Brown
+                        'wedgwood': '#4682B4'           // DMC 517 - Dark Wedgwood
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6;
+        }
+        .gradient-bg { background: linear-gradient(135deg, #F4E4BC 0%, #E6D4A3 100%); }
+        .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-hover:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(47, 38, 26, 0.15); }
+        .btn-primary { background: linear-gradient(135deg, #4682B4 0%, #5D4E37 100%); }
+        .btn-primary:hover { background: linear-gradient(135deg, #5D4E37 0%, #4682B4 100%); }
+        .filter-btn.active { background: linear-gradient(135deg, #4682B4 0%, #5D4E37 100%); color: white; }
+        .pet-card { background: white; }
+        .loading { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        .fade-in { animation: fadeIn 0.6s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .search-focus:focus { box-shadow: 0 0 0 3px rgba(70, 130, 180, 0.2); }
+        
+        /* Logo Styles */
+        .logo {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(47, 38, 26, 0.2);
+            border: 2px solid #E6D4A3;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(47, 38, 26, 0.3);
+            border-color: #4682B4;
+        }
+
+        .logo::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #4682B4, #E6D4A3, #5D4E37);
+            border-radius: 50%;
+            z-index: -1;
+            animation: rotate 10s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .logo img {
+            width: 85%;
+            height: 85%;
+            object-fit: contain;
+            border-radius: 50%;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        }
+
+        /* Custom styles for better spacing and containment */
+        .pet-grid-item {
+            min-height: 520px;
+            max-height: 520px;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+        }
+        
+        .pet-image-container {
+            height: 200px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        
+        .pet-content {
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            overflow: hidden;
+        }
+        
+        .pet-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-shrink: 0;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 0.5rem 0.25rem;
+            background: #F4E4BC;
+            border-radius: 0.5rem;
+            min-height: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .stat-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #5D4E37;
+            margin-bottom: 0.25rem;
+            line-height: 1;
+        }
+        
+        .stat-value {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #2F261A;
+            line-height: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .temperament-section {
+            margin-bottom: 1rem;
+            flex-shrink: 0;
+        }
+        
+        .temperament-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+            max-height: 60px;
+            overflow: hidden;
+        }
+        
+        .temperament-tag {
+            padding: 0.25rem 0.5rem;
+            background: rgba(70, 130, 180, 0.1);
+            color: #4682B4;
+            border-radius: 0.75rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            line-height: 1;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        
+        .description-section {
+            flex-grow: 1;
+            overflow: hidden;
+            min-height: 80px;
+        }
+        
+        .pet-description {
+            font-size: 0.875rem;
+            color: #5D4E37;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .pet-name {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #2F261A;
+            margin-bottom: 0.75rem;
+            line-height: 1.2;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .section-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #5D4E37;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 2rem;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 1.5rem;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: scale(0.9);
+            opacity: 0;
+            transition: all 0.3s ease;
+            border: 3px solid #E6D4A3;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .modal-header {
+            padding: 2rem 2rem 1rem;
+            border-bottom: 2px solid #F4E4BC;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: #E6D4A3;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.25rem;
+            color: #5D4E37;
+        }
+
+        .modal-close:hover {
+            background: #4682B4;
+            color: white;
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 0 2rem 2rem;
+        }
+
+        .modal-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .modal-image {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 1rem;
+            border: 3px solid #E6D4A3;
+        }
+
+        .modal-details {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .modal-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .modal-stat {
+            background: #F4E4BC;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            text-align: center;
+            border-left: 4px solid #4682B4;
+        }
+
+        .modal-stat-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #5D4E37;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-stat-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #2F261A;
+        }
+
+        .full-temperament {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .full-description {
+            line-height: 1.6;
+            color: #5D4E37;
+            font-size: 1rem;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .pet-grid-item {
+                min-height: 480px;
+                max-height: 480px;
+            }
+            
+            .pet-image-container {
+                height: 180px;
+            }
+            
+            .pet-stats {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.375rem;
+            }
+            
+            .stat-item {
+                padding: 0.375rem 0.125rem;
+                min-height: 45px;
+            }
+            
+            .pet-content {
+                padding: 1rem;
+            }
+
+            .modal-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .modal-content {
+                margin: 1rem;
+            }
+
+            .modal-header,
+            .modal-body {
+                padding: 1.5rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .pet-stats {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .stat-item {
+                min-height: 40px;
+            }
+            
+            .pet-name {
+                font-size: 1rem;
+            }
+
+            .modal-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Ensure all content stays within bounds */
+        .content-container {
+            max-width: 100%;
+            overflow: hidden;
+        }
+        
+        .text-ellipsis {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Smooth scrolling for modal */
+        .modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-content::-webkit-scrollbar-track {
+            background: #F4E4BC;
+            border-radius: 4px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb {
+            background: #4682B4;
+            border-radius: 4px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb:hover {
+            background: #5D4E37;
+        }
+    </style>
+</head>
+<body class="bg-yellow-beige min-h-screen">
+
+<!-- HEADER -->
+<header class="bg-white/95 backdrop-blur-sm shadow-lg sticky top-0 z-50 border-b-2 border-dark-yellow-beige">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center py-4">
+            <div class="flex items-center space-x-4">
+                <div class="logo cursor-pointer" onclick="window.location.href='home.html'">
+                    <img src="https://res.cloudinary.com/dkuuvasoe/image/upload/v1760186124/pawdcastlogo_cb1l1b.png" alt="Pawdcast Logo">
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-black-brown cursor-pointer" onclick="window.location.href='home.html'">Pawdcast</h1>
+                    <p class="text-sm text-mocha-brown -mt-1">Pet Gallery</p>
+                </div>
+            </div>
+            
+            <!-- Breadcrumb -->
+            <nav class="hidden md:flex text-sm">
+                <a href="index.html" class="text-mocha-brown hover:text-wedgwood">Home</a>
+                <span class="mx-2 text-drab-brown">›</span>
+                <span class="text-wedgwood font-medium">Pet Gallery</span>
+            </nav>
+            
+            <!-- Back Button -->
+            <button onclick="window.location.href='home.html'" class="px-6 py-2 text-wedgwood border-2 border-wedgwood rounded-full hover:bg-wedgwood hover:text-white transition-all duration-300 font-medium">
+                Back to Home
+            </button>
+        </div>
+    </div>
+</header>
+
+<!-- HERO SECTION -->
+<section class="gradient-bg py-16 relative overflow-hidden">
+    <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%235D4E37" fill-opacity="0.1"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-30"></div>
+    
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative text-center">
+        <div class="flex flex-col items-center mb-6">
+            <div class="logo mb-4" style="width: 80px; height: 80px;">
+                <img src="https://res.cloudinary.com/dkuuvasoe/image/upload/v1760186124/pawdcastlogo_cb1l1b.png" alt="Pawdcast Logo">
+            </div>
+            <h1 class="text-4xl md:text-6xl font-bold text-black-brown mb-4">Pet Gallery</h1>
+        </div>
+        <p class="text-xl text-mocha-brown max-w-2xl mx-auto">Discover your perfect furry companion from our curated collection of amazing pets.</p>
+    </div>
+</section>
+
+<!-- FILTERS SECTION -->
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="bg-white rounded-2xl shadow-lg p-6 mb-8 border-2 border-dark-yellow-beige">
+        <!-- Type Filter -->
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold text-black-brown mb-4 flex items-center">
+                <span class="text-2xl mr-2">🔍</span>
+                Filter by Type
+            </h3>
+            <div class="flex flex-wrap gap-3">
+                <button class="filter-btn px-6 py-3 border-2 border-wedgwood text-wedgwood rounded-full hover:bg-wedgwood hover:text-white transition-all duration-300 font-medium active" onclick="loadPets('all')">
+                    All Pets
+                </button>
+                <button class="filter-btn px-6 py-3 border-2 border-wedgwood text-wedgwood rounded-full hover:bg-wedgwood hover:text-white transition-all duration-300 font-medium" onclick="loadPets('dog')">
+                    🐕 Dogs
+                </button>
+                <button class="filter-btn px-6 py-3 border-2 border-wedgwood text-wedgwood rounded-full hover:bg-wedgwood hover:text-white transition-all duration-300 font-medium" onclick="loadPets('cat')">
+                    🐱 Cats
+                </button>
+            </div>
+        </div>
+
+        <!-- Search and Advanced Filters -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Search Bar -->
+            <div>
+                <label class="block text-sm font-medium text-mocha-brown mb-2">Search Pets</label>
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        id="searchInput"
+                        placeholder="Search by name or description..." 
+                        class="w-full p-4 pl-12 border-2 border-dark-yellow-beige rounded-xl search-focus focus:border-wedgwood focus:outline-none transition-all text-lg"
+                    >
+                    <svg class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-drab-brown" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Filter Buttons -->
+            <div>
+                <label class="block text-sm font-medium text-mocha-brown mb-2">Quick Filters</label>
+                <div class="flex flex-wrap gap-3">
+                    <button class="filter-btn px-4 py-2 border-2 border-drab-brown text-drab-brown rounded-lg hover:bg-drab-brown hover:text-white transition-all duration-300 text-sm" data-filter="lifespan" onclick="toggleFilter(this)">
+                        Lifespan
+                    </button>
+                    <button class="filter-btn px-4 py-2 border-2 border-drab-brown text-drab-brown rounded-lg hover:bg-drab-brown hover:text-white transition-all duration-300 text-sm" data-filter="size" onclick="toggleFilter(this)">
+                        Size
+                    </button>
+                    <button class="px-4 py-2 btn-primary text-white rounded-lg hover:scale-105 transition-all duration-300 text-sm" onclick="applyFilters()">
+                        Search
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Options (Hidden by default) -->
+        <div id="lifespanFilters" class="filter-options mt-4 hidden">
+            <div class="flex flex-wrap gap-2">
+                <button class="px-3 py-1 bg-yellow-beige text-mocha-brown rounded-full text-sm hover:bg-dark-yellow-beige transition-colors" onclick="filterByLifespan('short')">Short (0-5 years)</button>
+                <button class="px-3 py-1 bg-yellow-beige text-mocha-brown rounded-full text-sm hover:bg-dark-yellow-beige transition-colors" onclick="filterByLifespan('medium')">Medium (6-12 years)</button>
+                <button class="px-3 py-1 bg-yellow-beige text-mocha-brown rounded-full text-sm hover:bg-dark-yellow-beige transition-colors" onclick="filterByLifespan('long')">Long (13+ years)</button>
+            </div>
+        </div>
+
+        <div id="sizeFilters" class="filter-options mt-4 hidden">
+            <div class="flex flex-wrap gap-2">
+                <button class="px-3 py-1 bg-yellow-beige text-mocha-brown rounded-full text-sm hover:bg-dark-yellow-beige transition-colors" onclick="filterBySize('small')">Small</button>
+                <button class="px-3 py-1 bg-yellow-beige text-mocha-brown rounded-full text-sm hover:bg-dark-yellow-beige transition-colors" onclick="filterBySize('medium')">Medium</button>
+                <button class="px-3 py-1 bg-yellow-beige text-mocha-brown rounded-full text-sm hover:bg-dark-yellow-beige transition-colors" onclick="filterBySize('large')">Large</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pet Count -->
+    <div class="text-center mb-6">
+        <p id="petCount" class="text-lg font-medium text-mocha-bold">Loading amazing pets...</p>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loadingState" class="text-center py-12 hidden">
+        <div class="loading w-16 h-16 mx-auto bg-wedgwood rounded-full mb-4"></div>
+        <p class="text-xl text-mocha-brown">Finding your perfect companions...</p>
+    </div>
+
+    <!-- Pet Grid -->
+    <div id="petContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <!-- Pets will be rendered here -->
+    </div>
+
+    <!-- No Results State -->
+    <div id="noResults" class="text-center py-12 hidden">
+        <div class="w-24 h-24 mx-auto bg-dark-yellow-beige rounded-full flex items-center justify-center mb-4">
+            <span class="text-4xl">🔍</span>
+        </div>
+        <h3 class="text-xl font-bold text-black-brown mb-2">No Pets Found</h3>
+        <p class="text-mocha-brown">Try adjusting your filters or search terms to find more pets.</p>
+    </div>
+</section>
+
+<!-- Modal for Pet Details -->
+<div id="petModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <button class="modal-close" onclick="closeModal()">✕</button>
+            <h2 id="modalPetName" class="text-3xl font-bold text-black-brown"></h2>
+            <p id="modalPetScientific" class="text-mocha-brown italic"></p>
+        </div>
+        <div class="modal-body">
+            <div class="modal-grid">
+                <div>
+                    <img id="modalPetImage" class="modal-image" src="" alt="">
+                </div>
+                <div class="modal-details">
+                    <div class="modal-stats">
+                        <div class="modal-stat">
+                            <div class="modal-stat-label">Origin</div>
+                            <div id="modalPetOrigin" class="modal-stat-value"></div>
+                        </div>
+                        <div class="modal-stat">
+                            <div class="modal-stat-label">Size</div>
+                            <div id="modalPetSize" class="modal-stat-value"></div>
+                        </div>
+                        <div class="modal-stat">
+                            <div class="modal-stat-label">Lifespan</div>
+                            <div id="modalPetLifespan" class="modal-stat-value"></div>
+                        </div>
+                        <div class="modal-stat">
+                            <div class="modal-stat-label">Type</div>
+                            <div id="modalPetType" class="modal-stat-value"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="section-label">Temperament</div>
+                        <div id="modalPetTemperament" class="full-temperament"></div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="section-label">Description</div>
+                <p id="modalPetDescription" class="full-description"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const petContainer = document.getElementById('petContainer');
+    const petCount = document.getElementById('petCount');
+    const searchInput = document.getElementById('searchInput');
+    const loadingState = document.getElementById('loadingState');
+    const noResults = document.getElementById('noResults');
+    const petModal = document.getElementById('petModal');
+
+    // Modal elements
+    const modalPetName = document.getElementById('modalPetName');
+    const modalPetScientific = document.getElementById('modalPetScientific');
+    const modalPetImage = document.getElementById('modalPetImage');
+    const modalPetOrigin = document.getElementById('modalPetOrigin');
+    const modalPetSize = document.getElementById('modalPetSize');
+    const modalPetLifespan = document.getElementById('modalPetLifespan');
+    const modalPetType = document.getElementById('modalPetType');
+    const modalPetTemperament = document.getElementById('modalPetTemperament');
+    const modalPetDescription = document.getElementById('modalPetDescription');
+
+    let allPets = [];
+    let filteredPets = [];
+    let activeFilters = {
+        type: 'all',
+        lifespan: null,
+        size: null,
+        search: ''
+    };
+
+    function openModal(pet) {
+        // Set modal content
+        modalPetName.textContent = pet.name || 'Unknown Pet';
+        modalPetScientific.textContent = pet.scientificName || 'No scientific name available';
+        modalPetImage.src = pet.image_url || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjRFNEJDIi8+Cjx0ZXh0IHg9IjIwMCIgeT0iMTUwIiBmb250LWZhbWlseT0iSW50ZXIiIGZvbnQtc2l6ZT0iMTYiIGZpbGw9IiM1RDRFMzciIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj7wn5CeIFBldCBJbWFnZTwvdGV4dD4KPC9zdmc+';
+        modalPetOrigin.textContent = pet.origin || 'Unknown';
+        modalPetSize.textContent = pet.size || 'Unknown';
+        modalPetLifespan.textContent = (pet.lifespan || '?') + ' years';
+        modalPetType.textContent = pet.type ? pet.type.charAt(0).toUpperCase() + pet.type.slice(1) : 'Unknown';
+
+        // Handle temperament
+        let temperament = [];
+        if (Array.isArray(pet.temperament)) {
+            temperament = pet.temperament;
+        } else if (typeof pet.temperament === 'string') {
+            temperament = pet.temperament.split(',').map(t => t.trim());
+        }
+        
+        modalPetTemperament.innerHTML = temperament.map(t => 
+            `<span class="temperament-tag">${t}</span>`
+        ).join('') || '<span class="temperament-tag">No temperament data</span>';
+
+        modalPetDescription.textContent = pet.description || 'No description available.';
+
+        // Show modal
+        petModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        petModal.classList.remove('active');
+        document.body.style.overflow = 'auto';
+        
+        // Reset modal content after animation
+        setTimeout(() => {
+            modalPetName.textContent = '';
+            modalPetScientific.textContent = '';
+            modalPetImage.src = '';
+            modalPetOrigin.textContent = '';
+            modalPetSize.textContent = '';
+            modalPetLifespan.textContent = '';
+            modalPetType.textContent = '';
+            modalPetTemperament.innerHTML = '';
+            modalPetDescription.textContent = '';
+        }, 300);
+    }
+
+    // Close modal when clicking outside content
+    petModal.addEventListener('click', (e) => {
+        if (e.target === petModal) {
+            closeModal();
+        }
+    });
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && petModal.classList.contains('active')) {
+            closeModal();
+        }
+    });
+
+    async function loadPets(type) {
+        // Update active filter
+        activeFilters.type = type;
+
+        // Update active button state
+        document.querySelectorAll('[onclick^="loadPets"]').forEach(btn => {
+            btn.classList.remove('active');
+            btn.classList.add('border-wedgwood', 'text-wedgwood');
+            btn.classList.remove('bg-wedgwood', 'text-white');
+        });
+        
+        // Find and activate the clicked button
+        const buttons = document.querySelectorAll('[onclick^="loadPets"]');
+        buttons.forEach(btn => {
+            if (btn.getAttribute('onclick').includes(`'${type}'`)) {
+                btn.classList.add('active');
+                btn.classList.remove('border-wedgwood', 'text-wedgwood');
+                btn.classList.add('bg-wedgwood', 'text-white');
+            }
+        });
+
+        showLoading(true);
+        hideNoResults();
+
+        let url = 'http://localhost:8080/api/pets';
+        if (type === 'dog' || type === 'cat') {
+            url += '/type/' + type;
+        }
+
+        try {
+            console.log('Fetching pets from:', url);
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            allPets = await response.json();
+            console.log('Loaded pets:', allPets.length);
+            
+            showLoading(false);
+            applyFilters();
+        } catch (err) {
+            console.error('Error loading pets:', err);
+            showLoading(false);
+            showError();
+        }
+    }
+
+    function applyFilters() {
+        activeFilters.search = searchInput.value.toLowerCase();
+
+        filteredPets = allPets.filter(pet => {
+            // Filter by type
+            if (activeFilters.type !== 'all' && pet.type !== activeFilters.type) {
+                return false;
+            }
+
+            // Filter by lifespan
+            if (activeFilters.lifespan) {
+                const lifespan = parseInt(pet.lifespan);
+                if (activeFilters.lifespan === 'short' && lifespan > 5) return false;
+                if (activeFilters.lifespan === 'medium' && (lifespan <= 5 || lifespan > 12)) return false;
+                if (activeFilters.lifespan === 'long' && lifespan <= 12) return false;
+            }
+
+            // Filter by size
+            if (activeFilters.size && pet.size.toLowerCase() !== activeFilters.size) {
+                return false;
+            }
+
+            // Filter by search term
+            if (activeFilters.search) {
+                const searchTerm = activeFilters.search;
+                if (!pet.name.toLowerCase().includes(searchTerm) &&
+                    !pet.description.toLowerCase().includes(searchTerm)) {
+                    return false;
+                }
+            }
+
+            return true;
+        });
+
+        renderPets(filteredPets);
+        updatePetCount();
+    }
+
+    function renderPets(pets) {
+        if (pets.length === 0) {
+            showNoResults();
+            return;
+        }
+
+        hideNoResults();
+        petContainer.innerHTML = '';
+        
+        pets.forEach(pet => {
+            const petCard = document.createElement('div');
+            petCard.className = 'card-hover pet-card rounded-2xl overflow-hidden shadow-lg border-2 border-dark-yellow-beige fade-in pet-grid-item content-container';
+
+            // Determine icon based on pet type
+            const typeIcon = pet.type === 'dog' ? '🐕' : '🐱';
+
+            // Handle temperament data - ensure it's an array
+            let temperament = [];
+            if (Array.isArray(pet.temperament)) {
+                temperament = pet.temperament;
+            } else if (typeof pet.temperament === 'string') {
+                temperament = pet.temperament.split(',').map(t => t.trim());
+            }
+
+            petCard.innerHTML = `
+                <div class="pet-image-container">
+                    <img class="w-full h-full object-cover transition-transform duration-500 hover:scale-110" 
+                         src="${pet.image_url || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjRFNEJDIi8+Cjx0ZXh0IHg9IjIwMCIgeT0iMTUwIiBmb250LWZhbWlseT0iSW50ZXIiIGZvbnQtc2l6ZT0iMTYiIGZpbGw9IiM1RDRFMzciIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj7wn5CeIFBldCBJbWFnZTwvdGV4dD4KPC9zdmc+'}" 
+                         alt="${pet.name}" 
+                         onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjRFNEJDIi8+Cjx0ZXh0IHg9IjIwMCIgeT0iMTUwIiBmb250LWZhbWlseT0iSW50ZXIiIGZvbnQtc2l6ZT0iMTYiIGZpbGw9IiM1RDRFMzciIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj7wn5CeIFBldCBJbWFnZTwvdGV4dD4KPC9zdmc+'">
+                    <div class="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-full w-10 h-10 flex items-center justify-center">
+                        <span class="text-xl">${typeIcon}</span>
+                    </div>
+                </div>
+                <div class="pet-content">
+                    <h3 class="pet-name text-ellipsis">${pet.name || 'Unknown Pet'}</h3>
+                    
+                    <div class="pet-stats">
+                        <div class="stat-item">
+                            <div class="stat-label">Origin</div>
+                            <div class="stat-value text-ellipsis">${pet.origin || 'Unknown'}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Size</div>
+                            <div class="stat-value text-ellipsis">${pet.size || 'Unknown'}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Lifespan</div>
+                            <div class="stat-value">${pet.lifespan || '?'}y</div>
+                        </div>
+                    </div>
+                    
+                    <div class="temperament-section">
+                        <span class="section-label">Temperament</span>
+                        <div class="temperament-tags">
+                            ${temperament.slice(0, 4).map(t => `
+                                <span class="temperament-tag">${t}</span>
+                            `).join('')}
+                            ${temperament.length > 4 ? `<span class="temperament-tag">+${temperament.length - 4}</span>` : ''}
+                            ${temperament.length === 0 ? `<span class="temperament-tag">No data</span>` : ''}
+                        </div>
+                    </div>
+                    
+                    <div class="description-section">
+                        <span class="section-label">Description</span>
+                        <p class="pet-description">${pet.description || 'No description available.'}</p>
+                    </div>
+                </div>
+            `;
+            
+            // Add click event to open modal
+            petCard.addEventListener('click', () => openModal(pet));
+            
+            petContainer.appendChild(petCard);
+        });
+    }
+
+    function updatePetCount() {
+        const count = filteredPets.length;
+        petCount.textContent = `Showing ${count} amazing pet${count !== 1 ? 's' : ''}`;
+    }
+
+    function showLoading(show) {
+        if (show) {
+            loadingState.classList.remove('hidden');
+            petContainer.innerHTML = '';
+            petCount.textContent = 'Loading amazing pets...';
+        } else {
+            loadingState.classList.add('hidden');
+        }
+    }
+
+    function showNoResults() {
+        noResults.classList.remove('hidden');
+        petContainer.innerHTML = '';
+    }
+
+    function hideNoResults() {
+        noResults.classList.add('hidden');
+    }
+
+    function showError() {
+        petContainer.innerHTML = `
+            <div class="col-span-full text-center py-12">
+                <div class="w-24 h-24 mx-auto bg-red-100 rounded-full flex items-center justify-center mb-4">
+                    <span class="text-4xl text-red-500">⚠️</span>
+                </div>
+                <h3 class="text-xl font-bold text-black-brown mb-2">Connection Error</h3>
+                <p class="text-mocha-brown mb-4">Unable to load pets. Please check your connection and try again.</p>
+                <button onclick="loadPets('all')" class="px-6 py-3 btn-primary text-white rounded-full hover:scale-105 transition-all duration-300 font-medium">
+                    Try Again
+                </button>
+            </div>
+        `;
+        petCount.textContent = 'Error loading pets';
+    }
+
+    function toggleFilter(button) {
+        const filterType = button.getAttribute('data-filter');
+        const filterOptions = document.getElementById(filterType + 'Filters');
+
+        // Hide all filter options
+        document.querySelectorAll('.filter-options').forEach(option => {
+            option.classList.add('hidden');
+        });
+
+        // Show selected filter options if not already visible
+        if (filterOptions.classList.contains('hidden')) {
+            filterOptions.classList.remove('hidden');
+        } else {
+            filterOptions.classList.add('hidden');
+        }
+    }
+
+    function filterByLifespan(range) {
+        activeFilters.lifespan = range;
+        applyFilters();
+        updateFilterButtonStates('lifespanFilters', range);
+    }
+
+    function filterBySize(size) {
+        activeFilters.size = size;
+        applyFilters();
+        updateFilterButtonStates('sizeFilters', size);
+    }
+
+    function updateFilterButtonStates(containerId, activeValue) {
+        document.querySelectorAll(`#${containerId} button`).forEach(btn => {
+            btn.classList.remove('bg-wedgwood', 'text-white');
+            btn.classList.add('bg-yellow-beige', 'text-mocha-brown');
+        });
+        event.target.classList.remove('bg-yellow-beige', 'text-mocha-brown');
+        event.target.classList.add('bg-wedgwood', 'text-white');
+    }
+
+    // Add event listener for Enter key in search
+    searchInput.addEventListener('keyup', function(event) {
+        if (event.key === 'Enter') {
+            applyFilters();
+        }
+    });
+
+    // Add real-time search
+    searchInput.addEventListener('input', function() {
+        applyFilters();
+    });
+
+    // Load all pets on page load
+    window.onload = () => {
+        loadPets('all');
+    };
+</script>
+
+</body>
+</html>

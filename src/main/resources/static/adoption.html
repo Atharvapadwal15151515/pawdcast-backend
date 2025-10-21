@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adoption Page - Pawdcast</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* DMC Color Palette */
+        :root {
+            --medium-yellow-beige: #D4C5A9;    /* DMC 3046 */
+            --dark-yellow-beige: #B8A082;      /* DMC 3045 */
+            --dark-drab-brown: #8B7355;        /* DMC 610 */
+            --very-dark-mocha: #4A3728;        /* DMC 3031 */
+            --black-brown: #2B1F17;            /* DMC 3371 */
+            --dark-wedgwood: #4A6741;          /* DMC 517 */
+            --white: #FFFFFF;
+            
+            /* Gradients */
+            --primary-gradient: linear-gradient(135deg, var(--medium-yellow-beige), var(--dark-yellow-beige));
+            --accent-gradient: linear-gradient(135deg, var(--dark-wedgwood), #5a7d4f);
+            --dark-gradient: linear-gradient(135deg, var(--very-dark-mocha), var(--black-brown));
+            --light-gradient: linear-gradient(135deg, var(--white), #faf9f5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+            background: var(--primary-gradient);
+            min-height: 100vh;
+            color: var(--black-brown);
+        }
+
+        /* Disclaimer Banner */
+        .disclaimer-banner {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            position: relative;
+            z-index: 100;
+        }
+
+        .disclaimer-banner i {
+            margin-right: 0.5rem;
+        }
+
+        /* Header */
+        .header {
+            background: var(--dark-gradient);
+            color: var(--white);
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(43, 31, 23, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="25" cy="25" r="2" fill="rgba(212,197,169,0.1)"/><circle cx="75" cy="75" r="1.5" fill="rgba(212,197,169,0.1)"/><circle cx="50" cy="10" r="1" fill="rgba(212,197,169,0.1)"/><circle cx="10" cy="60" r="1.5" fill="rgba(212,197,169,0.1)"/><circle cx="90" cy="40" r="1" fill="rgba(212,197,169,0.1)"/></svg>');
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            100% { transform: translateY(-100px); }
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        /* Logo Styles */
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 25px rgba(43, 31, 23, 0.4);
+            border: 3px solid var(--medium-yellow-beige);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 35px rgba(43, 31, 23, 0.5);
+            border-color: var(--dark-wedgwood);
+        }
+
+        .logo::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--dark-wedgwood), var(--medium-yellow-beige), var(--dark-drab-brown));
+            border-radius: 50%;
+            z-index: -1;
+            animation: rotate 10s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .logo img {
+            width: 85%;
+            height: 85%;
+            object-fit: contain;
+            border-radius: 50%;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+        }
+
+        .logo-text {
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            letter-spacing: 1px;
+        }
+
+        .header h1 i {
+            color: var(--medium-yellow-beige);
+            font-size: 3.5rem;
+        }
+
+        .header-subtitle {
+            font-size: 1.2rem;
+            color: var(--medium-yellow-beige);
+            font-weight: 400;
+            opacity: 0.9;
+        }
+
+        /* Main Content */
+        .main {
+            padding: 3rem 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Loading State */
+        .loading-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 300px;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--dark-yellow-beige);
+            border-left: 4px solid var(--dark-wedgwood);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 1.2rem;
+            color: var(--dark-drab-brown);
+            font-weight: 500;
+        }
+
+        /* Pet Grid */
+        .pets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 2.5rem;
+            margin-top: 2rem;
+        }
+
+        /* Pet Card */
+        .pet-card {
+            background: var(--white);
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(43, 31, 23, 0.12);
+            border: 1px solid var(--dark-yellow-beige);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+
+        .pet-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 60px rgba(43, 31, 23, 0.2);
+            border-color: var(--dark-wedgwood);
+        }
+
+        .pet-image-container {
+            position: relative;
+            height: 280px;
+            overflow: hidden;
+            background: var(--light-gradient);
+        }
+
+        .pet-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+            filter: brightness(0.95) contrast(1.1);
+        }
+
+        .pet-card:hover .pet-image {
+            transform: scale(1.08);
+            filter: brightness(1) contrast(1.15);
+        }
+
+        .pet-status-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--accent-gradient);
+            color: var(--white);
+            padding: 6px 16px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(74, 103, 65, 0.4);
+            z-index: 2;
+            letter-spacing: 0.5px;
+        }
+
+        .pet-type-icon {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            width: 45px;
+            height: 45px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--dark-wedgwood);
+            box-shadow: 0 4px 12px rgba(43, 31, 23, 0.2);
+        }
+
+        .pet-content {
+            padding: 2rem;
+        }
+
+        .pet-header {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--dark-yellow-beige);
+        }
+
+        .pet-name {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--very-dark-mocha);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .pet-basic-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .pet-info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+            color: var(--dark-drab-brown);
+        }
+
+        .pet-info-item i {
+            color: var(--dark-wedgwood);
+            width: 16px;
+        }
+
+        .pet-info-item strong {
+            color: var(--very-dark-mocha);
+        }
+
+        /* Action Buttons */
+        .pet-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 0.875rem 1.25rem;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            letter-spacing: 0.3px;
+        }
+
+        .btn-adopt {
+            background: var(--accent-gradient);
+            color: var(--white);
+            box-shadow: 0 6px 20px rgba(74, 103, 65, 0.3);
+        }
+
+        .btn-adopt:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(74, 103, 65, 0.4);
+        }
+
+        .btn-details {
+            background: var(--light-gradient);
+            color: var(--dark-wedgwood);
+            border: 2px solid var(--dark-yellow-beige);
+        }
+
+        .btn-details:hover {
+            background: var(--dark-wedgwood);
+            color: var(--white);
+            border-color: var(--dark-wedgwood);
+            transform: translateY(-2px);
+        }
+
+        .btn-details.active {
+            background: var(--dark-wedgwood);
+            color: var(--white);
+            border-color: var(--dark-wedgwood);
+        }
+
+        /* Pet Details Section */
+        .pet-details {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid var(--dark-yellow-beige);
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        .pet-details.show {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-item {
+            background: var(--light-gradient);
+            padding: 1rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--dark-wedgwood);
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: var(--very-dark-mocha);
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .detail-label i {
+            color: var(--dark-wedgwood);
+        }
+
+        .detail-value {
+            color: var(--dark-drab-brown);
+            font-size: 0.95rem;
+        }
+
+        /* Image Gallery */
+        .image-gallery {
+            margin-top: 1.5rem;
+        }
+
+        .gallery-title {
+            font-weight: 600;
+            color: var(--very-dark-mocha);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .gallery-title i {
+            color: var(--dark-wedgwood);
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .gallery-item {
+            position: relative;
+            height: 120px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--dark-yellow-beige);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.05);
+        }
+
+        .gallery-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: opacity 0.3s ease;
+        }
+
+        .gallery-image:hover {
+            opacity: 0.8;
+        }
+
+        .gallery-label {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(43, 31, 23, 0.8);
+            color: var(--white);
+            padding: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--dark-drab-brown);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: var(--dark-wedgwood);
+            margin-bottom: 1rem;
+            opacity: 0.7;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            color: var(--very-dark-mocha);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Modal for adoption process */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(43, 31, 23, 0.7);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--white);
+            margin: 2rem;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(43, 31, 23, 0.3);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--dark-drab-brown);
+            padding: 0.5rem;
+        }
+
+        .modal-icon {
+            font-size: 3rem;
+            color: var(--dark-wedgwood);
+            margin-bottom: 1rem;
+        }
+
+        .modal h3 {
+            color: var(--very-dark-mocha);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .modal p {
+            color: var(--dark-drab-brown);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        /* Countdown Timer */
+        .countdown-timer {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--dark-wedgwood);
+            margin: 1rem 0;
+            padding: 0.5rem;
+            background: var(--light-gradient);
+            border-radius: 10px;
+            border: 2px solid var(--dark-yellow-beige);
+        }
+
+        /* Image Modal */
+        .image-modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .image-modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .image-modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+        }
+
+        .image-modal img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 10px;
+        }
+
+        .image-modal-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: white;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main {
+                padding: 2rem 1rem;
+            }
+            
+            .pets-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            
+            .header h1 {
+                font-size: 2.2rem;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .header h1 i {
+                font-size: 2.5rem;
+            }
+            
+            .pet-actions {
+                flex-direction: column;
+            }
+            
+            .pet-basic-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .gallery-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .logo {
+                width: 100px;
+                height: 100px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 1.5rem 1rem;
+            }
+            
+            .pet-content {
+                padding: 1.5rem;
+            }
+            
+            .pet-image-container {
+                height: 220px;
+            }
+            
+            .logo {
+                width: 80px;
+                height: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Disclaimer Banner -->
+    <div class="disclaimer-banner">
+        <i class="fas fa-exclamation-triangle"></i>
+        DISCLAIMER: This is a mock feature for demonstration purposes only. The adoption process is not yet fully functional.
+    </div>
+
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-container">
+                <div class="logo">
+                    <img src="https://res.cloudinary.com/dkuuvasoe/image/upload/v1760186124/pawdcastlogo_cb1l1b.png" alt="Pawdcast Logo">
+                </div>
+                <div class="logo-text">
+                    <h1>
+                        <i class="fas fa-heart"></i>
+                        Pets Available for Adoption
+                    </h1>
+                    <p class="header-subtitle">Find your perfect companion and give them a loving home</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <div id="petsContainer" class="pets-grid">
+                <div class="loading-container">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">Loading adorable pets...</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Adoption Modal -->
+    <div id="adoptionModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeAdoptionModal()">&times;</button>
+            <div class="modal-icon">
+                <i class="fas fa-heart"></i>
+            </div>
+            <h3>Start Adoption Process</h3>
+            <p>You're about to start the adoption process for <strong id="modalPetName"></strong>.</p>
+            <div class="modal-question">
+                <p><strong>Have you got the adoption seeker receipt?</strong></p>
+                <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem;">
+                    <button class="btn btn-adopt" onclick="handleReceiptResponse(true)">
+                        <i class="fas fa-check"></i>
+                        Yes
+                    </button>
+                    <button class="btn btn-details" onclick="handleReceiptResponse(false)">
+                        <i class="fas fa-times"></i>
+                        No
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h3>Adoption Process Started!</h3>
+            <p>You will be contacted by the pet owners soon.</p>
+            <div class="countdown-timer">
+                Redirecting in <span id="countdown">5</span> seconds...
+            </div>
+            <button class="btn btn-adopt" onclick="redirectToLegalization()">
+                <i class="fas fa-arrow-right"></i>
+                Go Now
+            </button>
+        </div>
+    </div>
+
+    <!-- Image Modal -->
+    <div id="imageModal" class="image-modal">
+        <div class="image-modal-content">
+            <button class="image-modal-close" onclick="closeImageModal()">&times;</button>
+            <img id="modalImage" src="" alt="Full Size Image">
+        </div>
+    </div>
+
+    <script>
+        const apiBase = "http://localhost:8080/pets";
+        let currentPetForAdoption = null;
+        let countdownInterval;
+
+        function getPetIcon(petType) {
+            const icons = {
+                'dog': 'fas fa-dog',
+                'cat': 'fas fa-cat',
+                'bird': 'fas fa-dove',
+                'fish': 'fas fa-fish',
+                'rabbit': 'fas fa-rabbit',
+                'hamster': 'fas fa-mouse'
+            };
+            return icons[petType.toLowerCase()] || 'fas fa-paw';
+        }
+
+        async function loadPets() {
+            try {
+                const res = await fetch(`${apiBase}/available`);
+                if (!res.ok) throw new Error('Failed to fetch pets');
+                
+                const pets = await res.json();
+                const container = document.getElementById("petsContainer");
+                container.innerHTML = "";
+
+                if (pets.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-paw"></i>
+                            <h3>No pets available for adoption</h3>
+                            <p>Check back soon for new furry friends looking for homes!</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                pets.forEach(pet => {
+                    const card = document.createElement("div");
+                    card.className = "pet-card";
+
+                    const petIcon = getPetIcon(pet.petType || 'pet');
+                    
+                    card.innerHTML = `
+                        <div class="pet-image-container">
+                            <img src="${apiBase}/${pet.giverId}/photo" 
+                                 class="pet-image" 
+                                 alt="${pet.petName || 'Pet'} Photo"
+                                 onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjI4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjQjhBMDgyIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxOCIgZmlsbD0iI0ZGRkZGRiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPjxpIGNsYXNzPSJmYXMgZmEtcGF3IiBzdHlsZT0iZm9udC1zaXplOiAzZW07Ij48L2k+PGJyLz5QZXQgUGhvdG88L3RleHQ+PC9zdmc+'">
+                            <div class="pet-type-icon">
+                                <i class="${petIcon}"></i>
+                            </div>
+                            <div class="pet-status-badge">Available</div>
+                        </div>
+                        
+                        <div class="pet-content">
+                            <div class="pet-header">
+                                <h2 class="pet-name">${pet.petName || 'Unnamed Pet'}</h2>
+                            </div>
+
+                            <div class="pet-basic-info">
+                                <div class="pet-info-item">
+                                    <i class="fas fa-paw"></i>
+                                    <span><strong>Type:</strong> ${pet.petType || 'N/A'}</span>
+                                </div>
+                                <div class="pet-info-item">
+                                    <i class="fas fa-dna"></i>
+                                    <span><strong>Breed:</strong> ${pet.breed || 'Mixed'}</span>
+                                </div>
+                            </div>
+
+                            <div class="pet-actions">
+                                <button class="btn btn-adopt" onclick="startAdoption('${pet.petName || 'this pet'}', ${pet.giverId})">
+                                    <i class="fas fa-heart"></i>
+                                    Adopt Me
+                                </button>
+                                <button class="btn btn-details" onclick="toggleDetails(${pet.giverId}, this)">
+                                    <i class="fas fa-info-circle"></i>
+                                    Details
+                                </button>
+                            </div>
+
+                            <div id="details-${pet.giverId}" class="pet-details"></div>
+                        </div>
+                    `;
+
+                    container.appendChild(card);
+                });
+
+            } catch (error) {
+                console.error('Error loading pets:', error);
+                const container = document.getElementById("petsContainer");
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Unable to load pets</h3>
+                        <p>Please check your connection and try again.</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function toggleDetails(giverId, button) {
+            const detailsDiv = document.getElementById(`details-${giverId}`);
+
+            if (detailsDiv.classList.contains("show")) {
+                detailsDiv.classList.remove("show");
+                button.classList.remove("active");
+                button.innerHTML = '<i class="fas fa-info-circle"></i> Details';
+            } else {
+                try {
+                    // Show loading in button
+                    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+                    
+                    const res = await fetch(`${apiBase}/${giverId}`);
+                    if (!res.ok) throw new Error('Failed to fetch pet details');
+                    
+                    const pet = await res.json();
+
+                    detailsDiv.innerHTML = `
+                        <div class="details-grid">
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <i class="fas fa-birthday-cake"></i>
+                                    Age
+                                </div>
+                                <div class="detail-value">${pet.age || "Not specified"}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <i class="fas fa-heartbeat"></i>
+                                    Health Status
+                                </div>
+                                <div class="detail-value">${pet.healthStatus || "Not specified"}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <i class="fas fa-home"></i>
+                                    Adoption Status
+                                </div>
+                                <div class="detail-value">${pet.adoptionStatus || "Available"}</div>
+                            </div>
+                        </div>
+
+                        <div class="image-gallery">
+                            <div class="gallery-title">
+                                <i class="fas fa-images"></i>
+                                Pet Documentation
+                            </div>
+                            <div class="gallery-grid">
+                                <div class="gallery-item" onclick="openImage('${apiBase}/${giverId}/photo')">
+                                    <img src="${apiBase}/${giverId}/photo" class="gallery-image" alt="Pet Photo" onerror="this.parentElement.style.display='none'">
+                                    <div class="gallery-label">Pet Photo</div>
+                                </div>
+                                <div class="gallery-item" onclick="openImage('${apiBase}/${giverId}/medical-records')">
+                                    <img src="${apiBase}/${giverId}/medical-records" class="gallery-image" alt="Medical Records" onerror="this.parentElement.style.display='none'">
+                                    <div class="gallery-label">Medical Records</div>
+                                </div>
+                                <div class="gallery-item" onclick="openImage('${apiBase}/${giverId}/vaccination-certificate')">
+                                    <img src="${apiBase}/${giverId}/vaccination-certificate" class="gallery-image" alt="Vaccination Certificate" onerror="this.parentElement.style.display='none'">
+                                    <div class="gallery-label">Vaccination Certificate</div>
+                                </div>
+                                <div class="gallery-item" onclick="openImage('${apiBase}/${giverId}/ownership-proof')">
+                                    <img src="${apiBase}/${giverId}/ownership-proof" class="gallery-image" alt="Ownership Proof" onerror="this.parentElement.style.display='none'">
+                                    <div class="gallery-label">Ownership Proof</div>
+                                </div>
+                                <div class="gallery-item" onclick="openImage('${apiBase}/${giverId}/residence-proof')">
+                                    <img src="${apiBase}/${giverId}/residence-proof" class="gallery-image" alt="Residence Proof" onerror="this.parentElement.style.display='none'">
+                                    <div class="gallery-label">Residence Proof</div>
+                                </div>
+                                <div class="gallery-item" onclick="openImage('${apiBase}/${giverId}/surrender-agreement')">
+                                    <img src="${apiBase}/${giverId}/surrender-agreement" class="gallery-image" alt="Surrender Agreement" onerror="this.parentElement.style.display='none'">
+                                    <div class="gallery-label">Surrender Agreement</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    detailsDiv.classList.add("show");
+                    button.classList.add("active");
+                    button.innerHTML = '<i class="fas fa-eye-slash"></i> Hide Details';
+
+                } catch (error) {
+                    console.error('Error loading pet details:', error);
+                    detailsDiv.innerHTML = `
+                        <div class="detail-item">
+                            <div class="detail-value" style="color: #dc3545; text-align: center;">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Unable to load pet details. Please try again.
+                            </div>
+                        </div>
+                    `;
+                    detailsDiv.classList.add("show");
+                    button.innerHTML = '<i class="fas fa-info-circle"></i> Details';
+                }
+            }
+        }
+
+        function startAdoption(petName, giverId) {
+            currentPetForAdoption = { petName, giverId };
+            document.getElementById('modalPetName').textContent = petName;
+            document.getElementById('adoptionModal').classList.add('show');
+        }
+
+        function handleReceiptResponse(hasReceipt) {
+            closeAdoptionModal();
+            
+            if (hasReceipt) {
+                // Show success modal with countdown
+                showSuccessModal();
+            } else {
+                // Redirect to adoption-seeker form
+                window.location.href = `adoption-seeker.html?petId=${currentPetForAdoption.giverId}&petName=${encodeURIComponent(currentPetForAdoption.petName)}`;
+            }
+        }
+
+        function showSuccessModal() {
+            const successModal = document.getElementById('successModal');
+            const countdownElement = document.getElementById('countdown');
+            let countdown = 5;
+            
+            successModal.classList.add('show');
+            countdownElement.textContent = countdown;
+            
+            // Clear any existing interval
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
+            
+            // Start countdown
+            countdownInterval = setInterval(() => {
+                countdown--;
+                countdownElement.textContent = countdown;
+                
+                if (countdown <= 0) {
+                    redirectToLegalization();
+                }
+            }, 1000);
+        }
+
+        function redirectToLegalization() {
+            // Clear the interval
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
+            
+            // Redirect to legalization page
+            window.location.href = `petlegal.html?petId=${currentPetForAdoption.giverId}&petName=${encodeURIComponent(currentPetForAdoption.petName)}`;
+        }
+
+        function closeAdoptionModal() {
+            document.getElementById('adoptionModal').classList.remove('show');
+            currentPetForAdoption = null;
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('successModal').classList.remove('show');
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
+        }
+
+        function openImage(imageUrl) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            modalImg.src = imageUrl;
+            modal.classList.add('show');
+        }
+
+        function closeImageModal() {
+            document.getElementById('imageModal').classList.remove('show');
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const adoptionModal = document.getElementById('adoptionModal');
+            const successModal = document.getElementById('successModal');
+            const imageModal = document.getElementById('imageModal');
+            
+            if (event.target === adoptionModal) {
+                closeAdoptionModal();
+            }
+            if (event.target === successModal) {
+                closeSuccessModal();
+            }
+            if (event.target === imageModal) {
+                closeImageModal();
+            }
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeAdoptionModal();
+                closeSuccessModal();
+                closeImageModal();
+            }
+        });
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPets();
+        });
+    </script>
+</body>
+</html>

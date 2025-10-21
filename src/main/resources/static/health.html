@@ -1,0 +1,1749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pet Health - Pawdcast</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* DMC Color Palette */
+        :root {
+            --medium-yellow-beige: #D4C5A9;    /* DMC 3046 */
+            --dark-yellow-beige: #B8A082;      /* DMC 3045 */
+            --dark-drab-brown: #8B7355;        /* DMC 610 */
+            --very-dark-mocha: #4A3728;        /* DMC 3031 */
+            --black-brown: #2B1F17;            /* DMC 3371 */
+            --dark-wedgwood: #4A6741;          /* DMC 517 */
+            --white: #FFFFFF;
+            
+            /* Gradients */
+            --primary-gradient: linear-gradient(135deg, var(--medium-yellow-beige), var(--dark-yellow-beige));
+            --accent-gradient: linear-gradient(135deg, var(--dark-wedgwood), #5a7d4f);
+            --dark-gradient: linear-gradient(135deg, var(--very-dark-mocha), var(--black-brown));
+            --light-gradient: linear-gradient(135deg, var(--white), #faf9f5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+            background: var(--primary-gradient);
+            min-height: 100vh;
+            color: var(--black-brown);
+        }
+
+        /* Header */
+        .header {
+            background: var(--dark-gradient);
+            color: var(--white);
+            padding: 1.5rem 2rem;
+            box-shadow: 0 4px 20px rgba(43, 31, 23, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--medium-yellow-beige);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .logo:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 8px 25px rgba(212, 197, 169, 0.4);
+            border-color: var(--dark-wedgwood);
+        }
+
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            letter-spacing: 0.5px;
+        }
+
+        .brand-subtitle {
+            font-size: 0.9rem;
+            color: var(--medium-yellow-beige);
+            font-weight: 500;
+            margin-top: 0.2rem;
+        }
+
+        .header h1 i {
+            color: var(--medium-yellow-beige);
+            font-size: 2rem;
+        }
+
+        /* User Profile Section */
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .profile-photo {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            border: 2px solid var(--medium-yellow-beige);
+            object-fit: cover;
+            background: var(--dark-yellow-beige);
+            transition: all 0.3s ease;
+        }
+
+        .profile-photo:hover {
+            transform: scale(1.1);
+            border-color: var(--dark-wedgwood);
+        }
+
+        .profile-name {
+            font-weight: 600;
+            color: var(--white);
+        }
+
+        /* Main Content */
+        .main {
+            padding: 3rem 1rem;
+            min-height: calc(100vh - 100px);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Action Buttons Section */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            background: var(--accent-gradient);
+            color: var(--white);
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 15px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(74, 103, 65, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-width: 200px;
+            justify-content: center;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(74, 103, 65, 0.4);
+        }
+
+        .btn-action.secondary {
+            background: var(--dark-gradient);
+        }
+
+        .form-container {
+            background: var(--white);
+            border-radius: 25px;
+            padding: 3rem;
+            box-shadow: 0 25px 50px rgba(43, 31, 23, 0.15);
+            border: 1px solid var(--dark-yellow-beige);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .form-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(212, 197, 169, 0.05) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--very-dark-mocha);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .form-title i {
+            color: var(--dark-wedgwood);
+        }
+
+        .form-title::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: var(--accent-gradient);
+            border-radius: 2px;
+        }
+
+        .form-subtitle {
+            font-size: 1.1rem;
+            color: var(--dark-drab-brown);
+            margin-top: 1rem;
+        }
+
+        /* Pet Selection */
+        .pet-selection {
+            background: var(--light-gradient);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 2px solid var(--dark-yellow-beige);
+            margin-bottom: 3rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .pet-selection-label {
+            font-weight: 700;
+            color: var(--very-dark-mocha);
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .pet-selection-label i {
+            color: var(--dark-wedgwood);
+        }
+
+        /* Form Grid */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        @media (min-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .form-group.full-width {
+                grid-column: 1 / -1;
+            }
+        }
+
+        /* Form Groups */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--very-dark-mocha);
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            letter-spacing: 0.3px;
+        }
+
+        .form-label i {
+            color: var(--dark-wedgwood);
+            font-size: 1.1rem;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            padding: 1rem 1.25rem;
+            border: 2px solid var(--dark-yellow-beige);
+            border-radius: 15px;
+            background: var(--light-gradient);
+            color: var(--black-brown);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            border-color: var(--dark-wedgwood);
+            box-shadow: 0 0 0 4px rgba(74, 103, 65, 0.15);
+            transform: translateY(-2px);
+            background: var(--white);
+        }
+
+        .form-select {
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%234A6741' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.75rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 3rem;
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+        }
+
+        /* Input Icons */
+        .input-icon {
+            position: relative;
+        }
+
+        .input-icon .form-input {
+            padding-left: 3rem;
+        }
+
+        .input-icon i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--dark-wedgwood);
+            font-size: 1.1rem;
+            z-index: 1;
+        }
+
+        /* Submit Button */
+        .submit-section {
+            grid-column: 1 / -1;
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .btn-submit {
+            background: var(--accent-gradient);
+            color: var(--white);
+            border: none;
+            padding: 1.25rem 3rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(74, 103, 65, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            letter-spacing: 0.5px;
+            min-width: 250px;
+            justify-content: center;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 35px rgba(74, 103, 65, 0.4);
+        }
+
+        .btn-submit:active {
+            transform: translateY(-2px);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Success Message */
+        .success-message {
+            background: rgba(74, 103, 65, 0.1);
+            color: var(--dark-wedgwood);
+            padding: 1.5rem 2rem;
+            border-radius: 15px;
+            margin-top: 2rem;
+            border: 1px solid var(--dark-wedgwood);
+            display: none;
+            align-items: center;
+            gap: 0.75rem;
+            animation: slideInDown 0.3s ease;
+        }
+
+        .success-message.show {
+            display: flex;
+        }
+
+        .success-message i {
+            font-size: 1.5rem;
+        }
+
+        /* Health Records Section */
+        .health-records-section {
+            background: var(--white);
+            border-radius: 25px;
+            padding: 3rem;
+            box-shadow: 0 25px 50px rgba(43, 31, 23, 0.15);
+            border: 1px solid var(--dark-yellow-beige);
+            margin-top: 2rem;
+            display: none;
+        }
+
+        .health-records-section.show {
+            display: block;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .pet-info {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .pet-photo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid var(--dark-yellow-beige);
+            object-fit: cover;
+            background: var(--light-gradient);
+            transition: all 0.3s ease;
+        }
+
+        .pet-photo:hover {
+            transform: scale(1.1);
+            border-color: var(--dark-wedgwood);
+        }
+
+        .pet-details h3 {
+            font-size: 1.5rem;
+            color: var(--very-dark-mocha);
+            margin-bottom: 0.5rem;
+        }
+
+        .pet-details .pet-type {
+            color: var(--dark-drab-brown);
+            font-weight: 600;
+        }
+
+        .records-title {
+            font-size: 1.8rem;
+            color: var(--very-dark-mocha);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .records-title i {
+            color: var(--dark-wedgwood);
+        }
+
+        .health-records-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .health-record-card {
+            background: var(--light-gradient);
+            border: 2px solid var(--dark-yellow-beige);
+            border-radius: 15px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .health-record-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(43, 31, 23, 0.1);
+            border-color: var(--dark-wedgwood);
+        }
+
+        .record-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .record-date {
+            font-weight: 700;
+            color: var(--dark-wedgwood);
+            font-size: 1.1rem;
+        }
+
+        .record-badges {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .record-badge {
+            background: var(--dark-wedgwood);
+            color: var(--white);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .record-details {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .record-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(139, 115, 85, 0.2);
+        }
+
+        .record-item:last-child {
+            border-bottom: none;
+        }
+
+        .record-label {
+            font-weight: 600;
+            color: var(--very-dark-mocha);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .record-label i {
+            color: var(--dark-wedgwood);
+            font-size: 0.9rem;
+        }
+
+        .record-value {
+            color: var(--black-brown);
+            text-align: right;
+        }
+
+        .no-records {
+            text-align: center;
+            padding: 3rem;
+            color: var(--dark-drab-brown);
+            grid-column: 1 / -1;
+        }
+
+        .no-records i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--dark-yellow-beige);
+        }
+
+        /* Pet Cards Grid */
+        .pet-cards-section {
+            background: var(--white);
+            border-radius: 25px;
+            padding: 3rem;
+            box-shadow: 0 25px 50px rgba(43, 31, 23, 0.15);
+            border: 1px solid var(--dark-yellow-beige);
+            margin-top: 2rem;
+            display: none;
+        }
+
+        .pet-cards-section.show {
+            display: block;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .pet-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .pet-card {
+            background: var(--light-gradient);
+            border: 2px solid var(--dark-yellow-beige);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pet-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(43, 31, 23, 0.15);
+            border-color: var(--dark-wedgwood);
+        }
+
+        .pet-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--accent-gradient);
+        }
+
+        .pet-card-photo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 3px solid var(--dark-yellow-beige);
+            object-fit: cover;
+            margin: 0 auto 1rem;
+            background: var(--light-gradient);
+            transition: all 0.3s ease;
+        }
+
+        .pet-card-photo:hover {
+            transform: scale(1.1);
+            border-color: var(--dark-wedgwood);
+        }
+
+        .pet-card-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--very-dark-mocha);
+            margin-bottom: 0.5rem;
+        }
+
+        .pet-card-details {
+            color: var(--dark-drab-brown);
+            margin-bottom: 1rem;
+        }
+
+        .pet-card-type {
+            font-weight: 600;
+            color: var(--dark-wedgwood);
+        }
+
+        .pet-card-breed {
+            font-style: italic;
+        }
+
+        .pet-card-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(139, 115, 85, 0.2);
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--dark-wedgwood);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--dark-drab-brown);
+        }
+
+        .view-records-btn {
+            background: var(--accent-gradient);
+            color: var(--white);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        .view-records-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(74, 103, 65, 0.4);
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: none;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-left: 3px solid var(--white);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main {
+                padding: 2rem 1rem;
+            }
+            
+            .form-container, .health-records-section, .pet-cards-section {
+                padding: 2rem 1.5rem;
+                border-radius: 20px;
+            }
+            
+            .form-title {
+                font-size: 2rem;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .header {
+                padding: 1rem 1.5rem;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .logo {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .brand-subtitle {
+                font-size: 0.8rem;
+            }
+            
+            .btn-submit, .btn-action {
+                padding: 1rem 2rem;
+                width: 100%;
+                min-width: auto;
+            }
+            
+            .pet-selection {
+                padding: 1.5rem;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .pet-info {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .health-records-grid, .pet-cards-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+
+        /* Focus indicators for accessibility */
+        .form-input:focus-visible, 
+        .form-select:focus-visible, 
+        .form-textarea:focus-visible,
+        .btn-submit:focus-visible,
+        .btn-action:focus-visible,
+        .pet-card:focus-visible {
+            outline: 3px solid var(--dark-wedgwood);
+            outline-offset: 2px;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .form-container {
+            animation-delay: 0.2s;
+        }
+
+        /* Custom placeholder styling */
+        ::placeholder {
+            color: var(--dark-drab-brown);
+            opacity: 0.7;
+        }
+
+        /* Required field indicator */
+        .required::after {
+            content: ' *';
+            color: #c5704f;
+            font-weight: bold;
+        }
+
+        /* Form sections */
+        .form-section {
+            grid-column: 1 / -1;
+            border-top: 2px solid var(--dark-yellow-beige);
+            padding-top: 2rem;
+            margin-top: 1rem;
+        }
+
+        .form-section:first-child {
+            border-top: none;
+            margin-top: 0;
+            padding-top: 0;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--very-dark-mocha);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title i {
+            color: var(--dark-wedgwood);
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-container">
+                <img src="https://res.cloudinary.com/dkuuvasoe/image/upload/v1760186124/pawdcastlogo_cb1l1b.png" alt="Pawdcast Logo" class="logo">
+                <div class="brand-text">
+                    <h1>
+                        <i class="fas fa-heartbeat"></i>
+                        Pet Health Tracker
+                    </h1>
+                    <div class="brand-subtitle">Powered by Pawdcast</div>
+                </div>
+            </div>
+            <div class="user-profile">
+                <img id="profilePhoto" src="" alt="Profile" class="profile-photo" style="display: none;">
+                <i id="defaultProfileIcon" class="fas fa-user-circle" style="font-size: 2rem; color: var(--medium-yellow-beige);"></i>
+                <span id="userFullName" class="profile-name">Loading...</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="main">
+        <div class="container">
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="btn-action" onclick="showAddHealthRecord()">
+                    <i class="fas fa-plus-circle"></i>
+                    Add Health Record
+                </button>
+                <button class="btn-action secondary" onclick="showPetCards()">
+                    <i class="fas fa-history"></i>
+                    View Health Records
+                </button>
+            </div>
+
+            <!-- Add Health Record Form -->
+            <div id="addHealthRecordSection" class="form-container fade-in-up">
+                <div class="form-header">
+                    <h2 class="form-title">
+                        <i class="fas fa-plus-circle"></i>
+                        Add Pet Health Record
+                    </h2>
+                    <p class="form-subtitle">Track your pet's health and wellness journey</p>
+                </div>
+
+                <!-- Pet Selection -->
+                <div class="pet-selection">
+                    <label class="pet-selection-label">
+                        <i class="fas fa-paw"></i>
+                        Select Pet:
+                    </label>
+                    <select id="petSelect" class="form-select">
+                        <option value="">Loading pets...</option>
+                    </select>
+                </div>
+
+                <!-- Health Form -->
+                <form id="healthForm">
+                    <div class="form-grid">
+                        <!-- Basic Measurements Section -->
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-ruler"></i>
+                                Basic Measurements
+                            </h3>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-weight"></i>
+                                Weight (kg)
+                            </label>
+                            <input type="number" step="0.1" name="weight" class="form-input" placeholder="Enter weight in kg">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-arrows-alt-v"></i>
+                                Height (cm)
+                            </label>
+                            <input type="number" step="0.1" name="height" class="form-input" placeholder="Enter height in cm">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-running"></i>
+                                Activity Level
+                            </label>
+                            <input type="text" name="activityLevel" class="form-input" placeholder="e.g., High, Medium, Low">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label required">
+                                <i class="fas fa-calendar-alt"></i>
+                                Entry Date
+                            </label>
+                            <input type="date" name="entryDate" class="form-input" required>
+                        </div>
+
+                        <!-- Medical Information Section -->
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-stethoscope"></i>
+                                Medical Information
+                            </h3>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label class="form-label">
+                                <i class="fas fa-notes-medical"></i>
+                                Medical Conditions
+                            </label>
+                            <textarea name="medicalConditions" class="form-textarea" placeholder="List any medical conditions, allergies, or ongoing health issues..."></textarea>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label class="form-label">
+                                <i class="fas fa-pills"></i>
+                                Current Medications
+                            </label>
+                            <textarea name="medications" class="form-textarea" placeholder="List current medications, dosages, and frequency..."></textarea>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label class="form-label">
+                                <i class="fas fa-syringe"></i>
+                                Vaccination Records
+                            </label>
+                            <textarea name="vaccinationRecords" class="form-textarea" placeholder="List recent vaccinations and dates..."></textarea>
+                        </div>
+
+                        <!-- Veterinary Care Section -->
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-user-md"></i>
+                                Veterinary Care
+                            </h3>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-calendar-check"></i>
+                                Last Vet Visit
+                            </label>
+                            <input type="date" name="lastVetVisit" class="form-input">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-calendar-plus"></i>
+                                Next Vet Visit
+                            </label>
+                            <input type="date" name="nextVetVisit" class="form-input">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-calendar-day"></i>
+                                Next Vet Date
+                            </label>
+                            <input type="date" name="nextVetDate" class="form-input">
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label class="form-label">
+                                <i class="fas fa-clipboard-list"></i>
+                                Medical Notes
+                            </label>
+                            <textarea name="medicalNotes" class="form-textarea" placeholder="Additional medical notes or observations..."></textarea>
+                        </div>
+
+                        <!-- Lifestyle Section -->
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-heart"></i>
+                                Lifestyle & Care
+                            </h3>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label class="form-label">
+                                <i class="fas fa-utensils"></i>
+                                Diet Notes
+                            </label>
+                            <textarea name="dietNotes" class="form-textarea" placeholder="Current diet, feeding schedule, treats, dietary restrictions..."></textarea>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label class="form-label">
+                                <i class="fas fa-dumbbell"></i>
+                                Exercise Notes
+                            </label>
+                            <textarea name="exerciseNotes" class="form-textarea" placeholder="Exercise routine, activity preferences, physical limitations..."></textarea>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="submit-section">
+                            <button type="submit" id="submitBtn" class="btn-submit">
+                                <div id="loading" class="loading"></div>
+                                <i class="fas fa-save" style="display: block;"></i>
+                                <span id="buttonText">Save Health Record</span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Success Message -->
+                <div id="successMessage" class="success-message">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Pet health record saved successfully!</span>
+                </div>
+            </div>
+
+            <!-- Pet Cards Section -->
+            <div id="petCardsSection" class="pet-cards-section">
+                <div class="form-header">
+                    <h2 class="form-title">
+                        <i class="fas fa-paw"></i>
+                        Your Pets
+                    </h2>
+                    <p class="form-subtitle">Select a pet to view their health records</p>
+                </div>
+                <div id="petCardsGrid" class="pet-cards-grid">
+                    <!-- Pet cards will be dynamically inserted here -->
+                </div>
+            </div>
+
+            <!-- Health Records Section -->
+            <div id="healthRecordsSection" class="health-records-section">
+                <div class="section-header">
+                    <div class="pet-info">
+                        <img id="petPhoto" src="" alt="Pet Photo" class="pet-photo" style="display: none;">
+                        <i id="defaultPetIcon" class="fas fa-paw" style="font-size: 3rem; color: var(--dark-yellow-beige);"></i>
+                        <div class="pet-details">
+                            <h3 id="petName">Pet Name</h3>
+                            <div class="pet-type" id="petTypeBreed">Loading...</div>
+                        </div>
+                    </div>
+                    <h2 class="records-title">
+                        <i class="fas fa-history"></i>
+                        Health Records
+                    </h2>
+                </div>
+                
+                <div id="healthRecordsList" class="health-records-grid">
+                    <!-- Health records will be dynamically inserted here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let loggedInUser = JSON.parse(localStorage.getItem("currentUser"));
+        let currentPet = null;
+        let userPets = [];
+
+        // Function to display profile photo
+        function displayProfilePhoto(user) {
+            const profilePhoto = document.getElementById('profilePhoto');
+            const defaultProfileIcon = document.getElementById('defaultProfileIcon');
+            const userFullName = document.getElementById('userFullName');
+            
+            if (userFullName) {
+                userFullName.textContent = user.fullName || 'User';
+            }
+            
+            try {
+                // Check if user has profile photo
+                if (user.profilePhoto) {
+                    const base64String = convertToBase64(user.profilePhoto);
+                    if (base64String) {
+                        profilePhoto.src = `data:image/jpeg;base64,${base64String}`;
+                        profilePhoto.style.display = 'block';
+                        defaultProfileIcon.style.display = 'none';
+                        return;
+                    }
+                }
+                
+                // Fallback to regular photo if profile photo doesn't exist or failed
+                if (user.photo) {
+                    const base64String = convertToBase64(user.photo);
+                    if (base64String) {
+                        profilePhoto.src = `data:image/jpeg;base64,${base64String}`;
+                        profilePhoto.style.display = 'block';
+                        defaultProfileIcon.style.display = 'none';
+                        return;
+                    }
+                }
+                
+                // Show default icon if no photos available or conversion failed
+                profilePhoto.style.display = 'none';
+                defaultProfileIcon.style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error displaying profile photo:', error);
+                // Fallback to default icon
+                profilePhoto.style.display = 'none';
+                defaultProfileIcon.style.display = 'block';
+            }
+        }
+
+        // Helper function to convert photo data to base64
+        function convertToBase64(photoData) {
+            if (photoData instanceof ArrayBuffer) {
+                return arrayBufferToBase64(photoData);
+            } else if (Array.isArray(photoData)) {
+                // If it's a byte array
+                const uint8Array = new Uint8Array(photoData);
+                return arrayBufferToBase64(uint8Array);
+            } else if (typeof photoData === 'string') {
+                // If it's already a base64 string
+                return photoData;
+            } else {
+                console.warn('Unknown profile photo format:', typeof photoData, photoData);
+                return '';
+            }
+        }
+
+        // Helper function to convert ArrayBuffer to base64
+        function arrayBufferToBase64(buffer) {
+            let binary = '';
+            const bytes = new Uint8Array(buffer);
+            const len = bytes.byteLength;
+            for (let i = 0; i < len; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return window.btoa(binary);
+        }
+
+        // Show/Hide sections
+        function showAddHealthRecord() {
+            document.getElementById('addHealthRecordSection').style.display = 'block';
+            document.getElementById('petCardsSection').classList.remove('show');
+            document.getElementById('healthRecordsSection').classList.remove('show');
+        }
+
+        function showPetCards() {
+            document.getElementById('addHealthRecordSection').style.display = 'none';
+            document.getElementById('petCardsSection').classList.add('show');
+            document.getElementById('healthRecordsSection').classList.remove('show');
+            loadPetCards();
+        }
+
+        function showHealthRecords(petId) {
+            document.getElementById('addHealthRecordSection').style.display = 'none';
+            document.getElementById('petCardsSection').classList.remove('show');
+            document.getElementById('healthRecordsSection').classList.add('show');
+            loadPetDetails(petId);
+            loadPetHealthRecords(petId);
+        }
+
+        async function loadUserPets() {
+            if (!loggedInUser) {
+                alert("Please login first!");
+                return;
+            }
+
+            try {
+                const res = await fetch('http://localhost:8080/pet-profiles/my-pets', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                console.log('Pets response status:', res.status);
+                
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    throw new Error(`Failed to load pets: ${errorText}`);
+                }
+
+                const pets = await res.json();
+                console.log('Loaded pets:', pets);
+                userPets = pets;
+                
+                const petSelect = document.getElementById("petSelect");
+                petSelect.innerHTML = "";
+
+                if (pets.length === 0) {
+                    const option = document.createElement("option");
+                    option.value = "";
+                    option.textContent = "No pets found - please add a pet first";
+                    petSelect.appendChild(option);
+                } else {
+                    const defaultOption = document.createElement("option");
+                    defaultOption.value = "";
+                    defaultOption.textContent = "Select a pet";
+                    petSelect.appendChild(defaultOption);
+
+                    pets.forEach(pet => {
+                        const option = document.createElement("option");
+                        option.value = pet.petId;
+                        option.textContent = pet.name;
+                        petSelect.appendChild(option);
+                    });
+
+                    // Add change event listener to load pet details and health records
+                    petSelect.addEventListener('change', function() {
+                        const petId = this.value;
+                        if (petId) {
+                            showHealthRecords(petId);
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error("Error loading pets:", error);
+                const petSelect = document.getElementById("petSelect");
+                petSelect.innerHTML = '<option value="">Error loading pets - Please login first</option>';
+                alert("Error loading pets: " + error.message);
+            }
+        }
+
+        // Load pet cards for the grid view
+        async function loadPetCards() {
+            const petCardsGrid = document.getElementById('petCardsGrid');
+            
+            if (userPets.length === 0) {
+                petCardsGrid.innerHTML = `
+                    <div class="no-records" style="grid-column: 1 / -1;">
+                        <i class="fas fa-paw"></i>
+                        <h3>No Pets Found</h3>
+                        <p>Please add pets first to view health records</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Load health records count for each pet
+            const petCardsWithStats = await Promise.all(
+                userPets.map(async (pet) => {
+                    try {
+                        const res = await fetch(`http://localhost:8080/pet-health/records/${pet.petId}`, {
+                            method: 'GET',
+                            credentials: 'include'
+                        });
+                        
+                        let recordsCount = 0;
+                        let lastRecordDate = 'No records';
+                        
+                        if (res.ok) {
+                            const records = await res.json();
+                            recordsCount = records.length;
+                            if (recordsCount > 0) {
+                                const sortedRecords = records.sort((a, b) => new Date(b.entryDate) - new Date(a.entryDate));
+                                lastRecordDate = new Date(sortedRecords[0].entryDate).toLocaleDateString();
+                            }
+                        }
+                        
+                        return {
+                            ...pet,
+                            recordsCount,
+                            lastRecordDate
+                        };
+                    } catch (error) {
+                        console.error(`Error loading records for pet ${pet.petId}:`, error);
+                        return {
+                            ...pet,
+                            recordsCount: 0,
+                            lastRecordDate: 'Error loading'
+                        };
+                    }
+                })
+            );
+
+            petCardsGrid.innerHTML = petCardsWithStats.map(pet => `
+                <div class="pet-card" onclick="showHealthRecords(${pet.petId})">
+                    <div class="pet-card-photo-container">
+                        <i class="fas fa-paw pet-card-photo" style="font-size: 3rem; color: var(--dark-yellow-beige); display: flex; align-items: center; justify-content: center;"></i>
+                    </div>
+                    <div class="pet-card-name">${pet.name}</div>
+                    <div class="pet-card-details">
+                        <span class="pet-card-type">${pet.type}</span>
+                        <span class="pet-card-breed"> - ${pet.breed}</span>
+                    </div>
+                    <div class="pet-card-stats">
+                        <div class="stat">
+                            <div class="stat-value">${pet.recordsCount}</div>
+                            <div class="stat-label">Records</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" style="font-size: 0.9rem;">${pet.lastRecordDate}</div>
+                            <div class="stat-label">Last Record</div>
+                        </div>
+                    </div>
+                    <button class="view-records-btn" onclick="event.stopPropagation(); showHealthRecords(${pet.petId})">
+                        <i class="fas fa-chart-line"></i>
+                        View Health Records
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Load pet details including photo
+        async function loadPetDetails(petId) {
+            try {
+                const res = await fetch(`http://localhost:8080/pet-profiles/${petId}`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                if (res.ok) {
+                    const pet = await res.json();
+                    currentPet = pet;
+                    
+                    // Update pet info in health records section
+                    document.getElementById('petName').textContent = pet.name;
+                    document.getElementById('petTypeBreed').textContent = `${pet.type} - ${pet.breed}`;
+                    
+                    // Load pet photo
+                    loadPetPhoto(petId);
+                }
+            } catch (error) {
+                console.error('Error loading pet details:', error);
+            }
+        }
+
+        // Load pet photo
+        async function loadPetPhoto(petId) {
+            try {
+                const res = await fetch(`http://localhost:8080/pet-profiles/${petId}/photo`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                if (res.ok) {
+                    const photoBlob = await res.blob();
+                    const reader = new FileReader();
+                    reader.onload = function() {
+                        const petPhoto = document.getElementById('petPhoto');
+                        const defaultPetIcon = document.getElementById('defaultPetIcon');
+                        petPhoto.src = reader.result;
+                        petPhoto.style.display = 'block';
+                        defaultPetIcon.style.display = 'none';
+                    };
+                    reader.readAsDataURL(photoBlob);
+                } else {
+                    // Show default icon if no photo
+                    const petPhoto = document.getElementById('petPhoto');
+                    const defaultPetIcon = document.getElementById('defaultPetIcon');
+                    petPhoto.style.display = 'none';
+                    defaultPetIcon.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error loading pet photo:', error);
+                // Show default icon on error
+                const petPhoto = document.getElementById('petPhoto');
+                const defaultPetIcon = document.getElementById('defaultPetIcon');
+                petPhoto.style.display = 'none';
+                defaultPetIcon.style.display = 'block';
+            }
+        }
+
+        // Enhanced function to load pet health records with better formatting
+        async function loadPetHealthRecords(petId) {
+            try {
+                const res = await fetch(`http://localhost:8080/pet-health/records/${petId}`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                const recordsList = document.getElementById('healthRecordsList');
+                
+                if (res.ok) {
+                    const records = await res.json();
+                    console.log('Loaded health records:', records);
+                    
+                    if (records.length === 0) {
+                        recordsList.innerHTML = `
+                            <div class="no-records">
+                                <i class="fas fa-clipboard-list"></i>
+                                <h3>No Health Records Yet</h3>
+                                <p>Add your first health record to start tracking your pet's health journey</p>
+                            </div>
+                        `;
+                    } else {
+                        // Sort records by entry date (newest first)
+                        records.sort((a, b) => new Date(b.entryDate) - new Date(a.entryDate));
+                        
+                        recordsList.innerHTML = records.map(record => createHealthRecordCard(record)).join('');
+                    }
+                } else {
+                    recordsList.innerHTML = `
+                        <div class="no-records">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h3>Unable to Load Records</h3>
+                            <p>Please try again later</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading health records:', error);
+                const recordsList = document.getElementById('healthRecordsList');
+                recordsList.innerHTML = `
+                    <div class="no-records">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Error Loading Records</h3>
+                        <p>Please check your connection and try again</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Function to create health record card with all data
+        function createHealthRecordCard(record) {
+            const entryDate = new Date(record.entryDate).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            // Create badges based on available data
+            const badges = [];
+            if (record.weight) badges.push('Weight');
+            if (record.height) badges.push('Height');
+            if (record.activityLevel) badges.push('Activity');
+            if (record.medicalConditions) badges.push('Medical');
+            if (record.vaccinationRecords) badges.push('Vaccine');
+            if (record.medications) badges.push('Meds');
+            if (record.dietNotes) badges.push('Diet');
+            if (record.exerciseNotes) badges.push('Exercise');
+            if (record.medicalNotes) badges.push('Notes');
+
+            return `
+                <div class="health-record-card">
+                    <div class="record-header">
+                        <div class="record-date">${entryDate}</div>
+                        <div class="record-badges">
+                            ${badges.map(badge => `<span class="record-badge">${badge}</span>`).join('')}
+                        </div>
+                    </div>
+                    <div class="record-details">
+                        ${record.weight ? `
+                            <div class="record-item">
+                                <span class="record-label"><i class="fas fa-weight"></i> Weight</span>
+                                <span class="record-value">${record.weight} kg</span>
+                            </div>
+                        ` : ''}
+                        ${record.height ? `
+                            <div class="record-item">
+                                <span class="record-label"><i class="fas fa-arrows-alt-v"></i> Height</span>
+                                <span class="record-value">${record.height} cm</span>
+                            </div>
+                        ` : ''}
+                        ${record.activityLevel ? `
+                            <div class="record-item">
+                                <span class="record-label"><i class="fas fa-running"></i> Activity Level</span>
+                                <span class="record-value">${record.activityLevel}</span>
+                            </div>
+                        ` : ''}
+                        ${record.lastVetVisit ? `
+                            <div class="record-item">
+                                <span class="record-label"><i class="fas fa-calendar-check"></i> Last Vet Visit</span>
+                                <span class="record-value">${new Date(record.lastVetVisit).toLocaleDateString()}</span>
+                            </div>
+                        ` : ''}
+                        ${record.nextVetVisit ? `
+                            <div class="record-item">
+                                <span class="record-label"><i class="fas fa-calendar-plus"></i> Next Vet Visit</span>
+                                <span class="record-value">${new Date(record.nextVetVisit).toLocaleDateString()}</span>
+                            </div>
+                        ` : ''}
+                        ${record.nextVetDate ? `
+                            <div class="record-item">
+                                <span class="record-label"><i class="fas fa-calendar-day"></i> Next Vet Date</span>
+                                <span class="record-value">${new Date(record.nextVetDate).toLocaleDateString()}</span>
+                            </div>
+                        ` : ''}
+                        ${record.medicalConditions ? `
+                            <div class="record-item full-width">
+                                <span class="record-label"><i class="fas fa-notes-medical"></i> Medical Conditions</span>
+                                <span class="record-value">${formatText(record.medicalConditions)}</span>
+                            </div>
+                        ` : ''}
+                        ${record.medications ? `
+                            <div class="record-item full-width">
+                                <span class="record-label"><i class="fas fa-pills"></i> Medications</span>
+                                <span class="record-value">${formatText(record.medications)}</span>
+                            </div>
+                        ` : ''}
+                        ${record.vaccinationRecords ? `
+                            <div class="record-item full-width">
+                                <span class="record-label"><i class="fas fa-syringe"></i> Vaccination Records</span>
+                                <span class="record-value">${formatText(record.vaccinationRecords)}</span>
+                            </div>
+                        ` : ''}
+                        ${record.dietNotes ? `
+                            <div class="record-item full-width">
+                                <span class="record-label"><i class="fas fa-utensils"></i> Diet Notes</span>
+                                <span class="record-value">${formatText(record.dietNotes)}</span>
+                            </div>
+                        ` : ''}
+                        ${record.exerciseNotes ? `
+                            <div class="record-item full-width">
+                                <span class="record-label"><i class="fas fa-dumbbell"></i> Exercise Notes</span>
+                                <span class="record-value">${formatText(record.exerciseNotes)}</span>
+                            </div>
+                        ` : ''}
+                        ${record.medicalNotes ? `
+                            <div class="record-item full-width">
+                                <span class="record-label"><i class="fas fa-clipboard-list"></i> Medical Notes</span>
+                                <span class="record-value">${formatText(record.medicalNotes)}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Helper function to format text (truncate long text)
+        function formatText(text, maxLength = 100) {
+            if (!text) return '';
+            if (text.length <= maxLength) return text;
+            return text.substring(0, maxLength) + '...';
+        }
+
+        // Enhanced form submission handler
+        document.getElementById("healthForm").onsubmit = async (e) => {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('submitBtn');
+            const loading = document.getElementById('loading');
+            const buttonText = document.getElementById('buttonText');
+            const successMessage = document.getElementById('successMessage');
+
+            // Validate pet selection
+            const petId = document.getElementById("petSelect").value;
+            if (!petId) {
+                alert("Please select a pet first.");
+                return;
+            }
+
+            // Validate required field
+            const entryDate = document.querySelector('input[name="entryDate"]').value;
+            if (!entryDate) {
+                alert("Please select an entry date.");
+                return;
+            }
+
+            // Show loading state
+            submitBtn.disabled = true;
+            loading.style.display = 'block';
+            buttonText.textContent = 'Saving...';
+            successMessage.classList.remove('show');
+
+            try {
+                const formData = new FormData(e.target);
+
+                const params = new URLSearchParams();
+                params.append("petId", petId);
+                
+                // Add all form fields to params (including empty ones that should be sent)
+                for (let [key, value] of formData.entries()) {
+                    // Send all values, even empty ones, so backend can handle nulls properly
+                    params.append(key, value.trim());
+                }
+
+                console.log('Submitting health data:', params.toString());
+
+                const res = await fetch(`http://localhost:8080/pet-health/add?${params.toString()}`, { 
+                    method: "POST",
+                    credentials: 'include'
+                });
+
+                console.log('Health save response status:', res.status);
+
+                if (res.ok) {
+                    successMessage.classList.add('show');
+                    
+                    // Clear form but keep the selected pet and today's date
+                    e.target.reset();
+                    const today = new Date().toISOString().split('T')[0];
+                    document.querySelector('input[name="entryDate"]').value = today;
+                    
+                    // Immediately reload health records to show the new record
+                    await loadPetHealthRecords(petId);
+                    
+                    // Auto-hide success message after 5 seconds
+                    setTimeout(() => {
+                        successMessage.classList.remove('show');
+                    }, 5000);
+                } else {
+                    const errorText = await res.text();
+                    console.error('Server error:', errorText);
+                    alert("Error saving health record: " + errorText);
+                }
+            } catch (error) {
+                console.error('Error saving health record:', error);
+                alert("Network error. Please try again.");
+            } finally {
+                // Reset button state
+                submitBtn.disabled = false;
+                loading.style.display = 'none';
+                buttonText.textContent = 'Save Health Record';
+            }
+        };
+
+        // Check session and load user data
+        async function checkSession() {
+            try {
+                const response = await fetch('http://localhost:8080/auth/me', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const user = await response.json();
+                    displayProfilePhoto(user);
+                    return user;
+                } else {
+                    console.log('Session expired or not logged in');
+                    return null;
+                }
+            } catch (error) {
+                console.log('Session check failed:', error);
+                return null;
+            }
+        }
+
+        // Initialize the page
+        window.onload = async () => {
+            const today = new Date().toISOString().split('T')[0];
+            document.querySelector('input[name="entryDate"]').value = today;
+            
+            // Check session first
+            const sessionUser = await checkSession();
+            
+            if (sessionUser) {
+                console.log('User session valid, loading pets...');
+                loggedInUser = sessionUser;
+                await loadUserPets();
+                
+                // If there's a pet ID in URL parameters, select it automatically
+                const urlParams = new URLSearchParams(window.location.search);
+                const petId = urlParams.get('petId');
+                if (petId) {
+                    document.getElementById('petSelect').value = petId;
+                    showHealthRecords(petId);
+                }
+            } else if (loggedInUser) {
+                console.log('Using localStorage user, loading pets...');
+                await loadUserPets();
+            } else {
+                console.log('No user found');
+                const petSelect = document.getElementById("petSelect");
+                petSelect.innerHTML = '<option value="">Please login first</option>';
+                alert("Please login first from the home page!");
+            }
+        };
+
+        // Add smooth transitions for form interactions
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputs = document.querySelectorAll('.form-input, .form-select, .form-textarea');
+            
+            inputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.style.transform = 'translateY(-2px)';
+                    this.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+                });
+                
+                input.addEventListener('blur', function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = '0 2px 6px rgba(0,0,0,0.05)';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

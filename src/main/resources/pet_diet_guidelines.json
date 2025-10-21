@@ -1,0 +1,108 @@
+{ 
+  "recommendedFoods": [ 
+    { 
+      "category": "High-Quality Dry Food", 
+      "foods": [ 
+        "Premium kibble with real meat as first ingredient", 
+        "Grain-free formulas for sensitive pets", 
+        "Breed-specific formulated kibble", 
+        "Life stage appropriate dry food" 
+      ], 
+      "benefits": "Complete nutrition, dental health, convenient" 
+    }, 
+    { 
+      "category": "Wet/Canned Food", 
+      "foods": [ 
+        "Canned food with high protein content", 
+        "Pâté or stew formulations", 
+        "Grain-free wet food options", 
+        "Limited ingredient diets" 
+      ], 
+      "benefits": "Hydration, palatability, easy to digest" 
+    }, 
+    { 
+      "category": "Lean Proteins", 
+      "foods": [ 
+        "Cooked chicken (boneless)", 
+        "Cooked turkey", 
+        "Lean beef (cooked)", 
+        "Fish (cooked, boneless)", 
+        "Eggs (cooked)" 
+      ], 
+      "benefits": "High-quality protein, muscle maintenance" 
+    }, 
+    { 
+      "category": "Healthy Vegetables", 
+      "foods": [ 
+        "Carrots (cooked or raw)", 
+        "Green beans", 
+        "Sweet potatoes", 
+        "Pumpkin", 
+        "Peas", 
+        "Broccoli (in moderation)" 
+      ], 
+      "benefits": "Fiber, vitamins, low calories" 
+    }, 
+    { 
+      "category": "Safe Fruits", 
+      "foods": [ 
+        "Apple slices (no seeds)", 
+        "Blueberries", 
+        "Banana (small amounts)", 
+        "Watermelon (seedless)", 
+        "Cantaloupe" 
+      ], 
+      "benefits": "Antioxidants, vitamins, natural treats" 
+    } 
+  ], 
+  "foodsToAvoid": [ 
+    { 
+      "category": "Toxic Foods", 
+      "foods": [ 
+        "Chocolate", 
+        "Grapes and raisins", 
+        "Onions and garlic", 
+        "Xylitol (sweetener)", 
+        "Alcohol", 
+        "Caffeine" 
+      ], 
+      "dangers": "Kidney failure, toxicity, organ damage" 
+    }, 
+    { 
+      "category": "Harmful Items", 
+      "foods": [ 
+        "Avocado", 
+        "Macadamia nuts", 
+        "Raw dough", 
+        "Moldy foods", 
+        "Fatty trimmings", 
+        "Cooked bones" 
+      ], 
+      "dangers": "Pancreatitis, choking, digestive issues" 
+    }, 
+    { 
+      "category": "Problematic Human Foods", 
+      "foods": [ 
+        "Salty snacks", 
+        "Sugary foods", 
+        "Dairy products (for some pets)", 
+        "Raw fish", 
+        "High-fat foods" 
+      ], 
+      "dangers": "Obesity, digestive upset, nutritional imbalance" 
+    } 
+  ], 
+  "feedingGuidelines": { 
+    "puppiesKittens": "3-4 small meals daily", 
+    "adultDogs": "2 meals daily", 
+    "adultCats": "2-3 small meals or free feeding", 
+    "seniorPets": "2-3 smaller meals adjusted for activity", 
+    "generalTips": [ 
+      "Always provide fresh water", 
+      "Follow package feeding guidelines", 
+      "Adjust portions based on activity level", 
+      "Monitor body condition score", 
+      "Consult vet for specific needs" 
+    ] 
+  } 
+}

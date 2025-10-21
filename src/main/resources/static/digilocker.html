@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pet DigiLocker - Pawdcast</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --medium-beige: #C8A882;
+            --dark-beige: #B59968;
+            --dark-brown: #7D6E4F;
+            --mocha-brown: #5A4A3A;
+            --black-brown: #3E3428;
+            --dark-wedgwood: #4A6B7C;
+            --white: #FFFFFF;
+            --light-overlay: rgba(200, 168, 130, 0.1);
+            --shadow: rgba(62, 52, 40, 0.15);
+            --success: #4A6B7C;
+            --error: #8B4545;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--medium-beige) 0%, var(--dark-beige) 100%);
+            color: var(--black-brown);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Logo Styles */
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            border: 3px solid var(--medium-beige);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+            border-color: var(--dark-wedgwood);
+        }
+
+        .logo::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--dark-wedgwood), var(--medium-beige), var(--dark-brown));
+            border-radius: 50%;
+            z-index: -1;
+            animation: rotate 10s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .logo img {
+            width: 85%;
+            height: 85%;
+            object-fit: contain;
+            border-radius: 50%;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+        }
+
+        /* Navigation */
+        .navbar {
+            background: linear-gradient(135deg, var(--mocha-brown) 0%, var(--black-brown) 100%);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px var(--shadow);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            list-style: none;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--white);
+            font-weight: 500;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .nav-btn:hover {
+            background: var(--dark-wedgwood);
+            transform: translateY(-2px);
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, var(--dark-wedgwood) 0%, var(--dark-brown) 100%);
+            box-shadow: 0 4px 15px rgba(74, 107, 124, 0.3);
+        }
+
+        .nav-btn.logout {
+            background: linear-gradient(135deg, var(--error) 0%, var(--mocha-brown) 100%);
+            margin-left: auto;
+        }
+
+        .nav-btn.logout:hover {
+            background: var(--error);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--white) 0%, rgba(200, 168, 130, 0.1) 100%);
+            padding: 2.5rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 30px var(--shadow);
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            color: var(--black-brown);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .header h1 i {
+            color: var(--dark-wedgwood);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: var(--mocha-brown);
+        }
+
+        /* Sections */
+        .section {
+            background: var(--white);
+            padding: 2.5rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 30px var(--shadow);
+            display: none;
+            animation: fadeInUp 0.4s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section h2 {
+            font-size: 2rem;
+            color: var(--black-brown);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section h2 i {
+            color: var(--dark-wedgwood);
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--mocha-brown);
+            font-size: 0.95rem;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.875rem;
+            border: 2px solid var(--medium-beige);
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: inherit;
+            background: var(--white);
+            color: var(--black-brown);
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--dark-wedgwood);
+            box-shadow: 0 0 0 3px rgba(74, 107, 124, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        input[type="file"] {
+            padding: 0.75rem;
+            cursor: pointer;
+        }
+
+        #fileName {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--mocha-brown);
+            font-style: italic;
+        }
+
+        /* Buttons */
+        button {
+            padding: 0.875rem 2rem;
+            background: linear-gradient(135deg, var(--dark-wedgwood) 0%, var(--mocha-brown) 100%);
+            color: var(--white);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 107, 124, 0.4);
+        }
+
+        button.secondary {
+            background: linear-gradient(135deg, var(--medium-beige) 0%, var(--dark-beige) 100%);
+            color: var(--black-brown);
+        }
+
+        button.secondary:hover {
+            box-shadow: 0 6px 20px var(--shadow);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Search Box */
+        .search-box {
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .search-box input {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .search-box select {
+            min-width: 200px;
+        }
+
+        /* Documents Grid */
+        .documents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .document-card {
+            border: 2px solid var(--medium-beige);
+            border-radius: 15px;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, var(--white) 0%, rgba(200, 168, 130, 0.05) 100%);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .document-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--dark-wedgwood) 0%, var(--dark-brown) 100%);
+        }
+
+        .document-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px var(--shadow);
+            border-color: var(--dark-wedgwood);
+        }
+
+        .document-card h3 {
+            font-size: 1.3rem;
+            color: var(--black-brown);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .document-card h3 i {
+            color: var(--dark-wedgwood);
+        }
+
+        .document-card p {
+            color: var(--mocha-brown);
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .document-card p strong {
+            color: var(--black-brown);
+        }
+
+        .document-actions {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .document-actions button {
+            flex: 1;
+            min-width: 100px;
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+            justify-content: center;
+        }
+
+        .document-actions button:last-child {
+            background: linear-gradient(135deg, var(--error) 0%, var(--mocha-brown) 100%);
+        }
+
+        .document-actions button:last-child:hover {
+            background: var(--error);
+        }
+
+        /* Loading Spinner */
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .loading.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid var(--medium-beige);
+            border-top: 4px solid var(--dark-wedgwood);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            color: var(--white);
+            z-index: 2001;
+            display: none;
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease;
+            max-width: 400px;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast.success {
+            background: linear-gradient(135deg, var(--success) 0%, var(--dark-brown) 100%);
+        }
+
+        .toast.error {
+            background: linear-gradient(135deg, var(--error) 0%, var(--mocha-brown) 100%);
+        }
+
+        .toast i {
+            font-size: 1.5rem;
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(62, 52, 40, 0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1500;
+            padding: 2rem;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--white);
+            padding: 0;
+            border-radius: 20px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            animation: modalZoomIn 0.3s ease;
+        }
+
+        @keyframes modalZoomIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2rem;
+            border-bottom: 2px solid var(--medium-beige);
+            background: linear-gradient(135deg, var(--white) 0%, rgba(200, 168, 130, 0.1) 100%);
+        }
+
+        .modal-header h3 {
+            color: var(--black-brown);
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .modal-header h3 i {
+            color: var(--dark-wedgwood);
+        }
+
+        .close-modal-btn {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: var(--mocha-brown);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            padding: 0;
+        }
+
+        .close-modal-btn:hover {
+            background: var(--light-overlay);
+            color: var(--black-brown);
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 2rem;
+            max-height: calc(90vh - 200px);
+            overflow-y: auto;
+        }
+
+        .modal-image {
+            max-width: 100%;
+            max-height: 500px;
+            border-radius: 15px;
+            display: block;
+            margin: 0 auto;
+            box-shadow: 0 8px 30px var(--shadow);
+        }
+
+        .modal-info {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: var(--light-overlay);
+            border-radius: 15px;
+            border-left: 4px solid var(--dark-wedgwood);
+        }
+
+        .modal-info p {
+            margin-bottom: 0.75rem;
+            color: var(--mocha-brown);
+            font-size: 1rem;
+        }
+
+        .modal-info p strong {
+            color: var(--black-brown);
+            font-weight: 600;
+        }
+
+        .modal-footer {
+            padding: 1.5rem 2rem;
+            border-top: 2px solid var(--medium-beige);
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            background: linear-gradient(135deg, var(--white) 0%, rgba(200, 168, 130, 0.05) 100%);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            grid-column: 1 / -1;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: var(--medium-beige);
+            margin-bottom: 1.5rem;
+        }
+
+        .empty-state h3 {
+            font-size: 1.8rem;
+            color: var(--black-brown);
+            margin-bottom: 1rem;
+        }
+
+        .empty-state p {
+            color: var(--mocha-brown);
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Welcome Section Styling */
+        #welcomeSection {
+            text-align: center;
+        }
+
+        #welcomeSection h2 {
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        #welcomeSection > p {
+            font-size: 1.1rem;
+            color: var(--mocha-brown);
+            margin-bottom: 2rem;
+        }
+
+        .welcome-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-links {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .nav-btn.logout {
+                margin-left: 0;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+                flex-direction: column;
+            }
+
+            .section {
+                padding: 1.5rem;
+            }
+
+            .section h2 {
+                font-size: 1.5rem;
+            }
+
+            .search-box {
+                flex-direction: column;
+            }
+
+            .search-box input,
+            .search-box select {
+                width: 100%;
+                min-width: 100%;
+            }
+
+            .documents-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                margin: 1rem;
+            }
+
+            .modal-header,
+            .modal-body,
+            .modal-footer {
+                padding: 1.5rem;
+            }
+
+            .toast {
+                right: 1rem;
+                left: 1rem;
+                max-width: calc(100% - 2rem);
+            }
+            
+            .logo {
+                width: 80px;
+                height: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage"></span>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo-container">
+                <div class="logo">
+                    <img src="https://res.cloudinary.com/dkuuvasoe/image/upload/v1760186124/pawdcastlogo_cb1l1b.png" alt="Pawdcast Logo">
+                </div>
+                <div>
+                    <h1>
+                        <i class="fas fa-folder-open"></i>
+                        Pet DigiLocker
+                    </h1>
+                    <p>Store and manage your pet's images securely in one place</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="navbar" style="border-radius: 15px; position: relative;">
+            <div class="nav-container" style="padding: 1rem;">
+                <button id="homeBtn" class="nav-btn active">
+                    <i class="fas fa-home"></i> Home
+                </button>
+                <button id="uploadBtn" class="nav-btn">
+                    <i class="fas fa-cloud-upload-alt"></i> Upload Image
+                </button>
+                <button id="documentsBtn" class="nav-btn">
+                    <i class="fas fa-images"></i> View Images
+                </button>
+                <button id="logoutBtn" class="nav-btn logout">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+
+        <!-- Sections -->
+        <!-- Welcome Section -->
+        <section id="welcomeSection" class="section active">
+            <h2><i class="fas fa-paw"></i> Welcome to Pet DigiLocker</h2>
+            <p>Upload and manage your pet's images in one secure place. Keep all important documents, photos, and records organized and accessible anytime.</p>
+            <div class="welcome-buttons">
+                <button id="welcomeUploadBtn">
+                    <i class="fas fa-cloud-upload-alt"></i> Upload Image
+                </button>
+                <button id="welcomeViewBtn" class="secondary">
+                    <i class="fas fa-images"></i> View Images
+                </button>
+            </div>
+        </section>
+
+        <!-- Upload Section -->
+        <section id="uploadSection" class="section">
+            <h2><i class="fas fa-cloud-upload-alt"></i> Upload New Image</h2>
+            <form id="uploadForm">
+                <div class="form-group">
+                    <label for="documentName">
+                        <i class="fas fa-tag"></i> Image Name *
+                    </label>
+                    <input type="text" id="documentName" name="documentName" required placeholder="e.g., My Pet Photo">
+                </div>
+                
+                <div class="form-group">
+                    <label for="documentType">
+                        <i class="fas fa-list"></i> Image Type *
+                    </label>
+                    <select id="documentType" name="documentType" required>
+                        <option value="">Select Type</option>
+                        <option value="Pet Photo">Pet Photo</option>
+                        <option value="Medical Record">Medical Record</option>
+                        <option value="Vaccination">Vaccination Card</option>
+                        <option value="License">Pet License</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="description">
+                        <i class="fas fa-align-left"></i> Description
+                    </label>
+                    <textarea id="description" name="description" rows="3" placeholder="Optional description about this image"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="file">
+                        <i class="fas fa-image"></i> Select Image *
+                    </label>
+                    <input type="file" id="file" name="file" required accept="image/*">
+                    <div id="fileName"></div>
+                </div>
+                
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button type="submit">
+                        <i class="fas fa-upload"></i> Upload Image
+                    </button>
+                    <button type="button" id="cancelEntry" class="secondary">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- View Documents Section -->
+        <section id="viewDocumentsSection" class="section">
+            <h2><i class="fas fa-images"></i> Your Images</h2>
+            
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search images by name or description...">
+                <select id="typeFilter">
+                    <option value="">All Types</option>
+                    <option value="Pet Photo">Pet Photo</option>
+                    <option value="Medical Record">Medical Record</option>
+                    <option value="Vaccination">Vaccination</option>
+                    <option value="License">License</option>
+                    <option value="Other">Other</option>
+                </select>
+                <button id="refreshDocuments">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+
+            <div id="documentsGrid" class="documents-grid">
+                <!-- Images will be loaded here -->
+            </div>
+        </section>
+    </div>
+
+    <!-- Image Preview Modal -->
+    <div id="previewModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle"><i class="fas fa-image"></i> Image Preview</h3>
+                <button id="closeModal" class="close-modal-btn">×</button>
+            </div>
+            <div id="modalContent" class="modal-body">
+                <!-- Image will be displayed here -->
+            </div>
+            <div class="modal-footer">
+                <button id="closePreview" class="secondary">
+                    <i class="fas fa-times"></i> Close
+                </button>
+                <button id="downloadFromModal">
+                    <i class="fas fa-download"></i> Download
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE_URL = 'http://localhost:8080';
+
+        // State management
+        let documents = [];
+        let currentDocumentId = null;
+
+        // DOM Elements
+        const sections = {
+            welcome: document.getElementById('welcomeSection'),
+            upload: document.getElementById('uploadSection'),
+            viewDocuments: document.getElementById('viewDocumentsSection')
+        };
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Pet DigiLocker initialized');
+            initializeEventListeners();
+        });
+
+        function initializeEventListeners() {
+            // Navigation
+            document.getElementById('homeBtn').addEventListener('click', () => showSection('welcome'));
+            document.getElementById('uploadBtn').addEventListener('click', () => showSection('upload'));
+            document.getElementById('documentsBtn').addEventListener('click', () => {
+                showSection('viewDocuments');
+                loadDocuments();
+            });
+
+            // Welcome page buttons
+            document.getElementById('welcomeUploadBtn').addEventListener('click', () => showSection('upload'));
+            document.getElementById('welcomeViewBtn').addEventListener('click', () => {
+                showSection('viewDocuments');
+                loadDocuments();
+            });
+
+            // Upload form
+            document.getElementById('uploadForm').addEventListener('submit', handleUpload);
+            document.getElementById('file').addEventListener('change', handleFileSelect);
+            document.getElementById('cancelEntry').addEventListener('click', () => showSection('welcome'));
+
+            // Documents controls
+            document.getElementById('refreshDocuments').addEventListener('click', loadDocuments);
+            document.getElementById('searchInput').addEventListener('input', handleSearch);
+            document.getElementById('typeFilter').addEventListener('change', handleTypeFilter);
+
+            // Modal
+            document.getElementById('closeModal').addEventListener('click', closeModal);
+            document.getElementById('closePreview').addEventListener('click', closeModal);
+            document.getElementById('downloadFromModal').addEventListener('click', () => {
+                if (currentDocumentId) {
+                    downloadDocument(currentDocumentId);
+                }
+            });
+
+            // Logout
+            document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+        }
+
+        async function handleUpload(e) {
+            e.preventDefault();
+            showLoading(true);
+
+            const formData = new FormData(e.target);
+            const fileInput = document.getElementById('file');
+            
+            if (!fileInput.files[0]) {
+                showToast('Please select an image to upload', 'error');
+                showLoading(false);
+                return;
+            }
+
+            try {
+                const response = await axios.post(`${API_BASE_URL}/api/digilocker/upload`, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+
+                console.log('Upload successful:', response.data);
+                showToast('Image uploaded successfully!', 'success');
+                e.target.reset();
+                document.getElementById('fileName').textContent = '';
+                showSection('viewDocuments');
+                loadDocuments();
+            } catch (error) {
+                console.error('Upload failed:', error);
+                if (error.response?.status === 401) {
+                    showToast('Session expired. Please login again.', 'error');
+                } else {
+                    showToast(error.response?.data || 'Failed to upload image', 'error');
+                }
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function loadDocuments() {
+            console.log('Loading images...');
+            showLoading(true);
+
+            try {
+                const response = await axios.get(`${API_BASE_URL}/api/digilocker/documents`);
+                documents = response.data;
+                console.log('Images loaded:', documents);
+                renderDocuments();
+                
+                if (documents.length > 0) {
+                    showToast(`Loaded ${documents.length} images`, 'success');
+                }
+            } catch (error) {
+                console.error('Load images failed:', error);
+                if (error.response?.status === 401) {
+                    showToast('Session expired. Please login again.', 'error');
+                } else {
+                    showToast('Failed to load images', 'error');
+                }
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function renderDocuments(filteredDocuments = null) {
+            const documentsToRender = filteredDocuments || documents;
+            const grid = document.getElementById('documentsGrid');
+            
+            if (documentsToRender.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-image"></i>
+                        <h3>No Images Found</h3>
+                        <p>Upload your first pet image to get started!</p>
+                        <button onclick="showSection('upload')">
+                            <i class="fas fa-cloud-upload-alt"></i> Upload Image
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = documentsToRender.map(doc => `
+                <div class="document-card">
+                    <h3>
+                        <i class="fas fa-file-image"></i>
+                        ${doc.documentName}
+                    </h3>
+                    <p><strong>Type:</strong> ${doc.documentType}</p>
+                    <p><strong>Uploaded:</strong> ${formatDate(doc.uploadDate)}</p>
+                    <p><strong>Size:</strong> ${formatFileSize(doc.fileSize)}</p>
+                    ${doc.description ? `<p><strong>Description:</strong> ${doc.description}</p>` : ''}
+                    <div class="document-actions">
+                        <button onclick="viewDocument(${doc.documentId})">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button onclick="downloadDocument(${doc.documentId})">
+                            <i class="fas fa-download"></i> Download
+                        </button>
+                        <button onclick="deleteDocument(${doc.documentId})">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function viewDocument(documentId) {
+            console.log("View image triggered:", documentId);
+            showLoading(true);
+
+            try {
+                const response = await axios.get(`${API_BASE_URL}/api/digilocker/document/${documentId}/view`);
+                console.log('View response received:', response.data);
+                
+                const docData = response.data;
+                currentDocumentId = documentId;
+                
+                showImagePreview(docData);
+                showToast('Image loaded successfully!', 'success');
+                
+            } catch (error) {
+                console.error('View image failed:', error);
+                
+                if (error.response?.status === 404) {
+                    showToast('Image not found', 'error');
+                } else if (error.response?.status === 401) {
+                    showToast('Session expired. Please login again.', 'error');
+                } else {
+                    showToast('Failed to view image: ' + (error.response?.data || error.message), 'error');
+                }
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function showImagePreview(docData) {
+            const modal = document.getElementById('previewModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalContent = document.getElementById('modalContent');
+
+            modalTitle.innerHTML = `<i class="fas fa-image"></i> ${docData.documentName}`;
+            
+            if (docData.documentData) {
+                const contentType = docData.contentType || 'image/jpeg';
+                const base64Data = docData.documentData;
+                
+                modalContent.innerHTML = `
+                    <div>
+                        <img src="data:${contentType};base64,${base64Data}" 
+                             alt="${docData.documentName}" 
+                             class="modal-image"
+                             onerror="this.style.display='none'; document.getElementById('fallbackContent').style.display='block'">
+                        <div id="fallbackContent" style="display: none; text-align: center; padding: 2rem;">
+                            <p style="color: var(--error);">Image failed to load. Please download the file.</p>
+                        </div>
+                        <div class="modal-info">
+                            <p><strong>Type:</strong> ${docData.documentType}</p>
+                            <p><strong>Size:</strong> ${formatFileSize(docData.fileSize)}</p>
+                            <p><strong>Uploaded:</strong> ${formatDate(docData.uploadDate)}</p>
+                            ${docData.description ? `<p><strong>Description:</strong> ${docData.description}</p>` : ''}
+                        </div>
+                    </div>
+                `;
+            } else {
+                modalContent.innerHTML = `
+                    <div style="text-align: center; padding: 2rem;">
+                        <p>No image data available.</p>
+                    </div>
+                `;
+            }
+            
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('previewModal').classList.remove('active');
+            currentDocumentId = null;
+        }
+
+        async function downloadDocument(documentId) {
+            console.log('Downloading image:', documentId);
+            showLoading(true);
+
+            try {
+                const response = await axios.get(`${API_BASE_URL}/api/digilocker/document/${documentId}/download`, {
+                    responseType: 'blob'
+                });
+
+                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const link = document.createElement('a');
+                link.href = url;
+                
+                const contentDisposition = response.headers['content-disposition'];
+                let filename = `image-${documentId}.jpg`;
+                
+                if (contentDisposition) {
+                    const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+                    if (filenameMatch) {
+                        filename = filenameMatch[1];
+                    }
+                }
+                
+                link.setAttribute('download', filename);
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                window.URL.revokeObjectURL(url);
+                
+                showToast('Image downloaded successfully!', 'success');
+            } catch (error) {
+                console.error('Download failed:', error);
+                if (error.response?.status === 404) {
+                    showToast('Image not found.', 'error');
+                } else if (error.response?.status === 401) {
+                    showToast('Session expired. Please login again.', 'error');
+                } else {
+                    showToast('Failed to download image', 'error');
+                }
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function deleteDocument(documentId) {
+            if (!confirm('Are you sure you want to delete this image? This action cannot be undone.')) {
+                return;
+            }
+
+            showLoading(true);
+
+            try {
+                await axios.delete(`${API_BASE_URL}/api/digilocker/document/${documentId}`);
+                showToast('Image deleted successfully!', 'success');
+                loadDocuments();
+            } catch (error) {
+                console.error('Delete failed:', error);
+                if (error.response?.status === 401) {
+                    showToast('Session expired. Please login again.', 'error');
+                } else {
+                    showToast(error.response?.data || 'Failed to delete image', 'error');
+                }
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function handleSearch(e) {
+            const query = e.target.value.trim();
+            
+            if (query.length === 0) {
+                renderDocuments();
+                return;
+            }
+
+            const filtered = documents.filter(doc => 
+                doc.documentName.toLowerCase().includes(query.toLowerCase()) ||
+                (doc.description && doc.description.toLowerCase().includes(query.toLowerCase()))
+            );
+            renderDocuments(filtered);
+        }
+
+        function handleTypeFilter(e) {
+            const type = e.target.value;
+            
+            if (!type) {
+                renderDocuments();
+                return;
+            }
+
+            const filtered = documents.filter(doc => doc.documentType === type);
+            renderDocuments(filtered);
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            const fileName = document.getElementById('fileName');
+            
+            if (file) {
+                fileName.textContent = `Selected: ${file.name} (${formatFileSize(file.size)})`;
+            } else {
+                fileName.textContent = '';
+            }
+        }
+
+        async function handleLogout() {
+            if (!confirm('Are you sure you want to logout?')) {
+                return;
+            }
+            
+            showLoading(true);
+            try {
+                await axios.post(`${API_BASE_URL}/auth/logout`);
+                showToast('Logged out successfully', 'success');
+                setTimeout(() => {
+                    window.location.href = 'home.html';
+                }, 1500);
+            } catch (error) {
+                console.error('Logout error:', error);
+                window.location.href = 'home.html';
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Helper functions
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function showSection(sectionName) {
+            // Update navigation buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            const activeBtn = {
+                'welcome': 'homeBtn',
+                'upload': 'uploadBtn',
+                'viewDocuments': 'documentsBtn'
+            }[sectionName];
+            
+            if (activeBtn) {
+                document.getElementById(activeBtn).classList.add('active');
+            }
+
+            // Show/hide sections
+            Object.values(sections).forEach(section => {
+                section.classList.remove('active');
+            });
+            sections[sectionName].classList.add('active');
+            
+            console.log('Navigated to:', sectionName);
+        }
+
+        function showLoading(show) {
+            const spinner = document.getElementById('loadingSpinner');
+            if (show) {
+                spinner.classList.add('active');
+            } else {
+                spinner.classList.remove('active');
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            const icon = toast.querySelector('i');
+            
+            toastMessage.textContent = message;
+            toast.className = `toast ${type}`;
+            
+            if (type === 'success') {
+                icon.className = 'fas fa-check-circle';
+            } else {
+                icon.className = 'fas fa-exclamation-circle';
+            }
+            
+            toast.style.display = 'flex';
+            
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 4000);
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('previewModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

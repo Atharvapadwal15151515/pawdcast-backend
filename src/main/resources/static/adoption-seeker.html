@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adoption Seeker Form - Pawdcast</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* DMC Color Palette */
+        :root {
+            --medium-yellow-beige: #D4C5A9;    /* DMC 3046 */
+            --dark-yellow-beige: #B8A082;      /* DMC 3045 */
+            --dark-drab-brown: #8B7355;        /* DMC 610 */
+            --very-dark-mocha: #4A3728;        /* DMC 3031 */
+            --black-brown: #2B1F17;            /* DMC 3371 */
+            --dark-wedgwood: #4A6741;          /* DMC 517 */
+            --white: #FFFFFF;
+            
+            /* Gradients */
+            --primary-gradient: linear-gradient(135deg, var(--medium-yellow-beige), var(--dark-yellow-beige));
+            --accent-gradient: linear-gradient(135deg, var(--dark-wedgwood), #5a7d4f);
+            --dark-gradient: linear-gradient(135deg, var(--very-dark-mocha), var(--black-brown));
+            --light-gradient: linear-gradient(135deg, var(--white), #faf9f5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+            background: var(--primary-gradient);
+            min-height: 100vh;
+            color: var(--black-brown);
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        /* Logo Styles */
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .logo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 25px rgba(43, 31, 23, 0.3);
+            border: 3px solid var(--dark-yellow-beige);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 35px rgba(43, 31, 23, 0.4);
+            border-color: var(--dark-wedgwood);
+        }
+
+        .logo::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--dark-wedgwood), var(--medium-yellow-beige), var(--dark-drab-brown));
+            border-radius: 50%;
+            z-index: -1;
+            animation: rotate 10s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .logo img {
+            width: 85%;
+            height: 85%;
+            object-fit: contain;
+            border-radius: 50%;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+        }
+
+        .page-title {
+            font-size: 3.2rem;
+            font-weight: 700;
+            color: var(--very-dark-mocha);
+            margin-bottom: 0.5rem;
+            letter-spacing: 1px;
+            text-shadow: 2px 4px 8px rgba(43, 31, 23, 0.1);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .page-title i {
+            color: var(--dark-wedgwood);
+        }
+
+        .page-title::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: var(--accent-gradient);
+            border-radius: 2px;
+        }
+
+        .page-subtitle {
+            font-size: 1.3rem;
+            color: var(--dark-drab-brown);
+            font-weight: 500;
+            margin-top: 1.5rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Login Prompt */
+        .login-prompt {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            padding: 1.5rem 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            text-align: center;
+            border: 1px solid #dc3545;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .login-prompt i {
+            font-size: 1.5rem;
+        }
+
+        .login-prompt a {
+            color: #dc3545;
+            font-weight: bold;
+            text-decoration: underline;
+            margin-left: 0.5rem;
+        }
+
+        /* Form Container */
+        .form-container {
+            background: var(--white);
+            border-radius: 25px;
+            padding: 3.5rem;
+            box-shadow: 0 25px 60px rgba(43, 31, 23, 0.15);
+            border: 1px solid var(--dark-yellow-beige);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(212, 197, 169, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        /* Form Introduction */
+        .form-intro {
+            background: var(--light-gradient);
+            padding: 2rem;
+            border-radius: 20px;
+            border-left: 5px solid var(--dark-wedgwood);
+            margin-bottom: 3rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-intro h3 {
+            color: var(--very-dark-mocha);
+            font-size: 1.4rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-intro h3 i {
+            color: var(--dark-wedgwood);
+        }
+
+        .form-intro p {
+            color: var(--dark-drab-brown);
+            line-height: 1.6;
+            font-size: 1.05rem;
+        }
+
+        /* Form Grid */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        @media (min-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .form-group.full-width {
+                grid-column: 1 / -1;
+            }
+        }
+
+        /* Form Sections */
+        .form-section {
+            grid-column: 1 / -1;
+            border-top: 2px solid var(--dark-yellow-beige);
+            padding-top: 2rem;
+            margin-top: 1rem;
+        }
+
+        .form-section:first-child {
+            border-top: none;
+            margin-top: 0;
+            padding-top: 0;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--very-dark-mocha);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-title i {
+            color: var(--dark-wedgwood);
+            font-size: 1.3rem;
+        }
+
+        /* Form Groups */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--very-dark-mocha);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-label i {
+            color: var(--dark-wedgwood);
+        }
+
+        .form-label.required::after {
+            content: ' *';
+            color: #c5704f;
+            font-weight: bold;
+        }
+
+        /* Text Input */
+        .form-input {
+            padding: 1rem 1.25rem;
+            border: 2px solid var(--dark-yellow-beige);
+            border-radius: 15px;
+            background: var(--light-gradient);
+            color: var(--black-brown);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .form-input:focus {
+            border-color: var(--dark-wedgwood);
+            box-shadow: 0 0 0 4px rgba(74, 103, 65, 0.15);
+            transform: translateY(-2px);
+            background: var(--white);
+        }
+
+        /* File Input Styling */
+        .file-input-container {
+            position: relative;
+            overflow: hidden;
+            display: block;
+            width: 100%;
+        }
+
+        .file-input-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 1.25rem 1.5rem;
+            background: var(--light-gradient);
+            border: 2px dashed var(--dark-yellow-beige);
+            border-radius: 15px;
+            color: var(--dark-drab-brown);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            font-weight: 500;
+            min-height: 70px;
+            text-align: center;
+        }
+
+        .file-input-button:hover {
+            border-color: var(--dark-wedgwood);
+            background: var(--white);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(74, 103, 65, 0.1);
+        }
+
+        .file-input-button.has-file {
+            border-style: solid;
+            background: rgba(74, 103, 65, 0.1);
+            color: var(--dark-wedgwood);
+            border-color: var(--dark-wedgwood);
+        }
+
+        .file-input {
+            position: absolute;
+            left: -9999px;
+            opacity: 0;
+        }
+
+        .file-name {
+            font-size: 0.9rem;
+            color: var(--dark-wedgwood);
+            margin-top: 0.5rem;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .file-size {
+            font-size: 0.8rem;
+            color: var(--dark-drab-brown);
+            opacity: 0.8;
+        }
+
+        /* Upload Progress */
+        .upload-progress {
+            width: 100%;
+            height: 6px;
+            background: var(--dark-yellow-beige);
+            border-radius: 3px;
+            margin-top: 0.5rem;
+            overflow: hidden;
+            display: none;
+        }
+
+        .upload-progress-bar {
+            height: 100%;
+            background: var(--accent-gradient);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Submit Button */
+        .submit-container {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: center;
+            margin-top: 3rem;
+        }
+
+        .btn-submit {
+            background: var(--accent-gradient);
+            color: var(--white);
+            border: none;
+            padding: 1.5rem 4rem;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(74, 103, 65, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            letter-spacing: 0.5px;
+            min-width: 280px;
+            justify-content: center;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(74, 103, 65, 0.4);
+        }
+
+        .btn-submit:active {
+            transform: translateY(-3px);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: none;
+            width: 28px;
+            height: 28px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-left: 4px solid var(--white);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Success/Error Messages */
+        .message {
+            padding: 1.5rem 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            font-weight: 500;
+            display: none;
+            align-items: center;
+            gap: 1rem;
+            animation: slideInDown 0.3s ease;
+        }
+
+        .message.success {
+            background: rgba(74, 103, 65, 0.1);
+            color: var(--dark-wedgwood);
+            border: 1px solid var(--dark-wedgwood);
+        }
+
+        .message.error {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            border: 1px solid #dc3545;
+        }
+
+        .message i {
+            font-size: 1.5rem;
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 0.5rem;
+            }
+            
+            .page-title {
+                font-size: 2.5rem;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .form-container {
+                padding: 2.5rem 2rem;
+                border-radius: 20px;
+            }
+            
+            .btn-submit {
+                padding: 1.25rem 2rem;
+                width: 100%;
+                min-width: auto;
+            }
+            
+            .form-intro {
+                padding: 1.5rem;
+            }
+            
+            .logo {
+                width: 100px;
+                height: 100px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 1rem 0.5rem;
+            }
+            
+            .form-container {
+                padding: 2rem 1.5rem;
+            }
+            
+            .page-title {
+                font-size: 2rem;
+            }
+            
+            .logo {
+                width: 80px;
+                height: 80px;
+            }
+        }
+
+        /* Focus indicators for accessibility */
+        .form-input:focus-visible, 
+        .file-input-button:focus-visible,
+        .btn-submit:focus-visible {
+            outline: 3px solid var(--dark-wedgwood);
+            outline-offset: 2px;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .form-container {
+            animation-delay: 0.2s;
+        }
+
+        /* Custom placeholder styling */
+        ::placeholder {
+            color: var(--dark-drab-brown);
+            opacity: 0.7;
+        }
+
+        /* File type indicators */
+        .file-types {
+            font-size: 0.85rem;
+            color: var(--dark-drab-brown);
+            opacity: 0.8;
+            margin-top: 0.25rem;
+            text-align: center;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="page-header fade-in-up">
+            <div class="logo-container">
+                <div class="logo">
+                    <img src="https://res.cloudinary.com/dkuuvasoe/image/upload/v1760186124/pawdcastlogo_cb1l1b.png" alt="Pawdcast Logo">
+                </div>
+                <div>
+                    <h1 class="page-title">
+                        <i class="fas fa-heart"></i>
+                        Adoption Seeker Form
+                    </h1>
+                    <p class="page-subtitle">Start your journey to find your perfect companion</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="loginPrompt" class="login-prompt" style="display: none;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>Please <a href="/" target="_blank">log in</a> first to submit an adoption application.</span>
+        </div>
+
+        <div class="form-container fade-in-up">
+            <div id="message" class="message"></div>
+            
+            <div class="form-intro">
+                <h3>
+                    <i class="fas fa-info-circle"></i>
+                    Application Requirements
+                </h3>
+                <p>Please complete this form with accurate information and upload all required documents. This helps us ensure the best match between pets and their forever families.</p>
+            </div>
+
+            <form id="seekerForm" enctype="multipart/form-data">
+                <div class="form-grid">
+                    <!-- Personal Information Section -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-user"></i>
+                            Personal Information
+                        </h3>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label class="form-label required">
+                            <i class="fas fa-map-marker-alt"></i>
+                            Address
+                        </label>
+                        <input type="text" name="address" class="form-input" placeholder="Enter your complete address" required>
+                    </div>
+
+                    <!-- Documentation Section -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-folder-open"></i>
+                            Required Documentation
+                        </h3>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-id-card"></i>
+                            ID Proof
+                        </label>
+                        <label class="file-input-container">
+                            <div class="file-input-button" data-field="idProof">
+                                <i class="fas fa-upload"></i>
+                                <span>Choose ID Proof</span>
+                            </div>
+                            <input type="file" name="idProof" class="file-input" accept=".pdf,.jpg,.jpeg,.png">
+                            <div class="file-name" style="display: none;"></div>
+                            <div class="file-types">PDF, JPG, PNG accepted</div>
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-dollar-sign"></i>
+                            Income Proof
+                        </label>
+                        <label class="file-input-container">
+                            <div class="file-input-button" data-field="incomeProof">
+                                <i class="fas fa-upload"></i>
+                                <span>Choose Income Proof</span>
+                            </div>
+                            <input type="file" name="incomeProof" class="file-input" accept=".pdf,.jpg,.jpeg,.png">
+                            <div class="file-name" style="display: none;"></div>
+                            <div class="file-types">Salary slips, bank statements, etc.</div>
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-home"></i>
+                            Residence Proof
+                        </label>
+                        <label class="file-input-container">
+                            <div class="file-input-button" data-field="residenceProof">
+                                <i class="fas fa-upload"></i>
+                                <span>Choose Residence Proof</span>
+                            </div>
+                            <input type="file" name="residenceProof" class="file-input" accept=".pdf,.jpg,.jpeg,.png">
+                            <div class="file-name" style="display: none;"></div>
+                            <div class="file-types">Utility bills, lease agreement, etc.</div>
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-camera"></i>
+                            Your Photo
+                        </label>
+                        <label class="file-input-container">
+                            <div class="file-input-button" data-field="photo">
+                                <i class="fas fa-upload"></i>
+                                <span>Choose Your Photo</span>
+                            </div>
+                            <input type="file" name="photo" class="file-input" accept=".jpg,.jpeg,.png">
+                            <div class="file-name" style="display: none;"></div>
+                            <div class="file-types">Recent photo for profile</div>
+                        </label>
+                    </div>
+
+                    <!-- Medical & Care Documentation Section -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-heartbeat"></i>
+                            Medical & Care Documentation
+                        </h3>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-notes-medical"></i>
+                            Medical Records
+                        </label>
+                        <label class="file-input-container">
+                            <div class="file-input-button" data-field="medicalRecords">
+                                <i class="fas fa-upload"></i>
+                                <span>Choose Medical Records</span>
+                            </div>
+                            <input type="file" name="medicalRecords" class="file-input" accept=".pdf,.jpg,.jpeg,.png">
+                            <div class="file-name" style="display: none;"></div>
+                            <div class="file-types">Health certificates, allergy information</div>
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-syringe"></i>
+                            Vaccination Certificate
+                        </label>
+                        <label class="file-input-container">
+                            <div class="file-input-button" data-field="vaccinationCertificate">
+                                <i class="fas fa-upload"></i>
+                                <span>Choose Vaccination Certificate</span>
+                            </div>
+                            <input type="file" name="vaccinationCertificate" class="file-input" accept=".pdf,.jpg,.jpeg,.png">
+                            <div class="file-name" style="display: none;"></div>
+                            <div class="file-types">Current vaccination records</div>
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-file-signature"></i>
+                            Adoption Agreement
+                        </label>
+                        <label class="file-input-container">
+                            <div class="file-input-button" data-field="adoptionAgreement">
+                                <i class="fas fa-upload"></i>
+                                <span>Choose Adoption Agreement</span>
+                            </div>
+                            <input type="file" name="adoptionAgreement" class="file-input" accept=".pdf,.jpg,.jpeg,.png">
+                            <div class="file-name" style="display: none;"></div>
+                            <div class="file-types">Signed adoption agreement</div>
+                        </label>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="submit-container">
+                        <button type="submit" id="submitBtn" class="btn-submit">
+                            <div id="loading" class="loading"></div>
+                            <i class="fas fa-paper-plane" style="display: block;"></i>
+                            <span id="buttonText">Submit Application</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+   <script>
+    const API_BASE = 'http://localhost:8080';
+    let currentUser = null;
+
+    // Check authentication status
+    function checkAuthStatus() {
+        return fetch(`${API_BASE}/auth/check`, {
+            credentials: 'include'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.authenticated) {
+                currentUser = data;
+                return true;
+            } else {
+                return false;
+            }
+        })
+        .catch(() => false);
+    }
+
+    function showMessage(message, type) {
+        const messageEl = document.getElementById('message');
+        messageEl.innerHTML = `
+            <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i>
+            ${message}
+        `;
+        messageEl.className = `message ${type}`;
+        messageEl.style.display = 'flex';
+        
+        setTimeout(() => {
+            messageEl.style.display = 'none';
+        }, 5000);
+    }
+
+    function updateFileDisplay(input) {
+        const container = input.closest('.file-input-container');
+        const button = container.querySelector('.file-input-button');
+        const fileName = container.querySelector('.file-name');
+        
+        if (input.files.length > 0) {
+            const file = input.files[0];
+            const fileSize = (file.size / 1024 / 1024).toFixed(2);
+            
+            button.innerHTML = `
+                <i class="fas fa-check-circle"></i>
+                <span>File Selected</span>
+            `;
+            button.classList.add('has-file');
+            
+            fileName.innerHTML = `
+                <div>${file.name}</div>
+                <div class="file-size">${fileSize} MB</div>
+            `;
+            fileName.style.display = 'block';
+        } else {
+            const fieldName = input.name;
+            const buttonText = {
+                'idProof': 'Choose ID Proof',
+                'incomeProof': 'Choose Income Proof',
+                'residenceProof': 'Choose Residence Proof',
+                'medicalRecords': 'Choose Medical Records',
+                'vaccinationCertificate': 'Choose Vaccination Certificate',
+                'adoptionAgreement': 'Choose Adoption Agreement',
+                'photo': 'Choose Your Photo'
+            }[fieldName] || 'Choose File';
+            
+            button.innerHTML = `
+                <i class="fas fa-upload"></i>
+                <span>${buttonText}</span>
+            `;
+            button.classList.remove('has-file');
+            fileName.style.display = 'none';
+        }
+    }
+
+    // Download PDF file
+    function downloadPDF(blob, filename) {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+    }
+
+    // Form submission handler with PDF download
+    document.getElementById("seekerForm").addEventListener("submit", async function(e) {
+        e.preventDefault();
+
+        // Check authentication first
+        const isAuthenticated = await checkAuthStatus();
+        if (!isAuthenticated) {
+            showMessage("Please log in first to submit an adoption application.", "error");
+            document.getElementById('loginPrompt').style.display = 'flex';
+            return;
+        }
+
+        const submitBtn = document.getElementById('submitBtn');
+        const loading = document.getElementById('loading');
+        const buttonText = document.getElementById('buttonText');
+
+        // Validate required address field
+        const address = document.querySelector('input[name="address"]').value.trim();
+        if (!address) {
+            showMessage("Please enter your address.", "error");
+            return;
+        }
+
+        // Show loading state
+        submitBtn.disabled = true;
+        loading.style.display = 'block';
+        buttonText.textContent = 'Submitting...';
+
+        let formData = new FormData(this);
+
+        try {
+            const response = await fetch(`${API_BASE}/seekers/add`, {
+                method: "POST",
+                body: formData,
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                if (response.status === 401) {
+                    throw new Error("Please log in to submit an application");
+                }
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            // Handle PDF download instead of JSON response
+            const pdfBlob = await response.blob();
+            
+            // Check if it's actually a PDF
+            if (pdfBlob.type === 'application/pdf') {
+                // Download the PDF certificate
+                downloadPDF(pdfBlob, `adoption-application-receipt-${Date.now()}.pdf`);
+                showMessage("Application submitted successfully! Your receipt is downloading...", "success");
+            } else {
+                // Fallback in case response is not PDF
+                throw new Error("Unexpected response format");
+            }
+            
+            // Reset form after successful submission
+            setTimeout(() => {
+                this.reset();
+                // Reset all file displays
+                const fileInputs = document.querySelectorAll('.file-input');
+                fileInputs.forEach(input => updateFileDisplay(input));
+            }, 2000);
+
+        } catch (err) {
+            console.error('Error submitting form:', err);
+            showMessage(err.message || "There was an error submitting your application. Please try again.", "error");
+        } finally {
+            // Reset button state
+            submitBtn.disabled = false;
+            loading.style.display = 'none';
+            buttonText.textContent = 'Submit Application';
+        }
+    });
+
+    // Initialize file input handlers and check auth status
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check authentication status on page load
+        checkAuthStatus().then(isAuthenticated => {
+            if (!isAuthenticated) {
+                document.getElementById('loginPrompt').style.display = 'flex';
+                showMessage("Please log in to submit an adoption application.", "error");
+            }
+        });
+
+        // File input handlers
+        const fileInputs = document.querySelectorAll('.file-input');
+        
+        fileInputs.forEach(input => {
+            input.addEventListener('change', function() {
+                updateFileDisplay(this);
+            });
+        });
+
+        // Add drag and drop functionality
+        const fileButtons = document.querySelectorAll('.file-input-button');
+        
+        fileButtons.forEach(button => {
+            const container = button.closest('.file-input-container');
+            const input = container.querySelector('.file-input');
+            
+            // Prevent default drag behaviors
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                button.addEventListener(eventName, preventDefaults, false);
+                document.body.addEventListener(eventName, preventDefaults, false);
+            });
+
+            // Highlight drop area when item is dragged over it
+            ['dragenter', 'dragover'].forEach(eventName => {
+                button.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                button.addEventListener(eventName, unhighlight, false);
+            });
+
+            // Handle dropped files
+            button.addEventListener('drop', handleDrop, false);
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            function highlight(e) {
+                button.style.borderColor = 'var(--dark-wedgwood)';
+                button.style.backgroundColor = 'rgba(74, 103, 65, 0.1)';
+            }
+
+            function unhighlight(e) {
+                button.style.borderColor = 'var(--dark-yellow-beige)';
+                button.style.backgroundColor = '';
+            }
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+
+                if (files.length > 0) {
+                    input.files = files;
+                    updateFileDisplay(input);
+                }
+            }
+        });
+    });
+</script>
+</body>
+</html>

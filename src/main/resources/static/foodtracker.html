@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PawdCast - Pet Nutrition Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4A6741;
+            --primary-light: #6B8A5F;
+            --primary-dark: #3A5233;
+            --secondary: #D4C5A9;
+            --accent: #8B7355;
+            --dark: #2B1F17;
+            --light: #FFFFFF;
+            --medium-beige: #D4C5A9;
+            --dark-beige: #B8A082;
+            --drab-brown: #8B7355;
+            --mocha: #4A3728;
+            --black-brown: #2B1F17;
+            --wedgwood: #4A6741;
+            --shadow: rgba(43, 31, 23, 0.15);
+            --success: #4A6741;
+            --danger: #8B4513;
+            --warning: #B8A082;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #F5F0E8 0%, #E8DED0 100%);
+            color: var(--dark);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+        
+        /* Animated background pattern */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(74, 103, 65, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(212, 197, 169, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, var(--black-brown) 0%, var(--mocha) 100%) !important;
+            box-shadow: 0 4px 20px var(--shadow);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            animation: slideDown 0.5s ease;
+        }
+        
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--secondary) !important;
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-brand:hover {
+            transform: scale(1.05);
+            color: var(--light) !important;
+        }
+        
+        .logo-container {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid var(--secondary);
+            transition: all 0.4s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .logo-container:hover {
+            transform: rotate(360deg) scale(1.1);
+            border-color: var(--primary);
+        }
+        
+        .logo-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .main-container {
+            position: relative;
+            z-index: 1;
+            padding: 2rem 0;
+        }
+        
+        /* Form Styles */
+        .form-control, .form-select {
+            border-radius: 12px;
+            border: 2px solid var(--dark-beige);
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(74, 103, 65, 0.25);
+            transform: translateY(-2px);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(74, 103, 65, 0.3);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(74, 103, 65, 0.4);
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(-1px);
+        }
+        
+        .btn-outline-light:hover {
+            background: var(--secondary);
+            border-color: var(--secondary);
+            color: var(--dark);
+        }
+        
+        /* Dashboard Styles */
+        .dashboard-container {
+            animation: fadeIn 0.6s ease;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        .welcome-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 40px var(--shadow);
+            position: relative;
+            overflow: hidden;
+            animation: slideInLeft 0.6s ease;
+        }
+        
+        @keyframes slideInLeft {
+            from {
+                transform: translateX(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .welcome-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-20px) rotate(180deg);
+            }
+        }
+        
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px var(--shadow);
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--primary);
+            animation: fadeInUp 0.6s ease;
+            animation-fill-mode: both;
+        }
+        
+        .stat-card:nth-child(1) { animation-delay: 0.1s; }
+        .stat-card:nth-child(2) { animation-delay: 0.2s; }
+        .stat-card:nth-child(3) { animation-delay: 0.3s; }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px var(--shadow);
+        }
+        
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+        
+        .content-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px var(--shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            animation: fadeIn 0.6s ease;
+        }
+        
+        .section-title {
+            color: var(--dark);
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .section-title i {
+            color: var(--primary);
+            animation: bounce 2s ease-in-out infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+        
+        /* Food Entry Form */
+        .food-entry-form {
+            background: linear-gradient(135deg, rgba(74, 103, 65, 0.08) 0%, rgba(212, 197, 169, 0.08) 100%);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 2px dashed var(--primary);
+            transition: all 0.3s ease;
+        }
+        
+        .food-entry-form:hover {
+            border-style: solid;
+            background: rgba(74, 103, 65, 0.12);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        /* Food Entries Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, var(--primary) 0%, var(--secondary) 100%);
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 15px var(--shadow);
+            transition: all 0.3s ease;
+            animation: slideInRight 0.5s ease;
+            animation-fill-mode: both;
+        }
+        
+        .timeline-item:nth-child(n) {
+            animation-delay: calc(0.1s * var(--i));
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .timeline-item:hover {
+            transform: translateX(10px);
+            box-shadow: 0 6px 25px var(--shadow);
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2.5rem;
+            top: 2rem;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: var(--primary);
+            border: 3px solid white;
+            box-shadow: 0 0 0 3px var(--primary);
+            animation: ping 2s ease-in-out infinite;
+        }
+        
+        @keyframes ping {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.3);
+                opacity: 0.7;
+            }
+        }
+        
+        .food-type-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Tab Navigation */
+        .custom-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .custom-tab {
+            padding: 1rem 2rem;
+            background: white;
+            border-radius: 12px;
+            border: 2px solid var(--dark-beige);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .custom-tab:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px var(--shadow);
+            border-color: var(--primary);
+        }
+        
+        .custom-tab.active {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 4px 20px rgba(74, 103, 65, 0.3);
+        }
+        
+        /* Diet Cards */
+        .diet-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 15px var(--shadow);
+            border-left: 4px solid var(--primary);
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.5s ease;
+            animation-fill-mode: both;
+        }
+        
+        .diet-card:hover {
+            transform: translateX(10px);
+            box-shadow: 0 6px 25px var(--shadow);
+        }
+        
+        .alert-card {
+            border-left-color: var(--danger);
+            background: linear-gradient(135deg, rgba(139, 69, 19, 0.05) 0%, rgba(139, 69, 19, 0.02) 100%);
+        }
+        
+        /* Loading Animation */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(5px);
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--secondary);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .custom-tabs {
+                flex-direction: column;
+            }
+            
+            .timeline {
+                padding-left: 1.5rem;
+            }
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #999;
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: var(--secondary);
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        /* Success Animation */
+        @keyframes successPulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+        
+        .success-feedback {
+            animation: successPulse 0.5s ease;
+        }
+
+        /* Report Charts */
+        .chart-container {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 15px var(--shadow);
+        }
+
+        .nutrition-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .summary-item {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(74, 103, 65, 0.1);
+            border-radius: 12px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .summary-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .summary-label {
+            font-size: 0.9rem;
+            color: var(--dark);
+            margin-top: 0.5rem;
+        }
+
+        .nav-pills .nav-link {
+            background: white;
+            color: var(--dark);
+            border: 2px solid var(--dark-beige);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-pills .nav-link:hover {
+            background: var(--secondary);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .nav-pills .nav-link.active {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, rgba(139, 69, 19, 0.1) 0%, rgba(139, 69, 19, 0.05) 100%);
+            border-color: var(--danger);
+            color: var(--dark);
+        }
+
+        .text-danger {
+            color: var(--danger) !important;
+        }
+
+        .text-success {
+            color: var(--success) !important;
+        }
+
+        .text-primary {
+            color: var(--primary) !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay hidden" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <div class="logo-container me-2">
+                    <img src="https://res.cloudinary.com/dkuuvasoe/image/upload/v1760186124/pawdcastlogo_cb1l1b.png" 
+                         alt="PawdCast Logo" class="logo-image">
+                </div>
+                <span>PawdCast</span>
+            </a>
+            <!-- Removed user profile and logout options -->
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container main-container">
+        <!-- Dashboard Section -->
+        <div id="dashboardSection">
+            <div class="dashboard-container">
+                <!-- Welcome Banner -->
+                <div class="welcome-banner">
+                    <h2><i class="fas fa-home me-2"></i>Welcome Back, <span id="userName">User</span>!</h2>
+                    <p class="mb-0">Track your pet's nutrition and keep them healthy</p>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="quick-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-paw"></i>
+                        </div>
+                        <h3 id="totalPets">0</h3>
+                        <p class="text-muted mb-0">Total Pets</p>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-utensils"></i>
+                        </div>
+                        <h3 id="totalEntries">0</h3>
+                        <p class="text-muted mb-0">Food Entries</p>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-calendar-day"></i>
+                        </div>
+                        <h3 id="todayEntries">0</h3>
+                        <p class="text-muted mb-0">Today's Entries</p>
+                    </div>
+                </div>
+
+                <!-- Custom Tabs -->
+                <div class="custom-tabs">
+                    <div class="custom-tab active" onclick="switchTab('tracker')">
+                        <i class="fas fa-utensils"></i>
+                        Food Tracker
+                    </div>
+                    <div class="custom-tab" onclick="switchTab('diet')">
+                        <i class="fas fa-book"></i>
+                        Diet Guide
+                    </div>
+                    <div class="custom-tab" onclick="switchTab('reports')">
+                        <i class="fas fa-chart-bar"></i>
+                        Reports
+                    </div>
+                </div>
+
+                <!-- Food Tracker Tab -->
+                <div id="trackerTab" class="content-card">
+                    <h3 class="section-title">
+                        <i class="fas fa-clipboard-list"></i>
+                        Food Tracker
+                    </h3>
+
+                    <!-- Add Food Entry Form -->
+                    <div class="food-entry-form">
+                        <h5 class="mb-3"><i class="fas fa-plus-circle me-2"></i>Add Food Entry</h5>
+                        <form id="foodEntryForm" onsubmit="addFoodEntry(event)">
+                            <div class="form-row">
+                                <div>
+                                    <label class="form-label">Select Pet</label>
+                                    <select class="form-select" id="foodEntryPet" required>
+                                        <option value="">Choose a pet...</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="form-label">Food Type</label>
+                                    <input type="text" class="form-control" id="foodType" placeholder="e.g., Dry kibble" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div>
+                                    <label class="form-label">Quantity</label>
+                                    <input type="number" class="form-control" id="foodQuantity" step="0.1" placeholder="1.5" required>
+                                </div>
+                                <div>
+                                    <label class="form-label">Unit</label>
+                                    <select class="form-select" id="foodUnit" required>
+                                        <option value="">Select unit...</option>
+                                        <option value="cups">Cups</option>
+                                        <option value="grams">Grams</option>
+                                        <option value="ounces">Ounces</option>
+                                        <option value="pieces">Pieces</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="form-label">Feeding Time</label>
+                                    <input type="datetime-local" class="form-control" id="feedingTime" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Notes (Optional)</label>
+                                <textarea class="form-control" id="foodNotes" rows="2" placeholder="Any additional information..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Save Entry
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Pet Selector for Timeline -->
+                    <div class="mb-4">
+                        <label class="form-label"><i class="fas fa-filter me-1"></i>Filter by Pet</label>
+                        <select class="form-select" id="petSelector" onchange="loadFoodEntries()" style="max-width: 300px;">
+                            <option value="">All pets</option>
+                        </select>
+                    </div>
+
+                    <!-- Food Entries Timeline -->
+                    <h5 class="mb-3"><i class="fas fa-history me-2"></i>Recent Entries</h5>
+                    <div class="timeline" id="foodEntriesList">
+                        <!-- Entries will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Diet Guide Tab -->
+                <div id="dietTab" class="content-card hidden">
+                    <h3 class="section-title">
+                        <i class="fas fa-book-medical"></i>
+                        Diet Guidelines & Tips
+                    </h3>
+
+                    <div class="nav nav-pills mb-4">
+                        <button class="nav-link active me-2" onclick="showDietSection('tips')">
+                            <i class="fas fa-lightbulb me-1"></i>Tips
+                        </button>
+                        <button class="nav-link me-2" onclick="showDietSection('guidelines')">
+                            <i class="fas fa-list-check me-1"></i>Guidelines
+                        </button>
+                        <button class="nav-link" onclick="showDietSection('emergency')">
+                            <i class="fas fa-exclamation-triangle me-1"></i>Emergency Signs
+                        </button>
+                    </div>
+
+                    <div id="dietTipsContent">
+                        <!-- Tips will be loaded here -->
+                    </div>
+                    <div id="dietGuidelinesContent" class="hidden">
+                        <!-- Guidelines will be loaded here -->
+                    </div>
+                    <div id="emergencySignsContent" class="hidden">
+                        <!-- Emergency signs will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Reports Tab -->
+                <div id="reportsTab" class="content-card hidden">
+                    <h3 class="section-title">
+                        <i class="fas fa-chart-line"></i>
+                        Nutrition Reports
+                    </h3>
+
+                    <div class="food-entry-form">
+                        <h5 class="mb-3"><i class="fas fa-filter me-2"></i>Report Filters</h5>
+                        <div class="form-row">
+                            <div>
+                                <label class="form-label">Select Pet</label>
+                                <select class="form-select" id="reportPetSelector">
+                                    <option value="">Select a pet...</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="form-label">Start Date</label>
+                                <input type="date" class="form-control" id="reportStartDate">
+                            </div>
+                            <div>
+                                <label class="form-label">End Date</label>
+                                <input type="date" class="form-control" id="reportEndDate">
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" onclick="generateReport()">
+                            <i class="fas fa-chart-bar me-2"></i>Generate Report
+                        </button>
+                    </div>
+
+                    <div id="reportResults">
+                        <!-- Report results will be displayed here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        const API_BASE = 'http://localhost:8080';
+        let currentUser = null;
+        let userPets = [];
+        let allFoodEntries = [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthStatus();
+            setDefaultDateTime();
+        });
+
+        function setDefaultDateTime() {
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('feedingTime').value = now.toISOString().slice(0, 16);
+        }
+
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.add('hidden');
+        }
+
+        function checkAuthStatus() {
+            showLoading();
+            fetch(`${API_BASE}/auth/check`, {
+                credentials: 'include'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.authenticated) {
+                    return fetch(`${API_BASE}/auth/me`, {
+                        credentials: 'include'
+                    });
+                } else {
+                    throw new Error('Not authenticated');
+                }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to get user data');
+                return response.json();
+            })
+            .then(userData => {
+                currentUser = userData;
+                initializeDashboard();
+            })
+            .catch((error) => {
+                console.error('Auth error:', error);
+                window.location.href = '/';
+            })
+            .finally(() => hideLoading());
+        }
+
+        function initializeDashboard() {
+            document.getElementById('dashboardSection').classList.remove('hidden');
+            document.getElementById('userName').textContent = currentUser.fullName || currentUser.email.split('@')[0];
+            
+            loadUserData();
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.custom-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.content-card').forEach(c => c.classList.add('hidden'));
+
+            if (tab === 'tracker') {
+                document.querySelectorAll('.custom-tab')[0].classList.add('active');
+                document.getElementById('trackerTab').classList.remove('hidden');
+            } else if (tab === 'diet') {
+                document.querySelectorAll('.custom-tab')[1].classList.add('active');
+                document.getElementById('dietTab').classList.remove('hidden');
+                loadDietTips();
+            } else if (tab === 'reports') {
+                document.querySelectorAll('.custom-tab')[2].classList.add('active');
+                document.getElementById('reportsTab').classList.remove('hidden');
+                populateReportPetSelector();
+            }
+        }
+
+        function showDietSection(section) {
+            document.querySelectorAll('#dietTab .nav-link').forEach(l => l.classList.remove('active'));
+            document.getElementById('dietTipsContent').classList.add('hidden');
+            document.getElementById('dietGuidelinesContent').classList.add('hidden');
+            document.getElementById('emergencySignsContent').classList.add('hidden');
+
+            if (section === 'tips') {
+                document.querySelectorAll('#dietTab .nav-link')[0].classList.add('active');
+                document.getElementById('dietTipsContent').classList.remove('hidden');
+                loadDietTips();
+            } else if (section === 'guidelines') {
+                document.querySelectorAll('#dietTab .nav-link')[1].classList.add('active');
+                document.getElementById('dietGuidelinesContent').classList.remove('hidden');
+                loadDietGuidelines();
+            } else if (section === 'emergency') {
+                document.querySelectorAll('#dietTab .nav-link')[2].classList.add('active');
+                document.getElementById('emergencySignsContent').classList.remove('hidden');
+                loadEmergencySigns();
+            }
+        }
+
+        function logout() {
+            showLoading();
+            fetch(`${API_BASE}/auth/logout`, {
+                method: 'POST',
+                credentials: 'include'
+            })
+            .finally(() => {
+                currentUser = null;
+                window.location.href = '/';
+            });
+        }
+
+        function loadUserData() {
+            loadUserPets();
+            loadAllFoodEntries();
+            loadDietTips();
+        }
+
+        function loadUserPets() {
+            fetch(`${API_BASE}/pet-profiles/my-pets`, {
+                credentials: 'include'
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to load pets');
+                return response.json();
+            })
+            .then(pets => {
+                userPets = pets;
+                populatePetSelectors();
+                updateStats();
+            })
+            .catch(error => {
+                console.error('Error loading pets:', error);
+                alert('Error loading pets. Please try again.');
+            });
+        }
+
+        function loadAllFoodEntries() {
+            if (userPets.length === 0) {
+                console.log('No pets found to load food entries');
+                return;
+            }
+
+            const promises = userPets.map(pet => 
+                fetch(`${API_BASE}/food-entries/pet/${encodeURIComponent(pet.name)}`, {
+                    credentials: 'include'
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error(`Failed to load entries for ${pet.name}`);
+                    return response.json();
+                })
+                .catch(error => {
+                    console.error(`Error loading entries for ${pet.name}:`, error);
+                    return [];
+                })
+            );
+
+            Promise.all(promises)
+            .then(results => {
+                allFoodEntries = results.flat();
+                console.log('Loaded food entries:', allFoodEntries);
+                loadFoodEntries();
+                updateStats();
+            })
+            .catch(error => {
+                console.error('Error loading all food entries:', error);
+            });
+        }
+
+        function populatePetSelectors() {
+            const selectors = ['foodEntryPet', 'petSelector', 'reportPetSelector'];
+            selectors.forEach(id => {
+                const select = document.getElementById(id);
+                select.innerHTML = id === 'petSelector' ? '<option value="">All pets</option>' : '<option value="">Select a pet...</option>';
+                userPets.forEach(pet => {
+                    select.innerHTML += `<option value="${pet.name}">${pet.name}</option>`;
+                });
+            });
+        }
+
+        function populateReportPetSelector() {
+            const select = document.getElementById('reportPetSelector');
+            select.innerHTML = '<option value="">Select a pet...</option>';
+            userPets.forEach(pet => {
+                select.innerHTML += `<option value="${pet.name}">${pet.name}</option>`;
+            });
+        }
+
+        function updateStats() {
+            document.getElementById('totalPets').textContent = userPets.length;
+            document.getElementById('totalEntries').textContent = allFoodEntries.length;
+            
+            const today = new Date().toDateString();
+            const todayEntries = allFoodEntries.filter(entry => 
+                new Date(entry.feedingTime).toDateString() === today
+            );
+            document.getElementById('todayEntries').textContent = todayEntries.length;
+        }
+
+        function addFoodEntry(e) {
+            e.preventDefault();
+            showLoading();
+            
+            const formData = new FormData();
+            formData.append('petName', document.getElementById('foodEntryPet').value);
+            formData.append('foodType', document.getElementById('foodType').value);
+            formData.append('quantity', document.getElementById('foodQuantity').value);
+            formData.append('unit', document.getElementById('foodUnit').value);
+            formData.append('feedingTime', document.getElementById('feedingTime').value);
+            formData.append('notes', document.getElementById('foodNotes').value);
+
+            fetch(`${API_BASE}/food-entries/create`, {
+                method: 'POST',
+                body: formData,
+                credentials: 'include'
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to add entry');
+                return response.json();
+            })
+            .then(() => {
+                document.getElementById('foodEntryForm').reset();
+                setDefaultDateTime();
+                document.getElementById('foodEntryForm').classList.add('success-feedback');
+                setTimeout(() => {
+                    document.getElementById('foodEntryForm').classList.remove('success-feedback');
+                }, 500);
+                loadAllFoodEntries();
+                alert('Food entry added successfully!');
+            })
+            .catch(error => {
+                console.error('Error adding food entry:', error);
+                alert('Error adding food entry. Please try again.');
+            })
+            .finally(() => hideLoading());
+        }
+
+        function loadFoodEntries() {
+            const selectedPet = document.getElementById('petSelector').value;
+            console.log('Loading entries for pet:', selectedPet);
+            
+            let entriesToShow = [];
+            
+            if (selectedPet) {
+                entriesToShow = allFoodEntries.filter(e => e.petName === selectedPet);
+                console.log(`Found ${entriesToShow.length} entries for ${selectedPet}`);
+            } else {
+                entriesToShow = allFoodEntries;
+                console.log(`Showing all ${entriesToShow.length} entries`);
+            }
+
+            const container = document.getElementById('foodEntriesList');
+            
+            if (entriesToShow.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-bowl-food"></i>
+                        <h4>No food entries found</h4>
+                        <p>${selectedPet ? `No food entries found for ${selectedPet}.` : 'Start tracking your pet\'s nutrition by adding entries above!'}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            entriesToShow.sort((a, b) => new Date(b.feedingTime) - new Date(a.feedingTime));
+            
+            container.innerHTML = entriesToShow.map((entry, index) => `
+                <div class="timeline-item" style="--i: ${index}">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="food-type-badge">${entry.foodType}</span>
+                        <small class="text-muted">
+                            <i class="fas fa-clock me-1"></i>${new Date(entry.feedingTime).toLocaleString()}
+                        </small>
+                    </div>
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-paw me-2 text-primary"></i>
+                        <strong>${entry.petName}</strong>
+                    </div>
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-weight me-2 text-muted"></i>
+                        <span>${entry.quantity} ${entry.unit}</span>
+                    </div>
+                    ${entry.notes ? `
+                        <div class="mt-2 p-2" style="background: rgba(74, 103, 65, 0.08); border-radius: 8px;">
+                            <small><i class="fas fa-note-sticky me-1"></i>${entry.notes}</small>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        function loadDietTips() {
+            fetch(`${API_BASE}/pet-diet/tips`)
+            .then(response => response.json())
+            .then(tips => {
+                let html = '';
+                
+                if (tips.generalTips && tips.generalTips.length > 0) {
+                    html += '<h5 class="mb-3"><i class="fas fa-lightbulb me-2"></i>General Feeding Tips</h5>';
+                    tips.generalTips.forEach((category, index) => {
+                        html += `
+                            <div class="diet-card" style="animation-delay: ${index * 0.1}s">
+                                <h6><i class="fas fa-check-circle me-2 text-success"></i>${category.category}</h6>
+                                <ul class="mb-0">
+                                    ${category.tips.map(tip => `<li>${tip}</li>`).join('')}
+                                </ul>
+                            </div>
+                        `;
+                    });
+                }
+                
+                if (tips.specialConsiderations && tips.specialConsiderations.length > 0) {
+                    html += '<h5 class="mt-4 mb-3"><i class="fas fa-star me-2"></i>Special Considerations</h5>';
+                    tips.specialConsiderations.forEach((consideration, index) => {
+                        html += `
+                            <div class="diet-card" style="animation-delay: ${index * 0.1}s">
+                                <h6><i class="fas fa-heart me-2 text-danger"></i>${consideration.category}</h6>
+                                <ul class="mb-0">
+                                    ${consideration.tips.map(tip => `<li>${tip}</li>`).join('')}
+                                </ul>
+                            </div>
+                        `;
+                    });
+                }
+                
+                if (tips.treatGuidelines && tips.treatGuidelines.length > 0) {
+                    html += '<h5 class="mt-4 mb-3"><i class="fas fa-cookie me-2"></i>Treat Guidelines</h5>';
+                    tips.treatGuidelines.forEach((guideline, index) => {
+                        html += `
+                            <div class="diet-card" style="animation-delay: ${index * 0.1}s">
+                                <h6><i class="fas fa-info-circle me-2 text-primary"></i>${guideline.tip}</h6>
+                                <p class="mb-0">${guideline.explanation}</p>
+                            </div>
+                        `;
+                    });
+                }
+                
+                document.getElementById('dietTipsContent').innerHTML = html || '<p class="text-muted">No diet tips available.</p>';
+            })
+            .catch(error => {
+                console.error('Error loading diet tips:', error);
+                document.getElementById('dietTipsContent').innerHTML = '<p class="text-muted">Error loading diet tips.</p>';
+            });
+        }
+
+        function loadDietGuidelines() {
+            fetch(`${API_BASE}/pet-diet/guidelines`)
+            .then(response => response.json())
+            .then(guidelines => {
+                let html = '';
+                
+                if (guidelines.recommendedFoods && guidelines.recommendedFoods.length > 0) {
+                    html += '<h5 class="mb-3"><i class="fas fa-thumbs-up me-2"></i>Recommended Foods</h5>';
+                    guidelines.recommendedFoods.forEach((category, index) => {
+                        html += `
+                            <div class="diet-card" style="animation-delay: ${index * 0.1}s">
+                                <h6><i class="fas fa-apple-alt me-2 text-success"></i>${category.category}</h6>
+                                <p><strong>Foods:</strong></p>
+                                <ul>
+                                    ${category.foods.map(food => `<li>${food}</li>`).join('')}
+                                </ul>
+                                <p class="mb-0"><strong><i class="fas fa-medal me-1"></i>Benefits:</strong> ${category.benefits}</p>
+                            </div>
+                        `;
+                    });
+                }
+                
+                if (guidelines.foodsToAvoid && guidelines.foodsToAvoid.length > 0) {
+                    html += '<h5 class="mt-4 mb-3"><i class="fas fa-ban me-2"></i>Foods to Avoid</h5>';
+                    guidelines.foodsToAvoid.forEach((category, index) => {
+                        html += `
+                            <div class="diet-card alert-card" style="animation-delay: ${index * 0.1}s">
+                                <h6><i class="fas fa-exclamation-triangle me-2 text-danger"></i>${category.category}</h6>
+                                <p><strong>Foods:</strong></p>
+                                <ul>
+                                    ${category.foods.map(food => `<li>${food}</li>`).join('')}
+                                </ul>
+                                <p class="mb-0 text-danger"><strong><i class="fas fa-skull-crossbones me-1"></i>Dangers:</strong> ${category.dangers}</p>
+                            </div>
+                        `;
+                    });
+                }
+                
+                if (guidelines.feedingGuidelines) {
+                    const fg = guidelines.feedingGuidelines;
+                    html += '<h5 class="mt-4 mb-3"><i class="fas fa-calendar-alt me-2"></i>Feeding Schedule Guidelines</h5>';
+                    html += `
+                        <div class="diet-card">
+                            <p><strong><i class="fas fa-baby me-1"></i>Puppies/Kittens:</strong> ${fg.puppiesKittens}</p>
+                            <p><strong><i class="fas fa-dog me-1"></i>Adult Dogs:</strong> ${fg.adultDogs}</p>
+                            <p><strong><i class="fas fa-cat me-1"></i>Adult Cats:</strong> ${fg.adultCats}</p>
+                            <p><strong><i class="fas fa-paw me-1"></i>Senior Pets:</strong> ${fg.seniorPets}</p>
+                            <h6 class="mt-3"><i class="fas fa-list me-2"></i>General Tips:</h6>
+                            <ul class="mb-0">
+                                ${fg.generalTips.map(tip => `<li>${tip}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                }
+                
+                document.getElementById('dietGuidelinesContent').innerHTML = html || '<p class="text-muted">No guidelines available.</p>';
+            })
+            .catch(error => {
+                console.error('Error loading guidelines:', error);
+                document.getElementById('dietGuidelinesContent').innerHTML = '<p class="text-muted">Error loading guidelines.</p>';
+            });
+        }
+
+        function loadEmergencySigns() {
+            fetch(`${API_BASE}/pet-diet/emergency-signs`)
+            .then(response => response.json())
+            .then(data => {
+                const html = `
+                    <div class="alert alert-danger" style="border-radius: 16px; border-left: 5px solid var(--danger);">
+                        <h5><i class="fas fa-exclamation-triangle me-2"></i>Emergency Warning Signs</h5>
+                        <p class="mb-0">If you notice any of these signs, contact your veterinarian immediately!</p>
+                    </div>
+                    <div class="diet-card alert-card">
+                        <ul class="mb-0">
+                            ${data.emergencySigns.map(sign => `
+                                <li><i class="fas fa-chevron-right me-2 text-danger"></i>${sign}</li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                `;
+                document.getElementById('emergencySignsContent').innerHTML = html;
+            })
+            .catch(error => {
+                console.error('Error loading emergency signs:', error);
+                document.getElementById('emergencySignsContent').innerHTML = '<p class="text-muted">Error loading emergency signs.</p>';
+            });
+        }
+
+        function generateReport() {
+            const petName = document.getElementById('reportPetSelector').value;
+            const startDate = document.getElementById('reportStartDate').value;
+            const endDate = document.getElementById('reportEndDate').value;
+
+            if (!petName) {
+                alert('Please select a pet');
+                return;
+            }
+
+            showLoading();
+            let url = `${API_BASE}/food-entries/pet/${encodeURIComponent(petName)}`;
+            
+            if (startDate && endDate) {
+                url = `${API_BASE}/food-entries/pet/${encodeURIComponent(petName)}/date-range?startDate=${startDate}T00:00:00&endDate=${endDate}T23:59:59`;
+            }
+
+            fetch(url, { credentials: 'include' })
+            .then(response => response.json())
+            .then(entries => {
+                displayReport(entries, petName, startDate, endDate);
+            })
+            .catch(error => {
+                console.error('Error generating report:', error);
+                document.getElementById('reportResults').innerHTML = '<p class="text-muted">Error generating report.</p>';
+            })
+            .finally(() => hideLoading());
+        }
+
+        function displayReport(entries, petName, startDate, endDate) {
+            let html = `
+                <div class="content-card mt-4" style="animation: fadeIn 0.6s ease;">
+                    <h4 class="mb-3"><i class="fas fa-chart-pie me-2"></i>Nutrition Report for ${petName}</h4>
+                    ${startDate && endDate ? 
+                        `<p class="text-muted">Period: ${new Date(startDate).toLocaleDateString()} - ${new Date(endDate).toLocaleDateString()}</p>` : 
+                        `<p class="text-muted">All time data</p>`
+                    }
+            `;
+
+            if (entries.length === 0) {
+                html += '<div class="empty-state"><i class="fas fa-chart-bar"></i><h4>No data available</h4><p>No food entries found for the selected criteria.</p></div>';
+            } else {
+                const totalEntries = entries.length;
+                const foodTypes = [...new Set(entries.map(e => e.foodType))];
+                const uniqueDays = [...new Set(entries.map(e => new Date(e.feedingTime).toDateString()))];
+                
+                const foodTypeCounts = {};
+                entries.forEach(entry => {
+                    foodTypeCounts[entry.foodType] = (foodTypeCounts[entry.foodType] || 0) + 1;
+                });
+                const mostCommonFood = Object.keys(foodTypeCounts).reduce((a, b) => 
+                    foodTypeCounts[a] > foodTypeCounts[b] ? a : b
+                );
+
+                html += `
+                    <div class="nutrition-summary">
+                        <div class="summary-item">
+                            <div class="summary-value">${totalEntries}</div>
+                            <div class="summary-label">Total Entries</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-value">${foodTypes.length}</div>
+                            <div class="summary-label">Food Types</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-value">${uniqueDays.length}</div>
+                            <div class="summary-label">Days Tracked</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-value">${mostCommonFood}</div>
+                            <div class="summary-label">Most Common Food</div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <h5><i class="fas fa-chart-bar me-2"></i>Food Type Distribution</h5>
+                        <canvas id="foodTypeChart" height="200"></canvas>
+                    </div>
+
+                    <h5 class="mb-3"><i class="fas fa-history me-2"></i>Recent Entries</h5>
+                    <div class="timeline">
+                `;
+
+                entries.slice(0, 10).forEach((entry, index) => {
+                    html += `
+                        <div class="timeline-item" style="--i: ${index}">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="food-type-badge">${entry.foodType}</span>
+                                <small class="text-muted">
+                                    <i class="fas fa-clock me-1"></i>${new Date(entry.feedingTime).toLocaleString()}
+                                </small>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-weight me-2 text-muted"></i>
+                                <span>${entry.quantity} ${entry.unit}</span>
+                            </div>
+                            ${entry.notes ? `
+                                <div class="mt-2 p-2" style="background: rgba(74, 103, 65, 0.08); border-radius: 8px;">
+                                    <small><i class="fas fa-note-sticky me-1"></i>${entry.notes}</small>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                });
+
+                html += '</div>';
+                if (entries.length > 10) {
+                    html += `<p class="text-center text-muted mt-3">... and ${entries.length - 10} more entries</p>`;
+                }
+
+                setTimeout(() => createFoodTypeChart(entries), 100);
+            }
+
+            html += '</div>';
+            document.getElementById('reportResults').innerHTML = html;
+        }
+
+        function createFoodTypeChart(entries) {
+            const ctx = document.getElementById('foodTypeChart').getContext('2d');
+            
+            const foodTypeCounts = {};
+            entries.forEach(entry => {
+                foodTypeCounts[entry.foodType] = (foodTypeCounts[entry.foodType] || 0) + 1;
+            });
+
+            const labels = Object.keys(foodTypeCounts);
+            const data = Object.values(foodTypeCounts);
+            const backgroundColors = [
+                'rgba(74, 103, 65, 0.8)',
+                'rgba(212, 197, 169, 0.8)',
+                'rgba(139, 115, 85, 0.8)',
+                'rgba(184, 160, 130, 0.8)',
+                'rgba(74, 55, 40, 0.8)',
+                'rgba(107, 138, 95, 0.8)'
+            ];
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Number of Entries',
+                        data: data,
+                        backgroundColor: backgroundColors,
+                        borderColor: backgroundColors.map(color => color.replace('0.8', '1')),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Food Type Distribution'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

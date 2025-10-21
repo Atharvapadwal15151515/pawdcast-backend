@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pawdcast - Your Pet Care Hub</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* DMC Color Palette - Original Colors */
+:root {
+  --medium-yellow-beige: #D4C5A9;
+  --dark-yellow-beige: #B8A082;
+  --dark-drab-brown: #8B7355;
+  --very-dark-mocha: #4A3728;
+  --black-brown: #2B1F17;
+  --dark-wedgwood: #4A6741;
+  --white: #FFFFFF;
+  
+  --primary-gradient: linear-gradient(135deg, var(--medium-yellow-beige), var(--dark-yellow-beige));
+  --accent-gradient: linear-gradient(135deg, var(--dark-wedgwood), #5a7d4f);
+  --dark-gradient: linear-gradient(135deg, var(--very-dark-mocha), var(--black-brown));
+  --light-gradient: linear-gradient(135deg, var(--white), #faf9f5);
+  --success-gradient: linear-gradient(135deg, var(--dark-wedgwood), #6b8e5a);
+  --warning-gradient: linear-gradient(135deg, #c5704f, #a85c42);
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--primary-gradient);
+  min-height: 100vh;
+  color: var(--black-brown);
+  overflow-x: hidden;
+}
+
+/* Animated Background */
+.bg-pattern {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  opacity: 0.05;
+  pointer-events: none;
+}
+
+.bg-pattern::before {
+  content: '';
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  background-image: 
+    radial-gradient(circle, var(--dark-drab-brown) 1px, transparent 1px);
+  background-size: 50px 50px;
+  animation: movePattern 20s linear infinite;
+}
+
+@keyframes movePattern {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(50px, 50px); }
+}
+
+/* Navigation */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 4px 30px rgba(43, 31, 23, 0.1);
+  padding: 1rem 0;
+  animation: slideDown 0.6s ease-out;
+  border-bottom: 1px solid var(--dark-yellow-beige);
+}
+
+.nav-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+}
+
+.logo {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid var(--dark-wedgwood);
+  box-shadow: 0 6px 25px rgba(74, 103, 65, 0.35);
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  background: var(--white);
+}
+
+.logo::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+  background: var(--accent-gradient);
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+.logo:hover {
+  transform: scale(1.2) rotate(8deg);
+  box-shadow: 0 10px 40px rgba(74, 103, 65, 0.5);
+  border-color: var(--medium-yellow-beige);
+}
+
+.logo:hover::after {
+  opacity: 0.15;
+}
+
+.logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: relative;
+  z-index: 1;
+}
+
+.brand-name {
+  font-size: 2rem;
+  font-weight: 800;
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.5px;
+}
+
+/* Hero Section */
+.hero {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 5rem 2rem 4rem;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-title {
+  font-size: 4.5rem;
+  font-weight: 900;
+  color: var(--very-dark-mocha);
+  margin-bottom: 1.5rem;
+  text-shadow: 2px 4px 12px rgba(43, 31, 23, 0.15);
+  animation: fadeInUp 0.8s ease-out;
+  line-height: 1.1;
+  letter-spacing: -2px;
+}
+
+.hero-subtitle {
+  font-size: 1.6rem;
+  color: var(--dark-drab-brown);
+  margin-bottom: 3rem;
+  animation: fadeInUp 0.8s ease-out 0.2s both;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+  font-weight: 400;
+}
+
+.search-bar {
+  max-width: 650px;
+  margin: 0 auto 2.5rem;
+  animation: fadeInUp 0.8s ease-out 0.4s both;
+}
+
+.search-wrapper {
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  padding: 1.4rem 4rem 1.4rem 4rem;
+  border: 3px solid var(--dark-yellow-beige);
+  border-radius: 50px;
+  font-size: 1.15rem;
+  background: var(--white);
+  box-shadow: 0 15px 50px rgba(43, 31, 23, 0.12);
+  transition: all 0.4s;
+  color: var(--black-brown);
+}
+
+.search-input:focus {
+  outline: none;
+  box-shadow: 0 20px 60px rgba(74, 103, 65, 0.25);
+  transform: translateY(-3px);
+  border-color: var(--dark-wedgwood);
+}
+
+.search-input::placeholder {
+  color: var(--dark-drab-brown);
+  opacity: 0.6;
+}
+
+.search-icon {
+  position: absolute;
+  left: 1.8rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--dark-wedgwood);
+  font-size: 1.3rem;
+}
+
+.filter-chips {
+  display: flex;
+  gap: 1.2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  animation: fadeInUp 0.8s ease-out 0.6s both;
+}
+
+.chip {
+  padding: 0.9rem 2rem;
+  border-radius: 50px;
+  border: 3px solid var(--dark-yellow-beige);
+  background: var(--white);
+  color: var(--dark-drab-brown);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.05rem;
+  box-shadow: 0 4px 15px rgba(43, 31, 23, 0.08);
+}
+
+.chip:hover {
+  background: var(--light-gradient);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(43, 31, 23, 0.15);
+}
+
+.chip.active {
+  background: var(--accent-gradient);
+  color: var(--white);
+  border-color: var(--dark-wedgwood);
+  box-shadow: 0 6px 25px rgba(74, 103, 65, 0.3);
+}
+
+.chip i {
+  font-size: 1.1rem;
+}
+
+/* Main Content */
+.main-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+.pets-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2.5rem;
+  margin-top: 2rem;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.pet-card {
+  background: var(--white);
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 15px 50px rgba(43, 31, 23, 0.12);
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  cursor: pointer;
+  animation: fadeInUp 0.6s ease-out both;
+  border: 2px solid var(--dark-yellow-beige);
+}
+
+.pet-card:hover {
+  transform: translateY(-15px) scale(1.02);
+  box-shadow: 0 25px 70px rgba(43, 31, 23, 0.2);
+  border-color: var(--dark-wedgwood);
+}
+
+.pet-image-wrapper {
+  position: relative;
+  height: 300px;
+  overflow: hidden;
+  background: var(--light-gradient);
+}
+
+.pet-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.7s ease;
+  filter: brightness(0.95);
+}
+
+.pet-card:hover .pet-image {
+  transform: scale(1.15);
+  filter: brightness(1);
+}
+
+.pet-badge {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.2rem;
+  background: var(--accent-gradient);
+  padding: 0.6rem 1.3rem;
+  border-radius: 50px;
+  font-weight: 800;
+  font-size: 0.9rem;
+  color: var(--white);
+  box-shadow: 0 6px 20px rgba(74, 103, 65, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  z-index: 10;
+}
+
+.pet-icon-overlay {
+  position: absolute;
+  bottom: -45px;
+  right: 2rem;
+  width: 90px;
+  height: 90px;
+  background: var(--white);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  color: var(--dark-wedgwood);
+  box-shadow: 0 10px 35px rgba(43, 31, 23, 0.2);
+  transition: all 0.5s;
+  z-index: 10;
+  border: 4px solid var(--dark-yellow-beige);
+}
+
+.pet-card:hover .pet-icon-overlay {
+  transform: scale(1.15) rotate(10deg);
+  border-color: var(--dark-wedgwood);
+}
+
+.pet-body {
+  padding: 3.5rem 2.5rem 2.5rem;
+  position: relative;
+}
+
+.pet-header-section {
+  margin-bottom: 1.5rem;
+}
+
+.pet-name {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--very-dark-mocha);
+  margin-bottom: 0.4rem;
+  letter-spacing: -0.5px;
+}
+
+.pet-scientific {
+  font-size: 1.05rem;
+  color: var(--dark-drab-brown);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.difficulty-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-top: 1.2rem;
+  padding: 1.2rem;
+  background: var(--light-gradient);
+  border-radius: 15px;
+  border-left: 4px solid var(--dark-wedgwood);
+}
+
+.difficulty-label {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--very-dark-mocha);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stars {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.star {
+  color: #fbbf24;
+  font-size: 1.1rem;
+}
+
+.star.empty {
+  color: var(--dark-yellow-beige);
+}
+
+.pet-description {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--dark-drab-brown);
+  margin-bottom: 1.5rem;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.info-item {
+  background: var(--light-gradient);
+  padding: 1.2rem;
+  border-radius: 15px;
+  border-left: 4px solid var(--dark-wedgwood);
+  transition: all 0.3s;
+}
+
+.info-item:hover {
+  transform: translateX(5px);
+  box-shadow: 0 6px 20px rgba(74, 103, 65, 0.1);
+}
+
+.info-label {
+  font-size: 0.85rem;
+  color: var(--dark-drab-brown);
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  letter-spacing: 0.5px;
+}
+
+.info-label i {
+  color: var(--dark-wedgwood);
+}
+
+.info-value {
+  font-size: 1.05rem;
+  color: var(--very-dark-mocha);
+  font-weight: 600;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.6rem;
+  margin-bottom: 1.2rem;
+  background: var(--dark-yellow-beige);
+  padding: 0.5rem;
+  border-radius: 15px;
+  box-shadow: inset 0 2px 8px rgba(43, 31, 23, 0.1);
+}
+
+.tab {
+  flex: 1;
+  padding: 1rem;
+  border: none;
+  background: none;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  color: var(--dark-drab-brown);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  font-size: 1rem;
+}
+
+.tab.active {
+  background: var(--white);
+  color: var(--dark-wedgwood);
+  box-shadow: 0 4px 15px rgba(43, 31, 23, 0.12);
+  transform: translateY(-2px);
+}
+
+.tab:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.5);
+  color: var(--very-dark-mocha);
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.tips-list {
+  list-style: none;
+}
+
+.tips-list li {
+  padding: 1.2rem;
+  margin-bottom: 0.9rem;
+  background: var(--light-gradient);
+  border-radius: 15px;
+  display: flex;
+  align-items: flex-start;
+  gap: 1.2rem;
+  transition: all 0.3s;
+  border-left: 4px solid transparent;
+  color: var(--black-brown);
+}
+
+.tips-list li:hover {
+  background: var(--white);
+  box-shadow: 0 6px 20px rgba(43, 31, 23, 0.08);
+  transform: translateX(8px);
+}
+
+.tips-list.dos li {
+  border-left-color: var(--dark-wedgwood);
+}
+
+.tips-list.donts li {
+  border-left-color: #c5704f;
+}
+
+.tip-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
+.tips-list.dos .tip-icon {
+  background: var(--success-gradient);
+  color: var(--white);
+  box-shadow: 0 2px 8px rgba(74, 103, 65, 0.3);
+}
+
+.tips-list.donts .tip-icon {
+  background: var(--warning-gradient);
+  color: var(--white);
+  box-shadow: 0 2px 8px rgba(197, 112, 79, 0.3);
+}
+
+.tip-text {
+  color: var(--black-brown);
+  line-height: 1.6;
+  font-size: 1rem;
+}
+
+.quick-facts {
+  background: var(--accent-gradient);
+  padding: 1.8rem;
+  border-radius: 18px;
+  margin-top: 1.5rem;
+  color: var(--white);
+  box-shadow: 0 6px 25px rgba(74, 103, 65, 0.3);
+}
+
+.quick-facts h4 {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1.2rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.facts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.2rem;
+}
+
+.fact-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+/* Floating Action Button */
+.fab {
+  position: fixed;
+  bottom: 2.5rem;
+  right: 2.5rem;
+  width: 65px;
+  height: 65px;
+  border-radius: 50%;
+  background: var(--accent-gradient);
+  color: var(--white);
+  border: none;
+  font-size: 1.6rem;
+  cursor: pointer;
+  box-shadow: 0 10px 35px rgba(74, 103, 65, 0.4);
+  transition: all 0.4s;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  border: 3px solid var(--dark-yellow-beige);
+}
+
+.fab.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.fab:hover {
+  transform: translateY(-8px) scale(1.12);
+  box-shadow: 0 15px 50px rgba(74, 103, 65, 0.5);
+  border-color: var(--white);
+}
+
+/* Loading */
+.loading {
+  text-align: center;
+  padding: 5rem;
+  color: var(--very-dark-mocha);
+}
+
+.spinner {
+  width: 70px;
+  height: 70px;
+  border: 5px solid var(--dark-yellow-beige);
+  border-top: 5px solid var(--dark-wedgwood);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1.5rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2.8rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.3rem;
+  }
+  
+  .pets-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .facts-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .logo {
+    width: 60px;
+    height: 60px;
+  }
+}
+
+@media (max-width: 480px) {
+  .filter-chips {
+    gap: 0.7rem;
+  }
+  
+  .chip {
+    padding: 0.7rem 1.3rem;
+    font-size: 0.95rem;
+  }
+  
+  .hero {
+    padding: 3rem 1.5rem;
+  }
+}
+</style>
+</head>
+<body>
+  <div class="bg-pattern"></div>
+  
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="logo-container">
+        <div class="logo">
+          <img src="https://res.cloudinary.com/dkuuvasoe/image/upload/v1760186124/pawdcastlogo_cb1l1b.png" alt="Pawdcast Logo">
+        </div>
+        <span class="brand-name">Pawdcast</span>
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <h1 class="hero-title">Discover Pet Care Excellence</h1>
+    <p class="hero-subtitle">Expert guides and tips for caring for your beloved companions</p>
+    
+    <div class="search-bar">
+      <div class="search-wrapper">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" class="search-input" id="searchInput" placeholder="Search for dogs, cats, birds, fish...">
+      </div>
+    </div>
+    
+    <div class="filter-chips">
+      <button class="chip active" data-category="all">
+        <i class="fas fa-th"></i> All Pets
+      </button>
+      <button class="chip" data-category="Mammal">
+        <i class="fas fa-paw"></i> Mammals
+      </button>
+      <button class="chip" data-category="Aquatic">
+        <i class="fas fa-fish"></i> Aquatic
+      </button>
+      <button class="chip" data-category="Avian">
+        <i class="fas fa-feather"></i> Birds
+      </button>
+    </div>
+  </section>
+
+  <main class="main-content">
+    <div id="petsContainer">
+      <div class="loading">
+        <div class="spinner"></div>
+        <p style="font-size: 1.2rem; font-weight: 600;">Loading amazing pets...</p>
+      </div>
+    </div>
+  </main>
+
+  <button class="fab" id="backToTop">
+    <i class="fas fa-arrow-up"></i>
+  </button>
+
+  <script>
+    const petData = {
+      petTypes: [
+        {
+          species: "Dog",
+          scientificName: "Canis lupus familiaris",
+          category: "Mammal",
+          difficulty: 3,
+          image: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&h=600&fit=crop",
+          icon: "fa-dog",
+          overview: {
+            description: "Dogs are incredibly loyal and social animals that form strong bonds with their families. They require regular exercise, mental stimulation, and consistent training to thrive. Different breeds have varying energy levels and care requirements.",
+            averageLifespan: {
+              range: "10-13 years",
+              factors: "Breed size and healthcare"
+            }
+          },
+          dosAndDonts: {
+            dos: [
+              "Provide daily exercise and mental stimulation through walks and play",
+              "Establish a consistent feeding schedule with high-quality dog food",
+              "Socialize your dog early with people and other animals",
+              "Use positive reinforcement training methods",
+              "Schedule regular veterinary check-ups and vaccinations",
+              "Provide a comfortable sleeping area and safe space",
+              "Brush teeth regularly and maintain dental hygiene"
+            ],
+            donts: [
+              "Don't leave dogs alone for extended periods without breaks",
+              "Avoid using physical punishment - it damages trust",
+              "Don't feed chocolate, grapes, onions, or xylitol",
+              "Avoid skipping daily exercise - it leads to behavioral issues",
+              "Don't neglect grooming needs specific to your breed",
+              "Avoid exposing to extreme heat or cold temperatures"
+            ]
+          },
+          quickTips: [
+            "Use puzzle toys",
+            "Daily routine",
+            "Recall training",
+            "Proper chew toys"
+          ]
+        },
+        {
+          species: "Cat",
+          scientificName: "Felis catus",
+          category: "Mammal",
+          difficulty: 2,
+          image: "https://images.pexels.com/photos/617278/pexels-photo-617278.jpeg?cs=srgb&dl=animal-cute-eyes-617278.jpg&fm=jpg",
+          icon: "fa-cat",
+          overview: {
+            description: "Cats are independent yet affectionate pets that make excellent companions. They're naturally clean animals with unique personalities. Cats need mental stimulation, proper nutrition, and regular veterinary care to live long, healthy lives.",
+            averageLifespan: {
+              range: "12-18 years",
+              factors: "Indoor lifestyle and care quality"
+            }
+          },
+          dosAndDonts: {
+            dos: [
+              "Provide vertical spaces like cat trees for climbing",
+              "Offer multiple clean litter boxes in quiet locations",
+              "Engage in daily interactive play sessions",
+              "Provide scratching posts to protect furniture",
+              "Brush regularly to reduce hairballs and matting",
+              "Keep food and water away from litter areas",
+              "Create quiet hiding spots for when they need alone time"
+            ],
+            donts: [
+              "Never declaw - it's painful and removes their natural defense",
+              "Avoid sudden changes in diet or daily routine",
+              "Don't punish cats for natural behaviors like scratching",
+              "Avoid using essential oils - many are toxic to cats",
+              "Don't ignore changes in litter box habits - they signal health issues",
+              "Avoid forcing interactions when they want space"
+            ]
+          },
+          quickTips: [
+            "Rotate toys weekly",
+            "Window perches",
+            "Pheromone diffusers",
+            "Regular brushing"
+          ]
+        },
+        {
+          species: "Fish",
+          scientificName: "Various species",
+          category: "Aquatic",
+          difficulty: 4,
+          image: "https://images.pexels.com/photos/886210/pexels-photo-886210.jpeg?cs=srgb&dl=water-animal-swimming-886210.jpg&fm=jpg",
+          icon: "fa-fish",
+          overview: {
+            description: "Aquarium fish require carefully maintained environments with proper water chemistry, temperature, and filtration. Different species have unique needs and compatibility requirements. A well-maintained aquarium can be a beautiful and calming addition to any home.",
+            averageLifespan: {
+              range: "1-20+ years depending on species",
+              factors: "Water quality and tank conditions"
+            }
+          },
+          dosAndDonts: {
+            dos: [
+              "Cycle your aquarium for 4-6 weeks before adding fish",
+              "Perform 25% water changes weekly",
+              "Test water parameters (pH, ammonia, nitrite, nitrate) regularly",
+              "Quarantine new fish for 2-4 weeks before adding to main tank",
+              "Provide appropriate hiding places and decorations",
+              "Research compatibility before mixing species",
+              "Maintain consistent water temperature with a quality heater"
+            ],
+            donts: [
+              "Don't overcrowd - follow the inch-per-gallon rule",
+              "Avoid overfeeding - it pollutes water quickly",
+              "Never use soap or harsh chemicals to clean the tank",
+              "Don't add fish to uncycled tanks",
+              "Avoid sudden temperature or pH changes",
+              "Don't tap on glass - it severely stresses fish"
+            ]
+          },
+          quickTips: [
+            "Slow acclimation",
+            "Quarantine tank",
+            "Test water weekly",
+            "Research species needs"
+          ]
+        },
+        {
+          species: "Bird",
+          scientificName: "Various species",
+          category: "Avian",
+          difficulty: 4,
+          image: "https://images.unsplash.com/photo-1522926193341-e9ffd686c60f?w=800&h=600&fit=crop",
+          icon: "fa-dove",
+          overview: {
+            description: "Birds are highly intelligent and social creatures that require significant mental stimulation and interaction. They can form deep bonds with their owners and may live for decades. Different species have vastly different care requirements and temperaments.",
+            averageLifespan: {
+              range: "5-80+ years by species",
+              factors: "Species type and care quality"
+            }
+          },
+          dosAndDonts: {
+            dos: [
+              "Provide perches of varying sizes and textures",
+              "Allow daily supervised out-of-cage flying time",
+              "Offer foraging toys and puzzles for enrichment",
+              "Maintain consistent 12-hour light/dark cycles",
+              "Feed species-appropriate pellets, fresh vegetables, and fruits",
+              "Interact and socialize with your bird daily",
+              "Provide bathing opportunities several times weekly"
+            ],
+            donts: [
+              "Never use non-stick cookware near birds - fumes are deadly",
+              "Avoid scented candles, air fresheners, and aerosols",
+              "Don't keep birds in kitchens due to fume exposure",
+              "Avoid sudden loud noises that cause stress",
+              "Never feed avocado, chocolate, caffeine, or alcohol",
+              "Don't restrict natural behaviors like vocalization"
+            ]
+          },
+          quickTips: [
+            "Rotate toys often",
+            "Natural wood perches",
+            "Fresh veggies daily",
+            "Positive reinforcement"
+          ]
+        }
+      ]
+    };
+
+    function renderPets(pets) {
+      const container = document.getElementById('petsContainer');
+      
+      const html = pets.map((pet, index) => `
+        <div class="pet-card" data-category="${pet.category}" style="animation-delay: ${index * 0.1}s">
+          <div class="pet-image-wrapper">
+            <img src="${pet.image}" alt="${pet.species}" class="pet-image">
+            <div class="pet-badge">${pet.category}</div>
+            <div class="pet-icon-overlay">
+              <i class="fas ${pet.icon}"></i>
+            </div>
+          </div>
+          
+          <div class="pet-body">
+            <div class="pet-header-section">
+              <h2 class="pet-name">${pet.species}</h2>
+              <p class="pet-scientific">${pet.scientificName}</p>
+              
+              <div class="difficulty-bar">
+                <span class="difficulty-label">Care Level:</span>
+                <div class="stars">
+                  ${Array.from({length: 5}, (_, i) => 
+                    `<i class="fas fa-star ${i < pet.difficulty ? '' : 'empty'}"></i>`
+                  ).join('')}
+                </div>
+              </div>
+            </div>
+            
+            <p class="pet-description">${pet.overview.description}</p>
+            
+            <div class="info-grid">
+              <div class="info-item">
+                <div class="info-label">
+                  <i class="fas fa-clock"></i> Lifespan
+                </div>
+                <div class="info-value">${pet.overview.averageLifespan.range}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">
+                  <i class="fas fa-heart"></i> Category
+                </div>
+                <div class="info-value">${pet.category}</div>
+              </div>
+            </div>
+            
+            <div class="quick-facts">
+              <h4><i class="fas fa-lightbulb"></i> Quick Tips</h4>
+              <div class="facts-grid">
+                ${pet.quickTips.map(tip => `
+                  <div class="fact-item">
+                    <i class="fas fa-check-circle"></i> ${tip}
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+            
+            <div class="tabs">
+              <button class="tab active" data-tab="dos-${index}">
+                <i class="fas fa-check-circle"></i> Care Tips
+              </button>
+              <button class="tab" data-tab="donts-${index}">
+                <i class="fas fa-times-circle"></i> Warnings
+              </button>
+            </div>
+            
+            <div class="tab-content active" id="dos-${index}">
+              <ul class="tips-list dos">
+                ${pet.dosAndDonts.dos.map(tip => `
+                  <li>
+                    <div class="tip-icon">✓</div>
+                    <span class="tip-text">${tip}</span>
+                  </li>
+                `).join('')}
+              </ul>
+            </div>
+            
+            <div class="tab-content" id="donts-${index}">
+              <ul class="tips-list donts">
+                ${pet.dosAndDonts.donts.map(tip => `
+                  <li>
+                    <div class="tip-icon">✗</div>
+                    <span class="tip-text">${tip}</span>
+                  </li>
+                `).join('')}
+              </ul>
+            </div>
+          </div>
+        </div>
+      `).join('');
+      
+      container.innerHTML = `<div class="pets-grid">${html}</div>`;
+      
+      initializeTabs();
+    }
+
+    function initializeTabs() {
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+          const tabId = this.getAttribute('data-tab');
+          const card = this.closest('.pet-card');
+          
+          card.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+          card.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+          
+          this.classList.add('active');
+          card.querySelector(`#${tabId}`).classList.add('active');
+        });
+      });
+    }
+
+    function initializeSearch() {
+      const searchInput = document.getElementById('searchInput');
+      searchInput.addEventListener('input', function() {
+        const term = this.value.toLowerCase();
+        filterPets(term);
+      });
+    }
+
+    function initializeFilters() {
+      document.querySelectorAll('.chip').forEach(chip => {
+        chip.addEventListener('click', function() {
+          document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+          this.classList.add('active');
+          
+          const category = this.getAttribute('data-category');
+          filterPets('', category);
+        });
+      });
+    }
+
+    function filterPets(searchTerm = '', category = 'all') {
+      const cards = document.querySelectorAll('.pet-card');
+      
+      cards.forEach(card => {
+        const petName = card.querySelector('.pet-name').textContent.toLowerCase();
+        const petCategory = card.getAttribute('data-category');
+        
+        const matchesSearch = petName.includes(searchTerm);
+        const matchesCategory = category === 'all' || petCategory === category;
+        
+        if (matchesSearch && matchesCategory) {
+          card.style.display = 'block';
+          setTimeout(() => {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+          }, 50);
+        } else {
+          card.style.opacity = '0';
+          card.style.transform = 'translateY(20px)';
+          setTimeout(() => {
+            card.style.display = 'none';
+          }, 300);
+        }
+      });
+    }
+
+    function initializeBackToTop() {
+      const fab = document.getElementById('backToTop');
+      
+      window.addEventListener('scroll', () => {
+        if (window.pageYOffset > 400) {
+          fab.classList.add('visible');
+        } else {
+          fab.classList.remove('visible');
+        }
+      });
+      
+      fab.addEventListener('click', () => {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      });
+    }
+
+    // Initialize
+    setTimeout(() => {
+      renderPets(petData.petTypes);
+      initializeSearch();
+      initializeFilters();
+      initializeBackToTop();
+    }, 1000);
+  </script>
+</body>
+</html>
