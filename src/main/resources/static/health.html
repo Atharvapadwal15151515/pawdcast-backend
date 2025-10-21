@@ -1131,7 +1131,7 @@
         </div>
     </main>
 
-    <script>
+   <script>
         let loggedInUser = JSON.parse(localStorage.getItem("currentUser"));
         let currentPet = null;
         let userPets = [];
@@ -1238,7 +1238,7 @@
             }
 
             try {
-                const res = await fetch('http://localhost:8080/pet-profiles/my-pets', {
+                const res = await fetch('https://pawdcast-backend-5.onrender.com/pet-profiles/my-pets', {
                     method: 'GET',
                     credentials: 'include'
                 });
@@ -1310,7 +1310,7 @@
             const petCardsWithStats = await Promise.all(
                 userPets.map(async (pet) => {
                     try {
-                        const res = await fetch(`http://localhost:8080/pet-health/records/${pet.petId}`, {
+                        const res = await fetch(`https://pawdcast-backend-5.onrender.com/pet-health/records/${pet.petId}`, {
                             method: 'GET',
                             credentials: 'include'
                         });
@@ -1374,7 +1374,7 @@
         // Load pet details including photo
         async function loadPetDetails(petId) {
             try {
-                const res = await fetch(`http://localhost:8080/pet-profiles/${petId}`, {
+                const res = await fetch(`https://pawdcast-backend-5.onrender.com/pet-profiles/${petId}`, {
                     method: 'GET',
                     credentials: 'include'
                 });
@@ -1398,7 +1398,7 @@
         // Load pet photo
         async function loadPetPhoto(petId) {
             try {
-                const res = await fetch(`http://localhost:8080/pet-profiles/${petId}/photo`, {
+                const res = await fetch(`https://pawdcast-backend-5.onrender.com/pet-profiles/${petId}/photo`, {
                     method: 'GET',
                     credentials: 'include'
                 });
@@ -1434,7 +1434,7 @@
         // Enhanced function to load pet health records with better formatting
         async function loadPetHealthRecords(petId) {
             try {
-                const res = await fetch(`http://localhost:8080/pet-health/records/${petId}`, {
+                const res = await fetch(`https://pawdcast-backend-5.onrender.com/pet-health/records/${petId}`, {
                     method: 'GET',
                     credentials: 'include'
                 });
@@ -1637,7 +1637,7 @@
 
                 console.log('Submitting health data:', params.toString());
 
-                const res = await fetch(`http://localhost:8080/pet-health/add?${params.toString()}`, { 
+                const res = await fetch(`https://pawdcast-backend-5.onrender.com/pet-health/add?${params.toString()}`, { 
                     method: "POST",
                     credentials: 'include'
                 });
@@ -1678,7 +1678,7 @@
         // Check session and load user data
         async function checkSession() {
             try {
-                const response = await fetch('http://localhost:8080/auth/me', {
+                const response = await fetch('https://pawdcast-backend-5.onrender.com/auth/me', {
                     method: 'GET',
                     credentials: 'include'
                 });

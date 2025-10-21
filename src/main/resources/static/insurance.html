@@ -818,13 +818,12 @@
     <p>&copy; 2025 Pawdcast. All rights reserved.</p>
     <p>Caring for pets, one paw at a time. 🐾</p>
 </footer>
-
 <script>
     let insuranceInfoData;
     let estimatorData;
 
     // Fetch Insurance Information
-    fetch("http://localhost:8080/api/insurance/info")
+    fetch("https://pawdcast-backend-5.onrender.com/api/insurance/info")
         .then(res => res.json())
         .then(data => {
             insuranceInfoData = data;
@@ -833,7 +832,7 @@
         .catch(err => document.getElementById("info-content").innerHTML = "<p class='no-results'>⚠️ Error loading information. Please try again later.</p>");
 
     // Fetch Insurance Estimator Data
-    fetch("http://localhost:8080/api/insurance/estimator")
+    fetch("https://pawdcast-backend-5.onrender.com/api/insurance/estimator")
         .then(res => res.json())
         .then(data => estimatorData = data.providers)
         .catch(err => console.error("Error loading estimator data:", err));
@@ -962,6 +961,5 @@
         });
     }
 </script>
-
 </body>
 </html>
