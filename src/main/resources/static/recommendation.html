@@ -852,7 +852,7 @@
 
 <script>
         // API Base URL - Update this to your Spring Boot server URL
-        const API_BASE_URL = 'http://localhost:8080/api/breeds';
+        const API_BASE_URL = 'https://pawdcast-backend-5.onrender.com/api/breeds';
         
         // Mock data for demo
         const MOCK_BREEDS = [
@@ -975,8 +975,29 @@
         // Check if backend is available
         let useMockData = false;
 
+        // JWT Token helper function
+        function getAuthHeaders() {
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                window.location.href = "/login.html";
+                return null;
+            }
+            return {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${token}`
+            };
+        }
+
         // Initialize the application
         document.addEventListener('DOMContentLoaded', async function() {
+            // Check authentication first
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                window.location.href = "/login.html";
+                return;
+            }
+
             await checkBackendConnection();
             loadAllBreeds();
             
@@ -1000,10 +1021,22 @@
         // Check backend connection
         async function checkBackendConnection() {
             try {
-                const response = await axios.get(`${API_BASE_URL}/health`, { timeout: 3000 });
+                const headers = getAuthHeaders();
+                if (!headers) return;
+
+                const response = await axios.get(`${API_BASE_URL}/health`, { 
+                    headers: headers,
+                    timeout: 3000 
+                });
                 demoNotice.classList.add('hidden');
                 useMockData = false;
             } catch (error) {
+                if (error.response && error.response.status === 401) {
+                    localStorage.removeItem("jwtToken");
+                    localStorage.removeItem("userEmail");
+                    window.location.href = "/login.html";
+                    return;
+                }
                 console.log('Backend not available, using mock data');
                 demoNotice.classList.remove('hidden');
                 useMockData = true;
@@ -1032,12 +1065,21 @@
                     await new Promise(resolve => setTimeout(resolve, 500));
                     breeds = MOCK_BREEDS;
                 } else {
-                    const response = await axios.get(API_BASE_URL);
+                    const headers = getAuthHeaders();
+                    if (!headers) return;
+
+                    const response = await axios.get(API_BASE_URL, { headers });
                     breeds = response.data;
                 }
                 displayBreeds(breeds);
                 resultsTitle.textContent = `All Breeds (${breeds.length})`;
             } catch (error) {
+                if (error.response && error.response.status === 401) {
+                    localStorage.removeItem("jwtToken");
+                    localStorage.removeItem("userEmail");
+                    window.location.href = "/login.html";
+                    return;
+                }
                 console.error('Error loading breeds:', error);
                 await new Promise(resolve => setTimeout(resolve, 500));
                 const breeds = MOCK_BREEDS;
@@ -1066,12 +1108,21 @@
                         breed.description.toLowerCase().includes(query.toLowerCase())
                     );
                 } else {
-                    const response = await axios.get(`${API_BASE_URL}/search?q=${encodeURIComponent(query)}`);
+                    const headers = getAuthHeaders();
+                    if (!headers) return;
+
+                    const response = await axios.get(`${API_BASE_URL}/search?q=${encodeURIComponent(query)}`, { headers });
                     breeds = response.data;
                 }
                 displayBreeds(breeds);
                 resultsTitle.textContent = `Search Results for "${query}" (${breeds.length})`;
             } catch (error) {
+                if (error.response && error.response.status === 401) {
+                    localStorage.removeItem("jwtToken");
+                    localStorage.removeItem("userEmail");
+                    window.location.href = "/login.html";
+                    return;
+                }
                 console.error('Error searching breeds:', error);
                 showError('Search failed. Please try again.');
             } finally {
@@ -1112,6 +1163,9 @@
                         return true;
                     });
                 } else {
+                    const headers = getAuthHeaders();
+                    if (!headers) return;
+
                     const criteria = {
                         animalType: animalType || null,
                         idealIncome: idealIncome || null,
@@ -1122,7 +1176,7 @@
                         climatePreference: climatePreference || null
                     };
                     
-                    const response = await axios.post(`${API_BASE_URL}/recommend`, criteria);
+                    const response = await axios.post(`${API_BASE_URL}/recommend`, criteria, { headers });
                     breeds = response.data;
                 }
                 
@@ -1134,6 +1188,12 @@
                 resultsTitle.textContent = title;
                 
             } catch (error) {
+                if (error.response && error.response.status === 401) {
+                    localStorage.removeItem("jwtToken");
+                    localStorage.removeItem("userEmail");
+                    window.location.href = "/login.html";
+                    return;
+                }
                 console.error('Error getting recommendations:', error);
                 showError('Failed to get recommendations. Please try again.');
             } finally {
@@ -1201,7 +1261,10 @@
                     await new Promise(resolve => setTimeout(resolve, 200));
                     breed = MOCK_BREEDS.find(b => b.id === breedId) || MOCK_BREEDS[0];
                 } else {
-                    const response = await axios.get(`${API_BASE_URL}/${breedId}`);
+                    const headers = getAuthHeaders();
+                    if (!headers) return;
+
+                    const response = await axios.get(`${API_BASE_URL}/${breedId}`, { headers });
                     breed = response.data;
                 }
                 
@@ -1244,6 +1307,12 @@
                 
                 breedModal.classList.remove('hidden');
             } catch (error) {
+                if (error.response && error.response.status === 401) {
+                    localStorage.removeItem("jwtToken");
+                    localStorage.removeItem("userEmail");
+                    window.location.href = "/login.html";
+                    return;
+                }
                 console.error('Error loading breed details:', error);
                 showError('Failed to load breed details.');
             } finally {

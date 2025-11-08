@@ -30,4 +30,8 @@ public interface HabitLogRepository extends JpaRepository<HabitLog, Long> {
     // Get recent activity for a habit
     @Query("SELECT hl FROM HabitLog hl WHERE hl.habitId = :habitId ORDER BY hl.logDate DESC LIMIT 7")
     List<HabitLog> findRecentActivityByHabitId(@Param("habitId") Integer habitId);
+    
+    // Find habit logs by user ID (through habit and pet ownership)
+    @Query("SELECT hl FROM HabitLog hl WHERE hl.habitId IN (SELECT h.habitId FROM Habit h WHERE h.petId IN (SELECT p.petId FROM PetProfile p WHERE p.ownerId = :userId))")
+    List<HabitLog> findByUserId(@Param("userId") Integer userId);
 }

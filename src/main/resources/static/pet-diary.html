@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PawdCast - Royal Pet Diary</title>
+    <title>PawdCast -  Pet Diary</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;600;700&family=Playfair+Display:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
@@ -1044,380 +1044,438 @@
     <div id="toast" class="toast"></div>
 
  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script>
-        const API_BASE_URL = 'http://localhost:8080';
-        let diaryEntries = [];
-        let currentPage = 0;
-        let showCover = true;
+   <script>
+    const API_BASE_URL = 'https://pawdcast-backend-5.onrender.com';
+    let diaryEntries = [];
+    let currentPage = 0;
+    let showCover = true;
 
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeEventListeners();
+    // JWT Token helper functions
+    function getToken() {
+        return localStorage.getItem("jwtToken");
+    }
+
+    function authFetch(url, options = {}) {
+        const token = getToken();
+        if (!token) {
+            window.location.href = "/login.html";
+            return Promise.reject(new Error("No authentication token"));
+        }
+        
+        const headers = {
+            "Authorization": `Bearer ${token}`,
+            ...options.headers
+        };
+        
+        return fetch(url, { ...options, headers })
+            .then(response => {
+                if (response.status === 401) {
+                    localStorage.removeItem("jwtToken");
+                    localStorage.removeItem("userEmail");
+                    window.location.href = "/login.html";
+                    return Promise.reject(new Error("Session expired"));
+                }
+                return response;
+            });
+    }
+
+    // Check authentication on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const token = getToken();
+        if (!token) {
+            window.location.href = "/login.html";
+            return;
+        }
+        
+        initializeEventListeners();
+    });
+
+    function initializeEventListeners() {
+        // Navigation
+        document.getElementById('homeBtn').addEventListener('click', () => showSection('welcome'));
+        document.getElementById('createEntryBtn').addEventListener('click', () => showSection('createEntry'));
+        document.getElementById('viewDiaryBtn').addEventListener('click', () => {
+            showSection('viewDiary');
+            loadDiaryEntries();
         });
 
-        function initializeEventListeners() {
-            // Navigation
-            document.getElementById('homeBtn').addEventListener('click', () => showSection('welcome'));
-            document.getElementById('createEntryBtn').addEventListener('click', () => showSection('createEntry'));
-            document.getElementById('viewDiaryBtn').addEventListener('click', () => {
-                showSection('viewDiary');
-                loadDiaryEntries();
-            });
+        // Welcome buttons
+        document.getElementById('welcomeCreateBtn').addEventListener('click', () => showSection('createEntry'));
+        document.getElementById('welcomeViewBtn').addEventListener('click', () => {
+            showSection('viewDiary');
+            loadDiaryEntries();
+        });
 
-            // Welcome buttons
-            document.getElementById('welcomeCreateBtn').addEventListener('click', () => showSection('createEntry'));
-            document.getElementById('welcomeViewBtn').addEventListener('click', () => {
-                showSection('viewDiary');
-                loadDiaryEntries();
-            });
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', handleLogout);
 
-            // Logout
-            document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+        // Diary form
+        document.getElementById('diaryForm').addEventListener('submit', handleCreateEntry);
+        document.getElementById('cancelEntry').addEventListener('click', () => showSection('welcome'));
 
-            // Diary form
-            document.getElementById('diaryForm').addEventListener('submit', handleCreateEntry);
-            document.getElementById('cancelEntry').addEventListener('click', () => showSection('welcome'));
+        // Rating stars
+        document.querySelectorAll('.star').forEach(star => {
+            star.addEventListener('click', handleRating);
+        });
 
-            // Rating stars
-            document.querySelectorAll('.star').forEach(star => {
-                star.addEventListener('click', handleRating);
-            });
+        // Diary navigation
+        document.getElementById('prevPage').addEventListener('click', showPreviousPage);
+        document.getElementById('nextPage').addEventListener('click', showNextPage);
 
-            // Diary navigation
-            document.getElementById('prevPage').addEventListener('click', showPreviousPage);
-            document.getElementById('nextPage').addEventListener('click', showNextPage);
+        // Set default date
+        document.getElementById('entryDate').valueAsDate = new Date();
+    }
 
-            // Set default date
-            document.getElementById('entryDate').valueAsDate = new Date();
-        }
-
-        function handleRating(e) {
-            const rating = parseInt(e.target.dataset.rating);
-            document.getElementById('rating').value = rating;
-            
-            document.querySelectorAll('.star').forEach((star, index) => {
-                if (index < rating) {
-                    star.textContent = '★';
-                    star.style.color = '#D4AF37';
-                } else {
-                    star.textContent = '☆';
-                    star.style.color = '#B8A082';
-                }
-            });
-        }
-
-        async function handleCreateEntry(e) {
-            e.preventDefault();
-            showLoading(true);
-
-            const formData = new FormData(e.target);
-
-            try {
-                const response = await axios.post(`${API_BASE_URL}/api/diary/create`, formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                });
-
-                showToast('Diary entry saved successfully!', 'success');
-                e.target.reset();
-                document.getElementById('rating').value = '';
-                resetRatingStars();
-                showSection('welcome');
-            } catch (error) {
-                console.error("Error creating entry:", error);
-                showToast('Failed to save entry', 'error');
-            } finally {
-                showLoading(false);
-            }
-        }
-
-        function resetRatingStars() {
-            document.querySelectorAll('.star').forEach(star => {
+    function handleRating(e) {
+        const rating = parseInt(e.target.dataset.rating);
+        document.getElementById('rating').value = rating;
+        
+        document.querySelectorAll('.star').forEach((star, index) => {
+            if (index < rating) {
+                star.textContent = '★';
+                star.style.color = '#D4AF37';
+            } else {
                 star.textContent = '☆';
                 star.style.color = '#B8A082';
-            });
+            }
+        });
+    }
+
+    async function handleCreateEntry(e) {
+        e.preventDefault();
+        showLoading(true);
+
+        const formData = new FormData(e.target);
+        const token = getToken();
+
+        if (!token) {
+            window.location.href = "/login.html";
+            return;
         }
 
-        async function loadDiaryEntries() {
-            showLoading(true);
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/diary/create`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            });
 
-            try {
-                const response = await axios.get(`${API_BASE_URL}/api/diary/entries`);
-                diaryEntries = response.data.diaries || response.data;
-                
-                currentPage = 0;
-                showCover = true;
-                renderDiaryPages();
-                updateNavigation();
-                
-                if (diaryEntries.length > 0) {
-                    showToast(`Loaded ${diaryEntries.length} beautiful entries`, 'success');
-                }
-            } catch (error) {
+            if (response.status === 401) {
+                localStorage.removeItem("jwtToken");
+                localStorage.removeItem("userEmail");
+                window.location.href = "/login.html";
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error('Failed to save entry');
+            }
+
+            const data = await response.json();
+            showToast('Diary entry saved successfully!', 'success');
+            e.target.reset();
+            document.getElementById('rating').value = '';
+            resetRatingStars();
+            showSection('welcome');
+        } catch (error) {
+            console.error("Error creating entry:", error);
+            showToast('Failed to save entry', 'error');
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    function resetRatingStars() {
+        document.querySelectorAll('.star').forEach(star => {
+            star.textContent = '☆';
+            star.style.color = '#B8A082';
+        });
+    }
+
+    async function loadDiaryEntries() {
+        showLoading(true);
+
+        try {
+            const response = await authFetch(`${API_BASE_URL}/api/diary/entries`);
+            if (!response) return; // authFetch already handled redirect
+            
+            const data = await response.json();
+            diaryEntries = data.diaries || data;
+            
+            currentPage = 0;
+            showCover = true;
+            renderDiaryPages();
+            updateNavigation();
+            
+            if (diaryEntries.length > 0) {
+                showToast(`Loaded ${diaryEntries.length} beautiful entries`, 'success');
+            }
+        } catch (error) {
+            if (error.message !== "Session expired" && error.message !== "No authentication token") {
                 showToast('Failed to load diary entries', 'error');
-            } finally {
-                showLoading(false);
             }
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    function renderDiaryPages() {
+        const pagesContainer = document.getElementById('diaryPages');
+        pagesContainer.innerHTML = '';
+
+        if (diaryEntries.length === 0) {
+            const emptySpread = createEmptySpread();
+            pagesContainer.appendChild(emptySpread);
+            return;
         }
 
-        function renderDiaryPages() {
-            const pagesContainer = document.getElementById('diaryPages');
-            pagesContainer.innerHTML = '';
+        diaryEntries.forEach((entry, index) => {
+            const spread = createPageSpread(entry, index);
+            pagesContainer.appendChild(spread);
+        });
 
-            if (diaryEntries.length === 0) {
-                const emptySpread = createEmptySpread();
-                pagesContainer.appendChild(emptySpread);
-                return;
+        showCurrentView();
+    }
+
+    function createEmptySpread() {
+        const spread = document.createElement('div');
+        spread.className = 'page-spread';
+        spread.innerHTML = `
+            <div class="page left-page">
+                <div class="page-content">
+                    <div class="entry-header">
+                        <h2 class="entry-title">Welcome to Your Diary</h2>
+                        <div class="entry-date">${new Date().toLocaleDateString()}</div>
+                    </div>
+                    <div class="entry-content">
+                        <p>Your beautiful diary is waiting for your first entry!</p>
+                        <p>Click "New Entry" to start writing about your wonderful adventures with your pet.</p>
+                        <p>Capture those special moments that make your bond unique and precious.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="page right-page">
+                <div class="page-content">
+                    <div class="photo-container">
+                        <div class="no-image">
+                            <i class="fas fa-camera"></i>
+                            <p>Add your first photo</p>
+                        </div>
+                    </div>
+                    <div class="rating-section">
+                        <div class="rating-title">Day Rating</div>
+                        <div class="rating-stars">
+                            <span class="rating-star">☆</span>
+                            <span class="rating-star">☆</span>
+                            <span class="rating-star">☆</span>
+                            <span class="rating-star">☆</span>
+                            <span class="rating-star">☆</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        return spread;
+    }
+
+    function createPageSpread(entry, index) {
+        const spread = document.createElement('div');
+        spread.className = 'page-spread';
+        spread.dataset.index = index;
+
+        const entryDate = new Date(entry.entryDate).toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+
+        // Format content
+        let formattedContent = '';
+        if (entry.content && entry.content.trim() !== '') {
+            formattedContent = entry.content
+                .split('\n')
+                .filter(paragraph => paragraph.trim() !== '')
+                .map(paragraph => `<p>${paragraph}</p>`)
+                .join('');
+        } else {
+            formattedContent = '<p><em>No content written for this entry.</em></p>';
+        }
+
+        // Create meta items
+        const metaItems = [];
+        if (entry.mood) metaItems.push(`<div class="meta-item"><i class="fas fa-smile"></i> Mood: ${entry.mood}</div>`);
+        if (entry.weather) metaItems.push(`<div class="meta-item"><i class="fas fa-cloud"></i> Weather: ${entry.weather}</div>`);
+        if (entry.activity) metaItems.push(`<div class="meta-item"><i class="fas fa-running"></i> Activity: ${entry.activity}</div>`);
+        if (entry.location) metaItems.push(`<div class="meta-item"><i class="fas fa-map-marker-alt"></i> Location: ${entry.location}</div>`);
+
+        const metaHtml = metaItems.length > 0 ? 
+            `<div class="entry-meta">${metaItems.join('')}</div>` 
+            : '';
+
+        // Create tags
+        const tagsHtml = entry.tags ? 
+            `<div class="entry-tags">
+                <strong>Tags:</strong> ${entry.tags.split(',').map(tag => `<span class="tag">${tag.trim()}</span>`).join('')}
+            </div>` 
+            : '';
+
+        // Create rating stars
+        const ratingStars = entry.rating ? 
+            '<div class="rating-stars">' +
+                Array(5).fill(0).map((_, i) => 
+                    `<span class="rating-star ${i < entry.rating ? 'filled' : ''}">★</span>`
+                ).join('') +
+            '</div>' 
+            : '<div class="rating-stars"><span class="rating-star">☆</span><span class="rating-star">☆</span><span class="rating-star">☆</span><span class="rating-star">☆</span><span class="rating-star">☆</span></div>';
+
+        // Create image or placeholder
+        const imageHtml = (entry.hasImage || entry.photo) ? 
+            `<img src="${API_BASE_URL}/api/diary/entry/${entry.diaryId}/image" 
+                  alt="Diary photo" 
+                  class="entry-image"
+                  onerror="this.style.display='none'">` 
+            : `<div class="no-image">
+                  <i class="fas fa-camera"></i>
+                  <p>No photo for this entry</p>
+               </div>`;
+
+        // Create mood and weather sections
+        const moodSection = entry.mood ? `
+            <div class="mood-section">
+                <div class="mood-display">${entry.mood.split(' ')[0]}</div>
+                <p>${entry.mood.split(' ')[1] || 'Mood'}</p>
+            </div>
+        ` : '';
+
+        const weatherSection = entry.weather ? `
+            <div class="weather-section">
+                <div class="weather-display">${entry.weather.split(' ')[0]}</div>
+                <p>${entry.weather.split(' ')[1] || 'Weather'}</p>
+            </div>
+        ` : '';
+
+        spread.innerHTML = `
+            <div class="page left-page">
+                <div class="page-content">
+                    <div class="entry-header">
+                        <h2 class="entry-title">${entry.entryTitle || 'My Diary Entry'}</h2>
+                        <div class="entry-date">${entryDate}</div>
+                    </div>
+                    <div class="entry-content">
+                        ${formattedContent}
+                    </div>
+                    ${metaHtml}
+                    ${tagsHtml}
+                </div>
+            </div>
+            <div class="page right-page">
+                <div class="page-content">
+                    <div class="photo-container">
+                        ${imageHtml}
+                    </div>
+                    <div class="rating-section">
+                        <div class="rating-title">Day Rating</div>
+                        ${ratingStars}
+                    </div>
+                    <div class="mood-weather-container">
+                        ${moodSection}
+                        ${weatherSection}
+                    </div>
+                </div>
+            </div>
+        `;
+
+        return spread;
+    }
+
+    function showCurrentView() {
+        const cover = document.getElementById('diaryCover');
+        const pages = document.querySelectorAll('.page-spread');
+        
+        if (showCover) {
+            cover.style.display = 'flex';
+            pages.forEach(page => page.classList.remove('active'));
+        } else {
+            cover.style.display = 'none';
+            pages.forEach(page => page.classList.remove('active'));
+            if (pages[currentPage]) {
+                pages[currentPage].classList.add('active');
             }
+        }
+    }
 
-            diaryEntries.forEach((entry, index) => {
-                const spread = createPageSpread(entry, index);
-                pagesContainer.appendChild(spread);
-            });
-
+    function showPreviousPage() {
+        if (showCover) {
+            return;
+        }
+        
+        if (currentPage > 0) {
+            currentPage--;
+            showCurrentView();
+        } else {
+            showCover = true;
             showCurrentView();
         }
+        updateNavigation();
+    }
 
-        function createEmptySpread() {
-            const spread = document.createElement('div');
-            spread.className = 'page-spread';
-            spread.innerHTML = `
-                <div class="page left-page">
-                    <div class="page-content">
-                        <div class="entry-header">
-                            <h2 class="entry-title">Welcome to Your Diary</h2>
-                            <div class="entry-date">${new Date().toLocaleDateString()}</div>
-                        </div>
-                        <div class="entry-content">
-                            <p>Your beautiful diary is waiting for your first entry!</p>
-                            <p>Click "New Entry" to start writing about your wonderful adventures with your pet.</p>
-                            <p>Capture those special moments that make your bond unique and precious.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="page right-page">
-                    <div class="page-content">
-                        <div class="photo-container">
-                            <div class="no-image">
-                                <i class="fas fa-camera"></i>
-                                <p>Add your first photo</p>
-                            </div>
-                        </div>
-                        <div class="rating-section">
-                            <div class="rating-title">Day Rating</div>
-                            <div class="rating-stars">
-                                <span class="rating-star">☆</span>
-                                <span class="rating-star">☆</span>
-                                <span class="rating-star">☆</span>
-                                <span class="rating-star">☆</span>
-                                <span class="rating-star">☆</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            return spread;
+    function showNextPage() {
+        if (showCover) {
+            showCover = false;
+            currentPage = 0;
+        } else if (currentPage < diaryEntries.length - 1) {
+            currentPage++;
         }
+        showCurrentView();
+        updateNavigation();
+    }
 
-        function createPageSpread(entry, index) {
-            const spread = document.createElement('div');
-            spread.className = 'page-spread';
-            spread.dataset.index = index;
-
-            const entryDate = new Date(entry.entryDate).toLocaleDateString('en-US', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-
-            // Format content
-            let formattedContent = '';
-            if (entry.content && entry.content.trim() !== '') {
-                formattedContent = entry.content
-                    .split('\n')
-                    .filter(paragraph => paragraph.trim() !== '')
-                    .map(paragraph => `<p>${paragraph}</p>`)
-                    .join('');
-            } else {
-                formattedContent = '<p><em>No content written for this entry.</em></p>';
-            }
-
-            // Create meta items
-            const metaItems = [];
-            if (entry.mood) metaItems.push(`<div class="meta-item"><i class="fas fa-smile"></i> Mood: ${entry.mood}</div>`);
-            if (entry.weather) metaItems.push(`<div class="meta-item"><i class="fas fa-cloud"></i> Weather: ${entry.weather}</div>`);
-            if (entry.activity) metaItems.push(`<div class="meta-item"><i class="fas fa-running"></i> Activity: ${entry.activity}</div>`);
-            if (entry.location) metaItems.push(`<div class="meta-item"><i class="fas fa-map-marker-alt"></i> Location: ${entry.location}</div>`);
-
-            const metaHtml = metaItems.length > 0 ? 
-                `<div class="entry-meta">${metaItems.join('')}</div>` 
-                : '';
-
-            // Create tags
-            const tagsHtml = entry.tags ? 
-                `<div class="entry-tags">
-                    <strong>Tags:</strong> ${entry.tags.split(',').map(tag => `<span class="tag">${tag.trim()}</span>`).join('')}
-                </div>` 
-                : '';
-
-            // Create rating stars
-            const ratingStars = entry.rating ? 
-                '<div class="rating-stars">' +
-                    Array(5).fill(0).map((_, i) => 
-                        `<span class="rating-star ${i < entry.rating ? 'filled' : ''}">★</span>`
-                    ).join('') +
-                '</div>' 
-                : '<div class="rating-stars"><span class="rating-star">☆</span><span class="rating-star">☆</span><span class="rating-star">☆</span><span class="rating-star">☆</span><span class="rating-star">☆</span></div>';
-
-            // Create image or placeholder
-            const imageHtml = (entry.hasImage || entry.photo) ? 
-                `<img src="${API_BASE_URL}/api/diary/entry/${entry.diaryId}/image" 
-                      alt="Diary photo" 
-                      class="entry-image"
-                      onerror="this.style.display='none'">` 
-                : `<div class="no-image">
-                      <i class="fas fa-camera"></i>
-                      <p>No photo for this entry</p>
-                   </div>`;
-
-            // Create mood and weather sections
-            const moodSection = entry.mood ? `
-                <div class="mood-section">
-                    <div class="mood-display">${entry.mood.split(' ')[0]}</div>
-                    <p>${entry.mood.split(' ')[1] || 'Mood'}</p>
-                </div>
-            ` : '';
-
-            const weatherSection = entry.weather ? `
-                <div class="weather-section">
-                    <div class="weather-display">${entry.weather.split(' ')[0]}</div>
-                    <p>${entry.weather.split(' ')[1] || 'Weather'}</p>
-                </div>
-            ` : '';
-
-            spread.innerHTML = `
-                <div class="page left-page">
-                    <div class="page-content">
-                        <div class="entry-header">
-                            <h2 class="entry-title">${entry.entryTitle || 'My Diary Entry'}</h2>
-                            <div class="entry-date">${entryDate}</div>
-                        </div>
-                        <div class="entry-content">
-                            ${formattedContent}
-                        </div>
-                        ${metaHtml}
-                        ${tagsHtml}
-                    </div>
-                </div>
-                <div class="page right-page">
-                    <div class="page-content">
-                        <div class="photo-container">
-                            ${imageHtml}
-                        </div>
-                        <div class="rating-section">
-                            <div class="rating-title">Day Rating</div>
-                            ${ratingStars}
-                        </div>
-                        <div class="mood-weather-container">
-                            ${moodSection}
-                            ${weatherSection}
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            return spread;
+    function updateNavigation() {
+        if (showCover) {
+            document.getElementById('pageInfo').textContent = 'Cover';
+            document.getElementById('prevPage').disabled = true;
+            document.getElementById('nextPage').disabled = diaryEntries.length === 0;
+        } else {
+            document.getElementById('pageInfo').textContent = 
+                `Page ${currentPage + 1} of ${diaryEntries.length}`;
+            document.getElementById('prevPage').disabled = false;
+            document.getElementById('nextPage').disabled = currentPage === diaryEntries.length - 1;
         }
+    }
 
-        function showCurrentView() {
-            const cover = document.getElementById('diaryCover');
-            const pages = document.querySelectorAll('.page-spread');
-            
-            if (showCover) {
-                cover.style.display = 'flex';
-                pages.forEach(page => page.classList.remove('active'));
-            } else {
-                cover.style.display = 'none';
-                pages.forEach(page => page.classList.remove('active'));
-                if (pages[currentPage]) {
-                    pages[currentPage].classList.add('active');
-                }
-            }
-        }
+    function handleLogout() {
+        showLoading(true);
+        // Remove JWT tokens from localStorage
+        localStorage.removeItem("jwtToken");
+        localStorage.removeItem("userEmail");
+        window.location.href = 'home.html';
+    }
 
-        function showPreviousPage() {
-            if (showCover) {
-                return;
-            }
-            
-            if (currentPage > 0) {
-                currentPage--;
-                showCurrentView();
-            } else {
-                showCover = true;
-                showCurrentView();
-            }
-            updateNavigation();
-        }
+    function showSection(sectionName) {
+        document.querySelectorAll('.section').forEach(section => {
+            section.classList.remove('active');
+        });
+        document.getElementById(sectionName + 'Section').classList.add('active');
+    }
 
-        function showNextPage() {
-            if (showCover) {
-                showCover = false;
-                currentPage = 0;
-            } else if (currentPage < diaryEntries.length - 1) {
-                currentPage++;
-            }
-            showCurrentView();
-            updateNavigation();
-        }
+    function showLoading(show) {
+        document.getElementById('loadingSpinner').style.display = show ? 'flex' : 'none';
+    }
 
-        function updateNavigation() {
-            if (showCover) {
-                document.getElementById('pageInfo').textContent = 'Cover';
-                document.getElementById('prevPage').disabled = true;
-                document.getElementById('nextPage').disabled = diaryEntries.length === 0;
-            } else {
-                document.getElementById('pageInfo').textContent = 
-                    `Page ${currentPage + 1} of ${diaryEntries.length}`;
-                document.getElementById('prevPage').disabled = false;
-                document.getElementById('nextPage').disabled = currentPage === diaryEntries.length - 1;
-            }
-        }
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = `toast ${type}`;
+        toast.classList.add('show');
 
-        async function handleLogout() {
-            showLoading(true);
-            try {
-                await axios.post(`${API_BASE_URL}/auth/logout`);
-                window.location.href = 'home.html';
-            } catch (error) {
-                window.location.href = 'home.html';
-            }
-        }
-
-        function showSection(sectionName) {
-            document.querySelectorAll('.section').forEach(section => {
-                section.classList.remove('active');
-            });
-            document.getElementById(sectionName + 'Section').classList.add('active');
-        }
-
-        function showLoading(show) {
-            document.getElementById('loadingSpinner').style.display = show ? 'flex' : 'none';
-        }
-
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.className = `toast ${type}`;
-            toast.classList.add('show');
-
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
-        }
-    </script>
-
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+</script>
 
 </body>
 </html>

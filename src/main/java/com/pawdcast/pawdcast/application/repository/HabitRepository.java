@@ -30,4 +30,8 @@ public interface HabitRepository extends JpaRepository<Habit, Integer> {
     // Find habit with pet profile eager loading
     @Query("SELECT h FROM Habit h JOIN FETCH h.petProfile WHERE h.habitId = :habitId")
     Optional<Habit> findByIdWithPetProfile(@Param("habitId") Integer habitId);
+    
+    // Find habits by user ID (through pet ownership)
+    @Query("SELECT h FROM Habit h WHERE h.petId IN (SELECT p.petId FROM PetProfile p WHERE p.ownerId = :userId)")
+    List<Habit> findByUserId(@Param("userId") Integer userId);
 }

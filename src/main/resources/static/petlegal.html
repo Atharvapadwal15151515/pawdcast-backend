@@ -1045,7 +1045,7 @@
     </div>
 <script>
         // Configuration
-        const API_BASE_URL = 'http://localhost:8080/api/legal';
+        const API_BASE_URL = 'https://pawdcast-backend-5.onrender.com/api/legal';
         const API_ENDPOINTS = {
             legalHub: `${API_BASE_URL}/pet-legal-hub`,
             health: `${API_BASE_URL}/pet-legal-hub/health`
@@ -1061,17 +1061,38 @@
         const quickNav = document.getElementById('quickNav');
         const legalHubContent = document.getElementById('legalHubContent');
 
+        // JWT Token helper function
+        function getAuthHeaders() {
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                window.location.href = "/login.html";
+                return null;
+            }
+            return {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${token}`
+            };
+        }
+
         // Enhanced API Service
         const apiService = {
             async fetchLegalHub() {
+                const headers = getAuthHeaders();
+                if (!headers) return;
+
                 try {
                     const response = await fetch(API_ENDPOINTS.legalHub, {
                         method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        }
+                        headers: headers
                     });
+
+                    if (response.status === 401) {
+                        localStorage.removeItem("jwtToken");
+                        localStorage.removeItem("userEmail");
+                        window.location.href = "/login.html";
+                        return;
+                    }
 
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
@@ -1085,8 +1106,21 @@
             },
 
             async checkHealth() {
+                const headers = getAuthHeaders();
+                if (!headers) return false;
+
                 try {
-                    const response = await fetch(API_ENDPOINTS.health);
+                    const response = await fetch(API_ENDPOINTS.health, {
+                        headers: headers
+                    });
+                    
+                    if (response.status === 401) {
+                        localStorage.removeItem("jwtToken");
+                        localStorage.removeItem("userEmail");
+                        window.location.href = "/login.html";
+                        return false;
+                    }
+                    
                     return response.ok;
                 } catch (error) {
                     return false;
@@ -1451,6 +1485,13 @@
             try {
                 uiController.showLoading();
                 
+                // Check authentication first
+                const token = localStorage.getItem("jwtToken");
+                if (!token) {
+                    window.location.href = "/login.html";
+                    return;
+                }
+
                 // Check API health first
                 const isHealthy = await apiService.checkHealth();
                 if (!isHealthy) {
@@ -1462,12 +1503,21 @@
                 
             } catch (error) {
                 console.error('Failed to load legal hub:', error);
-                uiController.showError(error.message);
+                if (error.message !== "Failed to fetch legal data. Please check your connection and try again.") {
+                    uiController.showError(error.message);
+                }
             }
         }
 
         // Initialize application
         document.addEventListener('DOMContentLoaded', () => {
+            // Check authentication on page load
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                window.location.href = "/login.html";
+                return;
+            }
+
             progressController.init();
             searchController.init();
             loadPetLegalHub();

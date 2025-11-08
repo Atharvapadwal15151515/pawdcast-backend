@@ -3,11 +3,9 @@ package com.pawdcast.pawdcast.application.service;
 import com.pawdcast.pawdcast.application.model.Habit;
 import com.pawdcast.pawdcast.application.model.HabitLog;
 import com.pawdcast.pawdcast.application.model.PetProfile;
-import com.pawdcast.pawdcast.application.model.User;
 import com.pawdcast.pawdcast.application.repository.HabitRepository;
 import com.pawdcast.pawdcast.application.repository.HabitLogRepository;
 import com.pawdcast.pawdcast.application.repository.PetProfileRepository;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -33,28 +31,16 @@ public class HabitService {
     @Autowired
     private PetProfileRepository petProfileRepository;
 
-    // Helper method to get current user ID from session
-    private Integer getCurrentUserId(HttpSession session) {
-        User user = (User) session.getAttribute("user");
-        if (user == null) {
-            throw new RuntimeException("User not authenticated");
-        }
-        return user.getId();
-    }
-
     // Helper method to get user's pet IDs
-    private List<Integer> getUserPetIds(HttpSession session) {
-        Integer userId = getCurrentUserId(session);
+    private List<Integer> getUserPetIds(Integer userId) {
         List<PetProfile> userPets = petProfileRepository.findByOwnerId(userId);
         return userPets.stream()
                 .map(PetProfile::getPetId)
                 .collect(Collectors.toList());
     }
 
-    // 1️⃣ Add Habit with session validation
-    public Habit addHabit(Habit habit, HttpSession session) {
-        Integer userId = getCurrentUserId(session);
-        
+    // 1️⃣ Add Habit with user validation
+    public Habit addHabit(Habit habit, Integer userId) {
         // Verify that the pet belongs to the current user
         Optional<PetProfile> pet = petProfileRepository.findById(habit.getPetId());
         if (pet.isEmpty() || !pet.get().getOwnerId().equals(userId)) {
@@ -68,10 +54,8 @@ public class HabitService {
         return habitRepository.save(habit);
     }
 
-    // 2️⃣ Mark Habit as Completed with session validation
-    public boolean markHabitAsCompleted(Integer habitId, HttpSession session) {
-        Integer userId = getCurrentUserId(session);
-        
+    // 2️⃣ Mark Habit as Completed with user validation
+    public boolean markHabitAsCompleted(Integer habitId, Integer userId) {
         Optional<Habit> habitOpt = habitRepository.findById(habitId);
         if (habitOpt.isEmpty()) {
             return false;
@@ -104,7 +88,7 @@ public class HabitService {
         return true;
     }
 
-    // 3️⃣ Auto Update Stats (same as before)
+    // 3️⃣ Auto Update Stats
     private void updateHabitStats(Habit habit, LocalDate completionDate) {
         boolean continuesStreak = habit.getLastCompletedDate() != null &&
                                  habit.getLastCompletedDate().equals(completionDate.minusDays(1));
@@ -126,15 +110,12 @@ public class HabitService {
     }
 
     // 4️⃣ Get user's pets for selection
-    public List<PetProfile> getUserPets(HttpSession session) {
-        Integer userId = getCurrentUserId(session);
+    public List<PetProfile> getUserPets(Integer userId) {
         return petProfileRepository.findByOwnerId(userId);
     }
 
     // 5️⃣ Get habits for a specific pet with validation
-    public List<Habit> getHabitsByPetId(Integer petId, HttpSession session) {
-        Integer userId = getCurrentUserId(session);
-        
+    public List<Habit> getHabitsByPetId(Integer petId, Integer userId) {
         // Verify that the pet belongs to the current user
         Optional<PetProfile> pet = petProfileRepository.findById(petId);
         if (pet.isEmpty() || !pet.get().getOwnerId().equals(userId)) {
@@ -145,8 +126,8 @@ public class HabitService {
     }
 
     // 6️⃣ Get all habits for current user (all pets)
-    public List<Habit> getUserHabits(HttpSession session) {
-        List<Integer> userPetIds = getUserPetIds(session);
+    public List<Habit> getUserHabits(Integer userId) {
+        List<Integer> userPetIds = getUserPetIds(userId);
         if (userPetIds.isEmpty()) {
             return List.of();
         }
@@ -154,9 +135,7 @@ public class HabitService {
     }
 
     // 7️⃣ Get Calendar Data with validation
-    public Map<LocalDate, String> getHabitCalendar(Integer habitId, int year, int month, HttpSession session) {
-        Integer userId = getCurrentUserId(session);
-        
+    public Map<LocalDate, String> getHabitCalendar(Integer habitId, int year, int month, Integer userId) {
         Optional<Habit> habitOpt = habitRepository.findById(habitId);
         if (habitOpt.isEmpty()) {
             throw new RuntimeException("Habit not found");
@@ -182,10 +161,8 @@ public class HabitService {
         return calendarData;
     }
 
-    // 8️⃣ Analytics with session validation
-    public Map<String, Object> getHabitAnalytics(Integer habitId, HttpSession session) {
-        Integer userId = getCurrentUserId(session);
-        
+    // 8️⃣ Analytics with user validation
+    public Map<String, Object> getHabitAnalytics(Integer habitId, Integer userId) {
         Optional<Habit> habitOpt = habitRepository.findById(habitId);
         if (habitOpt.isEmpty()) {
             return Map.of("error", "Habit not found");
@@ -208,8 +185,8 @@ public class HabitService {
         return analytics;
     }
 
-    public Map<String, Object> getUserAnalytics(HttpSession session) {
-        List<Habit> userHabits = getUserHabits(session);
+    public Map<String, Object> getUserAnalytics(Integer userId) {
+        List<Habit> userHabits = getUserHabits(userId);
         
         Map<String, Object> analytics = new HashMap<>();
         double totalCompletionRate = 0;
@@ -243,9 +220,7 @@ public class HabitService {
     }
 
     // 9️⃣ Get recent activity for habit detail
-    public List<HabitLog> getRecentActivity(Integer habitId, HttpSession session) {
-        Integer userId = getCurrentUserId(session);
-        
+    public List<HabitLog> getRecentActivity(Integer habitId, Integer userId) {
         Optional<Habit> habitOpt = habitRepository.findById(habitId);
         if (habitOpt.isEmpty()) {
             throw new RuntimeException("Habit not found");
@@ -259,6 +234,23 @@ public class HabitService {
         }
         
         return habitLogRepository.findRecentActivityByHabitId(habitId);
+    }
+
+    // 🔟 Get habit by ID with validation
+    public Habit getHabitById(Integer habitId, Integer userId) {
+        Optional<Habit> habitOpt = habitRepository.findById(habitId);
+        if (habitOpt.isEmpty()) {
+            throw new RuntimeException("Habit not found");
+        }
+        
+        // Verify ownership
+        Habit habit = habitOpt.get();
+        Optional<PetProfile> pet = petProfileRepository.findById(habit.getPetId());
+        if (pet.isEmpty() || !pet.get().getOwnerId().equals(userId)) {
+            throw new RuntimeException("Habit doesn't belong to user");
+        }
+        
+        return habit;
     }
 
     // Scheduled task to mark missed habits

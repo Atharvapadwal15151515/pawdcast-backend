@@ -750,10 +750,17 @@
     </div>
 
 <script>
-        const API_BASE = 'http://localhost:8080';
+        const API_BASE = 'https://pawdcast-backend-5.onrender.com';
 
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', function() {
+            // Check authentication first
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                window.location.href = "/login.html";
+                return;
+            }
+
             console.log('Page loaded, loading pets...');
             loadUserPets();
             
@@ -776,6 +783,25 @@
             });
         });
 
+        // JWT Token helper function
+        function getAuthHeaders(contentType = 'application/json') {
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                window.location.href = "/login.html";
+                return null;
+            }
+            
+            const headers = {
+                'Authorization': `Bearer ${token}`
+            };
+            
+            if (contentType) {
+                headers['Content-Type'] = contentType;
+            }
+            
+            return headers;
+        }
+
         // Load user's pets
         async function loadUserPets() {
             const petsGrid = document.getElementById('petsGrid');
@@ -783,12 +809,22 @@
             
             try {
                 console.log('Loading pets...');
+                const headers = getAuthHeaders();
+                if (!headers) return;
+
                 const response = await fetch(`${API_BASE}/pet-profiles/my-pets`, {
                     method: 'GET',
-                    credentials: 'include'
+                    headers: headers
                 });
 
                 console.log('Response status:', response.status);
+                
+                if (response.status === 401) {
+                    localStorage.removeItem("jwtToken");
+                    localStorage.removeItem("userEmail");
+                    window.location.href = "/login.html";
+                    return;
+                }
                 
                 if (response.ok) {
                     const pets = await response.json();
@@ -797,7 +833,7 @@
                 } else {
                     const errorText = await response.text();
                     console.error('Error response:', errorText);
-                    showMessage('Please login first from the home page', 'error');
+                    showMessage('Failed to load pets. Please try again.', 'error');
                 }
             } catch (error) {
                 console.error('Error loading pets:', error);
@@ -878,6 +914,12 @@
         async function handleFormSubmit() {
             console.log('Form submission started...');
             
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                window.location.href = "/login.html";
+                return;
+            }
+
             const submitBtn = document.getElementById('submitBtn');
             const originalText = submitBtn.innerHTML;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
@@ -900,11 +942,20 @@
                 
                 const response = await fetch(`${API_BASE}/pet-profiles/create`, {
                     method: 'POST',
-                    body: formData,
-                    credentials: 'include'
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
                 });
 
                 console.log('Create pet response status:', response.status);
+                
+                if (response.status === 401) {
+                    localStorage.removeItem("jwtToken");
+                    localStorage.removeItem("userEmail");
+                    window.location.href = "/login.html";
+                    return;
+                }
                 
                 if (response.ok) {
                     const result = await response.json();
@@ -917,7 +968,7 @@
                 } else {
                     const error = await response.text();
                     console.error('Error creating pet:', error);
-                    showMessage(error || 'Error creating pet profile. Please login first.', 'error');
+                    showMessage(error || 'Error creating pet profile. Please try again.', 'error');
                 }
             } catch (error) {
                 console.error('Error creating pet:', error);

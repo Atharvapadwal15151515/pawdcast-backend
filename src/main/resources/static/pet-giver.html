@@ -575,6 +575,16 @@
         const successMessage = document.getElementById('successMessage');
         const errorMessage = document.getElementById('errorMessage');
         const errorText = document.getElementById('errorText');
+        const API_BASE_URL = 'https://pawdcast-backend-5.onrender.com';
+
+        // Check authentication on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                window.location.href = "/login.html";
+                return;
+            }
+        });
 
         // File input handlers
         const fileInputs = document.querySelectorAll('.file-input');
@@ -590,17 +600,33 @@
         form.addEventListener('submit', function(e) {
             e.preventDefault();
             
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                window.location.href = "/login.html";
+                return;
+            }
+
             hideError();
             form.style.display = 'none';
             loadingState.style.display = 'block';
 
             let formData = new FormData(this);
 
-            fetch('http://localhost:8080/pets/add', {
+            fetch(`${API_BASE_URL}/pets/add`, {
                 method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
                 body: formData
             })
             .then(response => {
+                if (response.status === 401) {
+                    localStorage.removeItem("jwtToken");
+                    localStorage.removeItem("userEmail");
+                    window.location.href = "/login.html";
+                    return;
+                }
+                
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
@@ -615,7 +641,9 @@
                 console.error('Error:', error);
                 loadingState.style.display = 'none';
                 form.style.display = 'block';
-                showError('Failed to submit pet information. Please try again.');
+                if (error.message !== "Network response was not ok") {
+                    showError('Failed to submit pet information. Please try again.');
+                }
             });
         });
 
