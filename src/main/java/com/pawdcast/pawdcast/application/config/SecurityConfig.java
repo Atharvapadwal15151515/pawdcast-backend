@@ -7,7 +7,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfigurationSource;
 
 import com.pawdcast.pawdcast.application.filter.JwtFilter;
 
@@ -15,76 +14,72 @@ import com.pawdcast.pawdcast.application.filter.JwtFilter;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final CorsConfigurationSource corsConfigurationSource;
     private final JwtFilter jwtFilter;
 
-    public SecurityConfig(CorsConfigurationSource corsConfigurationSource, JwtFilter jwtFilter) {
-        this.corsConfigurationSource = corsConfigurationSource;
+    public SecurityConfig(JwtFilter jwtFilter) {
         this.jwtFilter = jwtFilter;
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource)) // Enable CORS
-            .csrf(csrf -> csrf.disable()) // Disable CSRF for JWT
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(authz -> authz
-                // ========== PUBLIC ENDPOINTS (No authentication required) ==========
+                // ========== PUBLIC ENDPOINTS ==========
                 .requestMatchers(
                     // Authentication endpoints
-                    "/auth/login",
-                    "/auth/signup", 
+                    "/auth/signup",
+                    "/auth/login", 
                     "/auth/check",
                     "/auth/password/**",
                     
-                    // User registration endpoints
+                    // User registration endpoints  
                     "/api/auth/register",
-                    "/api/auth/register/full", 
+                    "/api/auth/register/full",
                     "/api/auth/login",
-                    "/users/signup",
+                    "/users/signup", 
                     "/users/login",
                     
                     // Public information endpoints
                     "/api/pet-care",
-                    "/api/pets",
                     "/api/pets/**",
                     "/pet-diet/**",
-                    "/legal/**",
                     "/api/insurance/**",
                     "/api/legal/**",
                     "/api/products/**",
                     "/stats/**",
                     "/api/training-tips/**",
-                    "/venues/**",
-                    "/clinics/**",
-                    "/api/breeds/**",
-                    "/api/breeds",
-                    "/api/breeds/type/**",
-                    "/api/breeds/search",
-                    "/api/breeds/recommend/**",
-                    "/api/breeds/allergy-friendly/**",
-                    "/api/breeds/health",
-                    "/api/categories",
-                    "/api/categories/**",
                     
-                    // Pet browsing (public listings)
+                    // Pet browsing (public)
                     "/pets/all",
                     "/pets/available",
                     "/pets/**/photo",
-                    "/pets/**/medical-records", 
-                    "/pets/**/vaccination-certificate",
+                    "/pets/**/medical-records",
+                    "/pets/**/vaccination-certificate", 
                     "/pets/**/ownership-proof",
                     "/pets/**/residence-proof",
                     "/pets/**/surrender-agreement",
+                    
+                    // Breed information (public)
+                    "/api/breeds",
+                    "/api/breeds/**",
+                    
+                    // Categories (public)
+                    "/api/categories",
+                    "/api/categories/main",
+                    "/api/categories/**/products",
+                    "/api/categories/**/subcategories",
                     
                     // Static resources
                     "/css/**",
                     "/js/**", 
                     "/images/**",
-                    "/"
+                    "/",
+                    "/error"
                 ).permitAll()
                 
-                // ========== SECURED ENDPOINTS (Require JWT authentication) ==========
+                // ========== SECURED ENDPOINTS (Require JWT) ==========
                 .requestMatchers(
                     // User management
                     "/auth/me",
@@ -119,26 +114,34 @@ public class SecurityConfig {
                     "/api/expenses/**"
                 ).authenticated()
                 
-                // ========== ADMIN ENDPOINTS (Future role-based access) ==========
-                .requestMatchers(
-                    "/api/breeds", 
-                    "/api/breeds/**"
-                ).hasAnyRole("ADMIN")
-                
-                // Category management (secured for authenticated users)
-                .requestMatchers(
-                    "/api/categories"
-                ).authenticated()
-                
-                // Allow all other requests (adjust based on your needs)
                 .anyRequest().permitAll()
             )
             .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // No sessions - JWT only
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
-            // Add JWT filter before other filters
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    @Bean
+    public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
+        org.springframework.web.cors.CorsConfiguration configuration = new org.springframework.web.cors.CorsConfiguration();
+        configuration.setAllowedOrigins(java.util.List.of(
+            "https://pawdcast.netlify.app",
+            "http://localhost:3000",
+            "http://localhost:5173",
+            "http://127.0.0.1:3000",
+            "http://127.0.0.1:5173"
+        ));
+        configuration.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        configuration.setAllowedHeaders(java.util.List.of("*"));
+        configuration.setExposedHeaders(java.util.List.of("Authorization", "Content-Type"));
+        configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
+
+        org.springframework.web.cors.UrlBasedCorsConfigurationSource source = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }
