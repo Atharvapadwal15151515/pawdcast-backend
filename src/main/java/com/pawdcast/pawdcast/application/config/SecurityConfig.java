@@ -2,6 +2,7 @@ package com.pawdcast.pawdcast.application.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -16,7 +17,8 @@ public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
 
-    public SecurityConfig(JwtFilter jwtFilter) {
+    // Add @Lazy to break circular dependency
+    public SecurityConfig(@Lazy JwtFilter jwtFilter) {
         this.jwtFilter = jwtFilter;
     }
 
@@ -26,92 +28,31 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(authz -> authz
-                // ========== PUBLIC ENDPOINTS ==========
+                // PUBLIC ENDPOINTS
                 .requestMatchers(
-                    // Authentication endpoints
-                    "/auth/signup",
-                    "/auth/login", 
-                    "/auth/check",
-                    "/auth/password/**",
-                    
-                    // User registration endpoints  
-                    "/api/auth/register",
-                    "/api/auth/register/full",
-                    "/api/auth/login",
-                    "/users/signup", 
-                    "/users/login",
-                    
-                    // Public information endpoints
-                    "/api/pet-care",
-                    "/api/pets/**",
-                    "/pet-diet/**",
-                    "/api/insurance/**",
-                    "/api/legal/**",
-                    "/api/products/**",
-                    "/stats/**",
-                    "/api/training-tips/**",
-                    
-                    // Pet browsing (public)
-                    "/pets/all",
-                    "/pets/available",
-                    "/pets/**/photo",
-                    "/pets/**/medical-records",
-                    "/pets/**/vaccination-certificate", 
-                    "/pets/**/ownership-proof",
-                    "/pets/**/residence-proof",
-                    "/pets/**/surrender-agreement",
-                    
-                    // Breed information (public)
-                    "/api/breeds",
-                    "/api/breeds/**",
-                    
-                    // Categories (public)
-                    "/api/categories",
-                    "/api/categories/main",
-                    "/api/categories/**/products",
+                    "/auth/signup", "/auth/login", "/auth/check", "/auth/password/**",
+                    "/api/auth/register", "/api/auth/register/full", "/api/auth/login",
+                    "/users/signup", "/users/login",
+                    "/api/pet-care", "/api/pets/**", "/pet-diet/**", "/api/insurance/**",
+                    "/api/legal/**", "/api/products/**", "/stats/**", "/api/training-tips/**",
+                    "/pets/all", "/pets/available", "/pets/**/photo", "/pets/**/medical-records",
+                    "/pets/**/vaccination-certificate", "/pets/**/ownership-proof",
+                    "/pets/**/residence-proof", "/pets/**/surrender-agreement",
+                    "/api/breeds", "/api/breeds/**",
+                    "/api/categories", "/api/categories/main", "/api/categories/**/products",
                     "/api/categories/**/subcategories",
-                    
-                    // Static resources
-                    "/css/**",
-                    "/js/**", 
-                    "/images/**",
-                    "/",
-                    "/error"
+                    "/css/**", "/js/**", "/images/**", "/", "/error"
                 ).permitAll()
                 
-                // ========== SECURED ENDPOINTS (Require JWT) ==========
+                // SECURED ENDPOINTS
                 .requestMatchers(
-                    // User management
-                    "/auth/me",
-                    "/auth/profile", 
-                    "/auth/logout",
-                    "/users/me",
-                    "/users/**",
-                    "/api/auth/password",
-                    "/api/auth/profile",
-                    "/api/auth/**",
-                    
-                    // Pet management
-                    "/pet-profiles/**",
-                    "/pets/add",
-                    
-                    // Health & habits
-                    "/pet-health/**",
-                    "/api/habits/**",
-                    "/food-entries/**",
-                    
-                    // Adoptions & seekers
-                    "/adoptions/**", 
-                    "/seekers/**",
-                    
-                    // E-commerce
-                    "/api/cart/**",
-                    "/api/orders/**",
-                    
-                    // Personal data
-                    "/api/diary/**",
-                    "/api/digilocker/**",
-                    "/api/expenses/**"
+                    "/auth/me", "/auth/profile", "/auth/logout", "/users/me", "/users/**",
+                    "/api/auth/password", "/api/auth/profile", "/api/auth/**",
+                    "/pet-profiles/**", "/pets/add",
+                    "/pet-health/**", "/api/habits/**", "/food-entries/**",
+                    "/adoptions/**", "/seekers/**",
+                    "/api/cart/**", "/api/orders/**",
+                    "/api/diary/**", "/api/digilocker/**", "/api/expenses/**"
                 ).authenticated()
                 
                 .anyRequest().permitAll()
