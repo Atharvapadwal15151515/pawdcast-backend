@@ -968,6 +968,7 @@
         if (response.status === 401) {
             localStorage.removeItem("jwtToken");
             localStorage.removeItem("userEmail");
+            window.location.reload();
             return null;
         }
         return response;
@@ -992,13 +993,8 @@
 
     // Show FAQ Section
     function showFAQ() {
-        // Hide other sections
         document.getElementById('missionSection').classList.add('hidden');
-        
-        // Show FAQ section
         document.getElementById('faqSection').classList.remove('hidden');
-        
-        // Scroll to FAQ section
         document.getElementById('faqSection').scrollIntoView({ behavior: 'smooth' });
     }
 
@@ -1023,21 +1019,19 @@
         document.getElementById('termsOfServicePopup').classList.remove('hidden');
     }
 
-    // Close contact popup when clicking outside
+    // Close popups when clicking outside
     document.getElementById('contactPopup').onclick = (e) => {
         if (e.target.id === 'contactPopup') {
             document.getElementById('contactPopup').classList.add('hidden');
         }
     };
 
-    // Close privacy policy popup when clicking outside
     document.getElementById('privacyPolicyPopup').onclick = (e) => {
         if (e.target.id === 'privacyPolicyPopup') {
             document.getElementById('privacyPolicyPopup').classList.add('hidden');
         }
     };
 
-    // Close terms of service popup when clicking outside
     document.getElementById('termsOfServicePopup').onclick = (e) => {
         if (e.target.id === 'termsOfServicePopup') {
             document.getElementById('termsOfServicePopup').classList.add('hidden');
@@ -1056,61 +1050,75 @@
                 document.getElementById('totalUsers').classList.remove('pulse-slow');
                 document.getElementById('totalPets').classList.remove('pulse-slow');
             } else {
-                document.getElementById('totalUsers').textContent = '0';
-                document.getElementById('totalPets').textContent = '0';
-                document.getElementById('totalUsers').classList.remove('pulse-slow');
-                document.getElementById('totalPets').classList.remove('pulse-slow');
+                setDefaultStats();
             }
         } catch (error) {
             console.error('Error fetching statistics:', error);
-            document.getElementById('totalUsers').textContent = '0';
-            document.getElementById('totalPets').textContent = '0';
-            document.getElementById('totalUsers').classList.remove('pulse-slow');
-            document.getElementById('totalPets').classList.remove('pulse-slow');
+            setDefaultStats();
         }
     }
 
+    function setDefaultStats() {
+        document.getElementById('totalUsers').textContent = '0';
+        document.getElementById('totalPets').textContent = '0';
+        document.getElementById('totalUsers').classList.remove('pulse-slow');
+        document.getElementById('totalPets').classList.remove('pulse-slow');
+    }
+
     // Modal controls
-    document.getElementById('loginBtn').onclick = () => document.getElementById('loginModal').classList.remove('hidden');
-    document.getElementById('signupBtn').onclick = () => document.getElementById('signupModal').classList.remove('hidden');
+    document.getElementById('loginBtn').onclick = () => {
+        document.getElementById('loginModal').classList.remove('hidden');
+        clearLoginForm();
+    };
+    
+    document.getElementById('signupBtn').onclick = () => {
+        document.getElementById('signupModal').classList.remove('hidden');
+        clearSignupForm();
+    };
     
     document.getElementById('openSignup').onclick = () => {
         document.getElementById('loginModal').classList.add('hidden');
         document.getElementById('signupModal').classList.remove('hidden');
+        clearLoginForm();
     };
     
     document.getElementById('openLogin').onclick = () => {
         document.getElementById('signupModal').classList.add('hidden');
         document.getElementById('loginModal').classList.remove('hidden');
+        clearSignupForm();
     };
 
     // Forgot Password functionality
     document.getElementById('forgotPasswordBtn').onclick = () => {
         document.getElementById('loginModal').classList.add('hidden');
         document.getElementById('forgotPasswordModal').classList.remove('hidden');
+        clearLoginForm();
     };
 
     document.getElementById('backToLogin').onclick = () => {
         document.getElementById('forgotPasswordModal').classList.add('hidden');
         document.getElementById('loginModal').classList.remove('hidden');
+        document.getElementById('forgotPasswordEmail').value = '';
     };
 
     document.getElementById('backToLoginFromReset').onclick = () => {
         document.getElementById('resetPasswordModal').classList.add('hidden');
         document.getElementById('loginModal').classList.remove('hidden');
+        document.getElementById('newPassword').value = '';
+        document.getElementById('confirmNewPassword').value = '';
     };
 
-    // Send reset link - UPDATED WITH WORKING VERSION
+    // Send reset link
     document.getElementById('sendResetLinkBtn').onclick = async () => {
         const email = document.getElementById('forgotPasswordEmail').value;
         
         if (!email) {
-            alert("⚠️ Please enter your email address.");
+            showAlert("⚠️ Please enter your email address.", "warning");
             return;
         }
 
         if (!validateEmail(email)) {
-            alert("⚠️ Please enter a valid email address.");
+            showAlert("⚠️ Please enter a valid email address.", "warning");
             return;
         }
 
@@ -1121,77 +1129,66 @@
         button.disabled = true;
 
         try {
-            // Simulate API call delay
             await new Promise(resolve => setTimeout(resolve, 1500));
             
-            // Success message (backend not implemented yet)
-            alert(`✅ Password reset feature coming soon!\n\nFor now, please contact our support team at Info.pawdcast@gmail.com for password assistance.`);
+            showAlert(`✅ Password reset feature coming soon!\n\nFor now, please contact our support team at Info.pawdcast@gmail.com for password assistance.`, "info");
             
-            // Close modal and return to login
             document.getElementById('forgotPasswordModal').classList.add('hidden');
             document.getElementById('loginModal').classList.remove('hidden');
             document.getElementById('forgotPasswordEmail').value = '';
             
         } catch (error) {
-            alert("❌ Something went wrong. Please try again.");
+            showAlert("❌ Something went wrong. Please try again.", "error");
         } finally {
-            // Restore button
             button.textContent = originalText;
             button.disabled = false;
         }
     };
 
-    // Reset password - UPDATED WITH WORKING VERSION
+    // Reset password
     document.getElementById('resetPasswordBtn').onclick = async () => {
         const newPassword = document.getElementById('newPassword').value;
         const confirmPassword = document.getElementById('confirmNewPassword').value;
         
         if (!newPassword || !confirmPassword) {
-            alert("⚠️ Please fill in all fields.");
+            showAlert("⚠️ Please fill in all fields.", "warning");
             return;
         }
 
         if (newPassword.length < 6) {
-            alert("⚠️ Password must be at least 6 characters long.");
+            showAlert("⚠️ Password must be at least 6 characters long.", "warning");
             return;
         }
 
         if (newPassword !== confirmPassword) {
-            alert("⚠️ Passwords do not match.");
+            showAlert("⚠️ Passwords do not match.", "warning");
             return;
         }
 
-        // Show loading state
         const button = document.getElementById('resetPasswordBtn');
         const originalText = button.textContent;
         button.textContent = 'Resetting...';
         button.disabled = true;
 
         try {
-            // Simulate API call delay
             await new Promise(resolve => setTimeout(resolve, 1500));
             
-            // Success message (backend not implemented yet)
-            alert("✅ Password reset feature coming soon!\n\nPlease contact support at Info.pawdcast@gmail.com for password assistance.");
+            showAlert("✅ Password reset feature coming soon!\n\nPlease contact support at Info.pawdcast@gmail.com for password assistance.", "info");
             
-            // Close modal and return to login
             document.getElementById('resetPasswordModal').classList.add('hidden');
             document.getElementById('loginModal').classList.remove('hidden');
-            
-            // Clear form
             document.getElementById('newPassword').value = '';
             document.getElementById('confirmNewPassword').value = '';
             
         } catch (error) {
-            alert("❌ Something went wrong. Please try again.");
+            showAlert("❌ Something went wrong. Please try again.", "error");
         } finally {
-            // Restore button
             button.textContent = originalText;
             button.disabled = false;
         }
     };
 
-    // Check URL for reset token (if user comes from email link)
+    // Check URL for reset token
     function checkResetTokenFromURL() {
         const urlParams = new URLSearchParams(window.location.search);
         const token = urlParams.get('token');
@@ -1199,7 +1196,6 @@
         if (token) {
             resetToken = token;
             document.getElementById('resetPasswordModal').classList.remove('hidden');
-            // Clean URL
             window.history.replaceState({}, document.title, window.location.pathname);
         }
     }
@@ -1209,16 +1205,21 @@
         document.getElementById(modalId).onclick = (e) => {
             if (e.target.id === modalId) {
                 document.getElementById(modalId).classList.add('hidden');
+                if (modalId === 'loginModal') clearLoginForm();
+                if (modalId === 'signupModal') clearSignupForm();
             }
         };
     });
 
-    // Signup functionality with terms validation - UPDATED URL
+    // Signup functionality - UPDATED URL
     document.getElementById('signupSubmit').onclick = async () => {
-        // Check if terms checkbox is checked
         const termsCheckbox = document.getElementById('agreeTermsSignup');
         if (!termsCheckbox.checked) {
-            alert("⚠️ Please agree to the Terms of Service to continue.");
+            showAlert("⚠️ Please agree to the Terms of Service to continue.", "warning");
+            return;
+        }
+
+        if (!validateSignupForm()) {
             return;
         }
 
@@ -1228,11 +1229,25 @@
         formData.append("password", document.getElementById('signupPassword').value);
         formData.append("phone", document.getElementById('signupPhone').value);
         formData.append("address", document.getElementById('signupAddress').value);
-        formData.append("photo", document.getElementById('signupPhoto').files[0]);
+        
+        const photoFile = document.getElementById('signupPhoto').files[0];
+        if (photoFile) {
+            formData.append("photo", photoFile);
+        }
+
+        const profilePhotoFile = document.getElementById('signupProfilePhoto').files[0];
+        if (profilePhotoFile) {
+            formData.append("profilePhoto", profilePhotoFile);
+        }
+
+        const button = document.getElementById('signupSubmit');
+        const originalText = button.textContent;
+        button.textContent = 'Creating Account...';
+        button.disabled = true;
 
         try {
-            // UPDATED: Changed URL from /auth/signup to /api/auth/register
-            const res = await fetch('https://pawdcast-backend-5.onrender.com/api/auth/register', { 
+            // UPDATED URL: Changed from /api/auth/register to /auth/signup
+            const res = await fetch('https://pawdcast-backend-5.onrender.com/auth/signup', { 
                 method: 'POST', 
                 body: formData
             });
@@ -1240,133 +1255,133 @@
             if (res.ok) {
                 const data = await res.json();
                 if (data.token) {
-                    // Store JWT token
                     localStorage.setItem("jwtToken", data.token);
                     localStorage.setItem("userEmail", data.email || data.user?.email);
                     
-                    alert("🎉 Signup successful! Welcome to Pawdcast!");
+                    showAlert("🎉 Signup successful! Welcome to Pawdcast!", "success");
                     document.getElementById('signupModal').classList.add('hidden');
                     
                     // Get user data and show profile - UPDATED URL
-                    const userResponse = await authFetch('https://pawdcast-backend-5.onrender.com/api/auth/profile');
+                    const userResponse = await authFetch('https://pawdcast-backend-5.onrender.com/auth/me');
                     if (userResponse && userResponse.ok) {
                         const userData = await userResponse.json();
                         loggedInUser = userData.user || userData;
                         showProfile(loggedInUser);
                     }
                 } else {
-                    alert("🎉 Signup successful! Please sign in to continue.");
+                    showAlert("🎉 Signup successful! Please sign in to continue.", "success");
                     document.getElementById('signupModal').classList.add('hidden');
                     document.getElementById('loginModal').classList.remove('hidden');
                 }
                 
-                // Clear form
-                document.getElementById('signupFullName').value = '';
-                document.getElementById('signupEmail').value = '';
-                document.getElementById('signupPassword').value = '';
-                document.getElementById('signupPhone').value = '';
-                document.getElementById('signupAddress').value = '';
-                document.getElementById('signupPhoto').value = '';
-                document.getElementById('agreeTermsSignup').checked = false;
-                
-                // Refresh statistics after signup
+                clearSignupForm();
                 setTimeout(fetchStatistics, 1000);
             } else {
                 const errorData = await res.json();
-                alert("❌ " + (errorData.message || 'Signup failed'));
+                showAlert("❌ " + (errorData.message || 'Signup failed'), "error");
             }
         } catch (error) {
-            alert("❌ Network error. Please try again.");
+            console.error('Signup error:', error);
+            showAlert("❌ Network error. Please try again.", "error");
+        } finally {
+            button.textContent = originalText;
+            button.disabled = false;
         }
     };
 
-    // Login functionality - UPDATED URL AND RESPONSE HANDLING
+    // Login functionality - UPDATED URL
     document.getElementById('loginSubmit').onclick = async () => {
         const email = document.getElementById('loginEmail').value;
         const password = document.getElementById('loginPassword').value;
 
-        if (!email || !password) {
-            alert("⚠️ Please fill in all fields.");
+        if (!validateLoginForm()) {
             return;
         }
+
+        const button = document.getElementById('loginSubmit');
+        const originalText = button.textContent;
+        button.textContent = 'Signing In...';
+        button.disabled = true;
 
         try {
             const loginFormData = new FormData();
             loginFormData.append('email', email);
             loginFormData.append('password', password);
 
-            // UPDATED: Changed URL from /auth/login to /api/auth/login
-            const res = await fetch('https://pawdcast-backend-5.onrender.com/api/auth/login', {
+            // UPDATED URL: Changed from /api/auth/login to /auth/login
+            const res = await fetch('https://pawdcast-backend-5.onrender.com/auth/login', {
                 method: 'POST',
                 body: loginFormData
             });
             
             if (res.ok) {
                 const data = await res.json();
-                // UPDATED: Check for user data in response
-                if (data.user && data.user.email) {
-                    // Store JWT token if available
+                if (data.email) {
                     if (data.token) {
                         localStorage.setItem("jwtToken", data.token);
                     }
-                    localStorage.setItem("userEmail", data.user.email);
+                    localStorage.setItem("userEmail", data.email);
                     
                     // Get user data - UPDATED URL
-                    const userResponse = await authFetch('https://pawdcast-backend-5.onrender.com/api/auth/profile');
+                    const userResponse = await authFetch('https://pawdcast-backend-5.onrender.com/auth/me');
                     if (userResponse && userResponse.ok) {
                         const userData = await userResponse.json();
                         loggedInUser = userData.user || userData;
                         document.getElementById('loginModal').classList.add('hidden');
                         showProfile(loggedInUser);
                         
-                        // Clear form
-                        document.getElementById('loginEmail').value = '';
-                        document.getElementById('loginPassword').value = '';
-                        
-                        alert("✅ Login successful! Welcome back, " + (loggedInUser.fullName || loggedInUser.name) + "!");
+                        clearLoginForm();
+                        showAlert("✅ Login successful! Welcome back, " + (loggedInUser.fullName || loggedInUser.name) + "!", "success");
                     } else {
-                        // Fallback: use data from login response
-                        loggedInUser = data.user;
+                        loggedInUser = data;
                         document.getElementById('loginModal').classList.add('hidden');
                         showProfile(loggedInUser);
-                        
-                        alert("✅ Login successful! Welcome back, " + (data.user.fullName || data.user.name) + "!");
+                        clearLoginForm();
+                        showAlert("✅ Login successful! Welcome back, " + (data.fullName || data.name) + "!", "success");
                     }
                 } else {
-                    alert("❌ Invalid response format from server.");
+                    showAlert("❌ Invalid response format from server.", "error");
                 }
             } else {
                 const errorData = await res.json();
-                alert("❌ Login failed: " + (errorData.message || 'Invalid credentials'));
+                showAlert("❌ Login failed: " + (errorData.message || 'Invalid credentials'), "error");
             }
         } catch (error) {
-            alert("❌ Network error. Please try again.");
+            console.error('Login error:', error);
+            showAlert("❌ Network error. Please try again.", "error");
+        } finally {
+            button.textContent = originalText;
+            button.disabled = false;
         }
     };
 
-    // Show profile when logged in - UPDATED FOR JWT
+    // Show profile when logged in
     function showProfile(user) {
         document.getElementById('loginBtn').style.display = 'none';
         document.getElementById('signupBtn').style.display = 'none';
         document.getElementById('profileContainer').classList.remove('hidden');
         
-        // Set profile picture - prioritize profilePhoto, then photo, then default
+        // Set profile picture
         let profilePicSrc = '';
         if (user.profilePhoto) {
             profilePicSrc = `data:image/jpeg;base64,${user.profilePhoto}`;
         } else if (user.photo) {
             profilePicSrc = `data:image/jpeg;base64,${user.photo}`;
         } else {
-            // Default avatar if no photo
             profilePicSrc = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiM0NjgyQjQiLz4KPGNpcmNsZSBjeD0iMjAiIGN5PSIxNiIgcj0iNiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTggMzJDOCAyNi40NzcyIDEyLjQ3NzIgMjIgMTggMjJIMjJDMjcuNTIyOCAyMiAzMiAyNi40NzcyIDMyIDMyVjM0SDhWMzJaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K';
         }
         document.getElementById('profilePic').src = profilePicSrc;
         
-        // Set user details in dropdown
-        document.getElementById('profileName').textContent = user.fullName || user.name || 'User';
-        document.getElementById('profileEmail').textContent = user.email || '';
+        // Update profile dropdown
+        updateProfileDropdown(user);
         
-        // Add additional user details to dropdown
+        // Profile dropdown toggle
+        document.getElementById('profileBtn').onclick = () => {
+            document.getElementById('profileDropdown').classList.toggle('hidden');
+        };
+    }
+
+    function updateProfileDropdown(user) {
         let userDetailsHtml = `
             <div class="p-4 bg-gradient-to-r from-yellow-beige to-dark-yellow-beige">
                 <p id="profileName" class="font-bold text-black-brown">${user.fullName || user.name || 'User'}</p>
@@ -1387,14 +1402,7 @@
         `;
         
         document.getElementById('profileDropdown').innerHTML = userDetailsHtml;
-        
-        // Re-attach logout event listener
         document.getElementById('logoutBtn').onclick = logoutUser;
-        
-        // Profile dropdown toggle
-        document.getElementById('profileBtn').onclick = () => {
-            document.getElementById('profileDropdown').classList.toggle('hidden');
-        };
     }
 
     // Hide profile when logged out
@@ -1405,14 +1413,13 @@
         document.getElementById('profileDropdown').classList.add('hidden');
     }
 
-    // Logout functionality - UPDATED FOR JWT
+    // Logout functionality
     function logoutUser() {
-        // JWT logout - just remove token from localStorage
         localStorage.removeItem("jwtToken");
         localStorage.removeItem("userEmail");
         loggedInUser = null;
         hideProfile();
-        alert("👋 You've been logged out successfully!");
+        showAlert("👋 You've been logged out successfully!", "info");
     }
 
     // Get Started button functionality
@@ -1445,14 +1452,13 @@
         const token = localStorage.getItem("jwtToken");
         if (token) {
             try {
-                // UPDATED: Changed URL from /auth/me to /api/auth/profile
-                const userResponse = await authFetch('https://pawdcast-backend-5.onrender.com/api/auth/profile');
+                // UPDATED URL: Changed from /api/auth/profile to /auth/me
+                const userResponse = await authFetch('https://pawdcast-backend-5.onrender.com/auth/me');
                 if (userResponse && userResponse.ok) {
                     const userData = await userResponse.json();
                     loggedInUser = userData.user || userData;
                     showProfile(loggedInUser);
                 } else {
-                    // Token is invalid, clear it
                     localStorage.removeItem("jwtToken");
                     localStorage.removeItem("userEmail");
                 }
@@ -1512,61 +1518,69 @@
         return re.test(email);
     }
 
-    function validateForm(formType) {
-        if (formType === 'login') {
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            
-            if (!email || !password) {
-                alert("⚠️ Please fill in all fields.");
-                return false;
-            }
-            
-            if (!validateEmail(email)) {
-                alert("⚠️ Please enter a valid email address.");
-                return false;
-            }
-        } else if (formType === 'signup') {
-            const fullName = document.getElementById('signupFullName').value;
-            const email = document.getElementById('signupEmail').value;
-            const password = document.getElementById('signupPassword').value;
-            const phone = document.getElementById('signupPhone').value;
-            const address = document.getElementById('signupAddress').value;
-            
-            if (!fullName || !email || !password || !phone || !address) {
-                alert("⚠️ Please fill in all required fields.");
-                return false;
-            }
-            
-            if (!validateEmail(email)) {
-                alert("⚠️ Please enter a valid email address.");
-                return false;
-            }
-            
-            if (password.length < 6) {
-                alert("⚠️ Password must be at least 6 characters long.");
-                return false;
-            }
+    function validateLoginForm() {
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+        
+        if (!email || !password) {
+            showAlert("⚠️ Please fill in all fields.", "warning");
+            return false;
+        }
+        
+        if (!validateEmail(email)) {
+            showAlert("⚠️ Please enter a valid email address.", "warning");
+            return false;
         }
         
         return true;
     }
 
-    // Add form validation to submit buttons
-    const originalLoginSubmit = document.getElementById('loginSubmit').onclick;
-    const originalSignupSubmit = document.getElementById('signupSubmit').onclick;
-    
-    document.getElementById('loginSubmit').onclick = (e) => {
-        if (validateForm('login')) {
-            originalLoginSubmit();
+    function validateSignupForm() {
+        const fullName = document.getElementById('signupFullName').value;
+        const email = document.getElementById('signupEmail').value;
+        const password = document.getElementById('signupPassword').value;
+        const phone = document.getElementById('signupPhone').value;
+        const address = document.getElementById('signupAddress').value;
+        
+        if (!fullName || !email || !password || !phone || !address) {
+            showAlert("⚠️ Please fill in all required fields.", "warning");
+            return false;
         }
-    };
-    
-    document.getElementById('signupSubmit').onclick = (e) => {
-        if (validateForm('signup')) {
-            originalSignupSubmit();
+        
+        if (!validateEmail(email)) {
+            showAlert("⚠️ Please enter a valid email address.", "warning");
+            return false;
         }
-    };
+        
+        if (password.length < 6) {
+            showAlert("⚠️ Password must be at least 6 characters long.", "warning");
+            return false;
+        }
+        
+        return true;
+    }
+
+    // Utility functions
+    function clearLoginForm() {
+        document.getElementById('loginEmail').value = '';
+        document.getElementById('loginPassword').value = '';
+    }
+
+    function clearSignupForm() {
+        document.getElementById('signupFullName').value = '';
+        document.getElementById('signupEmail').value = '';
+        document.getElementById('signupPassword').value = '';
+        document.getElementById('signupPhone').value = '';
+        document.getElementById('signupAddress').value = '';
+        document.getElementById('signupPhoto').value = '';
+        document.getElementById('signupProfilePhoto').value = '';
+        document.getElementById('agreeTermsSignup').checked = false;
+    }
+
+    function showAlert(message, type = 'info') {
+        // You can replace this with a more sophisticated alert system
+        alert(message);
+    }
 </script>
 </body>
 </html>
