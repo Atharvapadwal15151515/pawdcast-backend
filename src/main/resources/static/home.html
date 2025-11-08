@@ -1213,7 +1213,7 @@
         };
     });
 
-    // Signup functionality with terms validation
+    // Signup functionality with terms validation - UPDATED URL
     document.getElementById('signupSubmit').onclick = async () => {
         // Check if terms checkbox is checked
         const termsCheckbox = document.getElementById('agreeTermsSignup');
@@ -1231,7 +1231,8 @@
         formData.append("photo", document.getElementById('signupPhoto').files[0]);
 
         try {
-            const res = await fetch('https://pawdcast-backend-5.onrender.com/auth/signup', { 
+            // UPDATED: Changed URL from /auth/signup to /api/auth/register
+            const res = await fetch('https://pawdcast-backend-5.onrender.com/api/auth/register', { 
                 method: 'POST', 
                 body: formData
             });
@@ -1246,11 +1247,11 @@
                     alert("🎉 Signup successful! Welcome to Pawdcast!");
                     document.getElementById('signupModal').classList.add('hidden');
                     
-                    // Get user data and show profile
-                    const userResponse = await authFetch('https://pawdcast-backend-5.onrender.com/auth/me');
+                    // Get user data and show profile - UPDATED URL
+                    const userResponse = await authFetch('https://pawdcast-backend-5.onrender.com/api/auth/profile');
                     if (userResponse && userResponse.ok) {
                         const userData = await userResponse.json();
-                        loggedInUser = userData;
+                        loggedInUser = userData.user || userData;
                         showProfile(loggedInUser);
                     }
                 } else {
@@ -1271,14 +1272,15 @@
                 // Refresh statistics after signup
                 setTimeout(fetchStatistics, 1000);
             } else {
-                alert("❌ " + await res.text());
+                const errorData = await res.json();
+                alert("❌ " + (errorData.message || 'Signup failed'));
             }
         } catch (error) {
             alert("❌ Network error. Please try again.");
         }
     };
 
-    // Login functionality - UPDATED FOR JWT
+    // Login functionality - UPDATED URL AND RESPONSE HANDLING
     document.getElementById('loginSubmit').onclick = async () => {
         const email = document.getElementById('loginEmail').value;
         const password = document.getElementById('loginPassword').value;
@@ -1293,23 +1295,27 @@
             loginFormData.append('email', email);
             loginFormData.append('password', password);
 
-            const res = await fetch('https://pawdcast-backend-5.onrender.com/auth/login', {
+            // UPDATED: Changed URL from /auth/login to /api/auth/login
+            const res = await fetch('https://pawdcast-backend-5.onrender.com/api/auth/login', {
                 method: 'POST',
                 body: loginFormData
             });
             
             if (res.ok) {
                 const data = await res.json();
-                if (data.token) {
-                    // Store JWT token
-                    localStorage.setItem("jwtToken", data.token);
-                    localStorage.setItem("userEmail", data.email || data.user?.email);
+                // UPDATED: Check for user data in response
+                if (data.user && data.user.email) {
+                    // Store JWT token if available
+                    if (data.token) {
+                        localStorage.setItem("jwtToken", data.token);
+                    }
+                    localStorage.setItem("userEmail", data.user.email);
                     
-                    // Get user data
-                    const userResponse = await authFetch('https://pawdcast-backend-5.onrender.com/auth/me');
+                    // Get user data - UPDATED URL
+                    const userResponse = await authFetch('https://pawdcast-backend-5.onrender.com/api/auth/profile');
                     if (userResponse && userResponse.ok) {
                         const userData = await userResponse.json();
-                        loggedInUser = userData;
+                        loggedInUser = userData.user || userData;
                         document.getElementById('loginModal').classList.add('hidden');
                         showProfile(loggedInUser);
                         
@@ -1317,14 +1323,21 @@
                         document.getElementById('loginEmail').value = '';
                         document.getElementById('loginPassword').value = '';
                         
-                        alert("✅ Login successful! Welcome back, " + userData.fullName + "!");
+                        alert("✅ Login successful! Welcome back, " + (loggedInUser.fullName || loggedInUser.name) + "!");
+                    } else {
+                        // Fallback: use data from login response
+                        loggedInUser = data.user;
+                        document.getElementById('loginModal').classList.add('hidden');
+                        showProfile(loggedInUser);
+                        
+                        alert("✅ Login successful! Welcome back, " + (data.user.fullName || data.user.name) + "!");
                     }
                 } else {
-                    alert("❌ No authentication token received.");
+                    alert("❌ Invalid response format from server.");
                 }
             } else {
-                const errorText = await res.text();
-                alert("❌ Login failed: " + errorText);
+                const errorData = await res.json();
+                alert("❌ Login failed: " + (errorData.message || 'Invalid credentials'));
             }
         } catch (error) {
             alert("❌ Network error. Please try again.");
@@ -1350,13 +1363,13 @@
         document.getElementById('profilePic').src = profilePicSrc;
         
         // Set user details in dropdown
-        document.getElementById('profileName').textContent = user.fullName || 'User';
+        document.getElementById('profileName').textContent = user.fullName || user.name || 'User';
         document.getElementById('profileEmail').textContent = user.email || '';
         
         // Add additional user details to dropdown
         let userDetailsHtml = `
             <div class="p-4 bg-gradient-to-r from-yellow-beige to-dark-yellow-beige">
-                <p id="profileName" class="font-bold text-black-brown">${user.fullName || 'User'}</p>
+                <p id="profileName" class="font-bold text-black-brown">${user.fullName || user.name || 'User'}</p>
                 <p id="profileEmail" class="text-sm text-mocha-brown">${user.email || ''}</p>
             </div>
             <div class="p-4 border-b border-dark-yellow-beige">
@@ -1432,10 +1445,11 @@
         const token = localStorage.getItem("jwtToken");
         if (token) {
             try {
-                const userResponse = await authFetch('https://pawdcast-backend-5.onrender.com/auth/me');
+                // UPDATED: Changed URL from /auth/me to /api/auth/profile
+                const userResponse = await authFetch('https://pawdcast-backend-5.onrender.com/api/auth/profile');
                 if (userResponse && userResponse.ok) {
                     const userData = await userResponse.json();
-                    loggedInUser = userData;
+                    loggedInUser = userData.user || userData;
                     showProfile(loggedInUser);
                 } else {
                     // Token is invalid, clear it
