@@ -884,6 +884,60 @@
         // Configuration
         const API_BASE_URL = 'https://pawdcast-backend-5.onrender.com';
 
+        // JWT Authentication Helper Function
+        async function authFetch(url, options = {}) {
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                window.location.href = "/login.html";
+                return;
+            }
+            
+            const headers = {
+                "Authorization": `Bearer ${token}`,
+                ...options.headers
+            };
+            
+            try {
+                const response = await fetch(url, { ...options, headers });
+                if (response.status === 401) {
+                    localStorage.removeItem("jwtToken");
+                    localStorage.removeItem("userEmail");
+                    window.location.href = "/login.html";
+                    return;
+                }
+                return response;
+            } catch (error) {
+                console.error('Auth fetch error:', error);
+                throw error;
+            }
+        }
+
+        // Axios interceptor for JWT
+        axios.interceptors.request.use(
+            config => {
+                const token = localStorage.getItem("jwtToken");
+                if (token) {
+                    config.headers.Authorization = `Bearer ${token}`;
+                }
+                return config;
+            },
+            error => {
+                return Promise.reject(error);
+            }
+        );
+
+        axios.interceptors.response.use(
+            response => response,
+            error => {
+                if (error.response?.status === 401) {
+                    localStorage.removeItem("jwtToken");
+                    localStorage.removeItem("userEmail");
+                    window.location.href = "/login.html";
+                }
+                return Promise.reject(error);
+            }
+        );
+
         // State management
         let documents = [];
         let currentDocumentId = null;
@@ -898,8 +952,17 @@
         // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Pet DigiLocker initialized');
+            checkAuth();
             initializeEventListeners();
         });
+
+        function checkAuth() {
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                window.location.href = "/login.html";
+                return;
+            }
+        }
 
         function initializeEventListeners() {
             // Navigation
@@ -970,6 +1033,7 @@
                 console.error('Upload failed:', error);
                 if (error.response?.status === 401) {
                     showToast('Session expired. Please login again.', 'error');
+                    handleAuthError();
                 } else {
                     showToast(error.response?.data || 'Failed to upload image', 'error');
                 }
@@ -995,6 +1059,7 @@
                 console.error('Load images failed:', error);
                 if (error.response?.status === 401) {
                     showToast('Session expired. Please login again.', 'error');
+                    handleAuthError();
                 } else {
                     showToast('Failed to load images', 'error');
                 }
@@ -1067,6 +1132,7 @@
                     showToast('Image not found', 'error');
                 } else if (error.response?.status === 401) {
                     showToast('Session expired. Please login again.', 'error');
+                    handleAuthError();
                 } else {
                     showToast('Failed to view image: ' + (error.response?.data || error.message), 'error');
                 }
@@ -1155,6 +1221,7 @@
                     showToast('Image not found.', 'error');
                 } else if (error.response?.status === 401) {
                     showToast('Session expired. Please login again.', 'error');
+                    handleAuthError();
                 } else {
                     showToast('Failed to download image', 'error');
                 }
@@ -1178,6 +1245,7 @@
                 console.error('Delete failed:', error);
                 if (error.response?.status === 401) {
                     showToast('Session expired. Please login again.', 'error');
+                    handleAuthError();
                 } else {
                     showToast(error.response?.data || 'Failed to delete image', 'error');
                 }
@@ -1224,24 +1292,26 @@
             }
         }
 
-        async function handleLogout() {
+        function handleLogout() {
             if (!confirm('Are you sure you want to logout?')) {
                 return;
             }
             
-            showLoading(true);
-            try {
-                await axios.post(`${API_BASE_URL}/auth/logout`);
-                showToast('Logged out successfully', 'success');
-                setTimeout(() => {
-                    window.location.href = 'home.html';
-                }, 1500);
-            } catch (error) {
-                console.error('Logout error:', error);
-                window.location.href = 'home.html';
-            } finally {
-                showLoading(false);
-            }
+            // JWT logout - just remove token from localStorage
+            localStorage.removeItem("jwtToken");
+            localStorage.removeItem("userEmail");
+            showToast('Logged out successfully', 'success');
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 1500);
+        }
+
+        function handleAuthError() {
+            localStorage.removeItem("jwtToken");
+            localStorage.removeItem("userEmail");
+            setTimeout(() => {
+                window.location.href = "/login.html";
+            }, 2000);
         }
 
         // Helper functions

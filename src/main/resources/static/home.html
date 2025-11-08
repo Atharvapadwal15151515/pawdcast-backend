@@ -948,8 +948,30 @@
 </div>
 
 <script>
-    let loggedInUser = JSON.parse(localStorage.getItem("currentUser")) || null;
+    let loggedInUser = null;
     let resetToken = null;
+
+    // JWT Authentication Helper Function
+    async function authFetch(url, options = {}) {
+        const token = localStorage.getItem("jwtToken");
+        if (!token) {
+            return null;
+        }
+        
+        const headers = {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+            ...options.headers
+        };
+        
+        const response = await fetch(url, { ...options, headers });
+        if (response.status === 401) {
+            localStorage.removeItem("jwtToken");
+            localStorage.removeItem("userEmail");
+            return null;
+        }
+        return response;
+    }
 
     // FAQ Toggle Function
     function toggleFAQ(element) {
@@ -1025,10 +1047,7 @@
     // Fetch statistics from backend
     async function fetchStatistics() {
         try {
-            const response = await fetch('https://pawdcast-backend-5.onrender.com/stats/counts', {
-                method: 'GET',
-                credentials: 'include'
-            });
+            const response = await fetch('https://pawdcast-backend-5.onrender.com/stats/counts');
             
             if (response.ok) {
                 const data = await response.json();
@@ -1214,13 +1233,32 @@
         try {
             const res = await fetch('https://pawdcast-backend-5.onrender.com/auth/signup', { 
                 method: 'POST', 
-                body: formData,
-                credentials: 'include'
+                body: formData
             });
+            
             if (res.ok) {
-                alert("🎉 Signup successful! Please sign in to continue.");
-                document.getElementById('signupModal').classList.add('hidden');
-                document.getElementById('loginModal').classList.remove('hidden');
+                const data = await res.json();
+                if (data.token) {
+                    // Store JWT token
+                    localStorage.setItem("jwtToken", data.token);
+                    localStorage.setItem("userEmail", data.email || data.user?.email);
+                    
+                    alert("🎉 Signup successful! Welcome to Pawdcast!");
+                    document.getElementById('signupModal').classList.add('hidden');
+                    
+                    // Get user data and show profile
+                    const userResponse = await authFetch('https://pawdcast-backend-5.onrender.com/auth/me');
+                    if (userResponse && userResponse.ok) {
+                        const userData = await userResponse.json();
+                        loggedInUser = userData;
+                        showProfile(loggedInUser);
+                    }
+                } else {
+                    alert("🎉 Signup successful! Please sign in to continue.");
+                    document.getElementById('signupModal').classList.add('hidden');
+                    document.getElementById('loginModal').classList.remove('hidden');
+                }
+                
                 // Clear form
                 document.getElementById('signupFullName').value = '';
                 document.getElementById('signupEmail').value = '';
@@ -1240,7 +1278,7 @@
         }
     };
 
-    // Login functionality - UPDATED
+    // Login functionality - UPDATED FOR JWT
     document.getElementById('loginSubmit').onclick = async () => {
         const email = document.getElementById('loginEmail').value;
         const password = document.getElementById('loginPassword').value;
@@ -1257,22 +1295,33 @@
 
             const res = await fetch('https://pawdcast-backend-5.onrender.com/auth/login', {
                 method: 'POST',
-                body: loginFormData,
-                credentials: 'include'
+                body: loginFormData
             });
             
             if (res.ok) {
-                const userData = await res.json();
-                loggedInUser = userData;
-                localStorage.setItem("currentUser", JSON.stringify(loggedInUser));
-                document.getElementById('loginModal').classList.add('hidden');
-                showProfile(loggedInUser);
-                
-                // Clear form
-                document.getElementById('loginEmail').value = '';
-                document.getElementById('loginPassword').value = '';
-                
-                alert("✅ Login successful! Welcome back, " + userData.fullName + "!");
+                const data = await res.json();
+                if (data.token) {
+                    // Store JWT token
+                    localStorage.setItem("jwtToken", data.token);
+                    localStorage.setItem("userEmail", data.email || data.user?.email);
+                    
+                    // Get user data
+                    const userResponse = await authFetch('https://pawdcast-backend-5.onrender.com/auth/me');
+                    if (userResponse && userResponse.ok) {
+                        const userData = await userResponse.json();
+                        loggedInUser = userData;
+                        document.getElementById('loginModal').classList.add('hidden');
+                        showProfile(loggedInUser);
+                        
+                        // Clear form
+                        document.getElementById('loginEmail').value = '';
+                        document.getElementById('loginPassword').value = '';
+                        
+                        alert("✅ Login successful! Welcome back, " + userData.fullName + "!");
+                    }
+                } else {
+                    alert("❌ No authentication token received.");
+                }
             } else {
                 const errorText = await res.text();
                 alert("❌ Login failed: " + errorText);
@@ -1282,7 +1331,7 @@
         }
     };
 
-    // Show profile when logged in - UPDATED
+    // Show profile when logged in - UPDATED FOR JWT
     function showProfile(user) {
         document.getElementById('loginBtn').style.display = 'none';
         document.getElementById('signupBtn').style.display = 'none';
@@ -1343,19 +1392,12 @@
         document.getElementById('profileDropdown').classList.add('hidden');
     }
 
-    // Logout functionality
-    async function logoutUser() {
-        try {
-            await fetch('https://pawdcast-backend-5.onrender.com/auth/logout', {
-                method: 'POST',
-                credentials: 'include'
-            });
-        } catch (error) {
-            console.log('Logout API call failed, but continuing...');
-        }
-        
+    // Logout functionality - UPDATED FOR JWT
+    function logoutUser() {
+        // JWT logout - just remove token from localStorage
+        localStorage.removeItem("jwtToken");
+        localStorage.removeItem("userEmail");
         loggedInUser = null;
-        localStorage.removeItem("currentUser");
         hideProfile();
         alert("👋 You've been logged out successfully!");
     }
@@ -1385,9 +1427,26 @@
     };
 
     // Initialize on page load
-    window.onload = () => {
-        if (loggedInUser) {
-            showProfile(loggedInUser);
+    window.onload = async () => {
+        // Check for existing JWT token and validate it
+        const token = localStorage.getItem("jwtToken");
+        if (token) {
+            try {
+                const userResponse = await authFetch('https://pawdcast-backend-5.onrender.com/auth/me');
+                if (userResponse && userResponse.ok) {
+                    const userData = await userResponse.json();
+                    loggedInUser = userData;
+                    showProfile(loggedInUser);
+                } else {
+                    // Token is invalid, clear it
+                    localStorage.removeItem("jwtToken");
+                    localStorage.removeItem("userEmail");
+                }
+            } catch (error) {
+                console.error('Error validating token:', error);
+                localStorage.removeItem("jwtToken");
+                localStorage.removeItem("userEmail");
+            }
         }
         
         // Fetch statistics

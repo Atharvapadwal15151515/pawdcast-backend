@@ -2,12 +2,15 @@ package com.pawdcast.pawdcast.application.controller;
 
 import com.pawdcast.pawdcast.application.model.PetHealth;
 import com.pawdcast.pawdcast.application.model.PetProfile;
+import com.pawdcast.pawdcast.application.model.User;
 import com.pawdcast.pawdcast.application.service.PetHealthService;
+import com.pawdcast.pawdcast.application.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -19,8 +22,19 @@ public class PetHealthController {
     @Autowired
     private PetHealthService petHealthService;
 
+    @Autowired
+    private AuthService authService;
+
+    private User getCurrentUser(HttpServletRequest request) {
+        String userEmail = (String) request.getAttribute("userEmail");
+        if (userEmail == null) {
+            throw new RuntimeException("User not authenticated");
+        }
+        return authService.findByEmail(userEmail);
+    }
+
     @PostMapping("/add")
-    public ResponseEntity<String> addPetHealth(
+    public ResponseEntity<?> addPetHealth(
             @RequestParam Integer petId,
             @RequestParam(required = false) Double weight,
             @RequestParam(required = false) Double height,
@@ -34,27 +48,62 @@ public class PetHealthController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate entryDate,
             @RequestParam(required = false) String exerciseNotes,
             @RequestParam(required = false) String medicalNotes,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate nextVetDate
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate nextVetDate,
+            HttpServletRequest request
     ) {
-        petHealthService.savePetHealth(
-                petId, weight, height, dietNotes, medicalConditions, vaccinationRecords,
-                lastVetVisit, nextVetVisit, medications, activityLevel, entryDate,
-                exerciseNotes, medicalNotes, nextVetDate
-        );
+        try {
+            User user = getCurrentUser(request);
+            
+            // Verify that the pet belongs to the user
+            if (!petHealthService.isPetOwnedByUser(petId, user.getId())) {
+                return ResponseEntity.status(403).body("Access denied - pet does not belong to user");
+            }
+            
+            petHealthService.savePetHealth(
+                    petId, weight, height, dietNotes, medicalConditions, vaccinationRecords,
+                    lastVetVisit, nextVetVisit, medications, activityLevel, entryDate,
+                    exerciseNotes, medicalNotes, nextVetDate
+            );
 
-        return ResponseEntity.ok("Pet health record saved successfully!");
+            return ResponseEntity.ok("Pet health record saved successfully!");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(401).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error saving health record: " + e.getMessage());
+        }
     }
 
-    // ✅ New endpoint: Get pets of a specific user
-    @GetMapping("/pets/{userId}")
-    public ResponseEntity<List<PetProfile>> getPetsByUser(@PathVariable Integer userId) {
-        return ResponseEntity.ok(petHealthService.getPetsByOwnerId(userId));
+    // Get pets of the current logged-in user
+    @GetMapping("/my-pets")
+    public ResponseEntity<?> getMyPets(HttpServletRequest request) {
+        try {
+            User user = getCurrentUser(request);
+            List<PetProfile> pets = petHealthService.getPetsByOwnerId(user.getId());
+            return ResponseEntity.ok(pets);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(401).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error retrieving pets: " + e.getMessage());
+        }
     }
 
-    // ✅ New endpoint: Get health records for a specific pet
+    // Get health records for a specific pet (with ownership validation)
     @GetMapping("/records/{petId}")
-    public ResponseEntity<List<PetHealth>> getPetHealthRecords(@PathVariable Integer petId) {
-        List<PetHealth> records = petHealthService.getHealthRecordsByPetId(petId);
-        return ResponseEntity.ok(records);
+    public ResponseEntity<?> getPetHealthRecords(@PathVariable Integer petId, HttpServletRequest request) {
+        try {
+            User user = getCurrentUser(request);
+            
+            // Verify that the pet belongs to the user
+            if (!petHealthService.isPetOwnedByUser(petId, user.getId())) {
+                return ResponseEntity.status(403).body("Access denied - pet does not belong to user");
+            }
+            
+            List<PetHealth> records = petHealthService.getHealthRecordsByPetId(petId);
+            return ResponseEntity.ok(records);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(401).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error retrieving health records: " + e.getMessage());
+        }
     }
 }

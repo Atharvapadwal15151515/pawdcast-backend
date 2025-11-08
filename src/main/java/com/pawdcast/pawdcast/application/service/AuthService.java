@@ -1,6 +1,8 @@
 package com.pawdcast.pawdcast.application.service;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +50,25 @@ public class AuthService {
         return user;
     }
 
-    // New method for updating user profile
+    // New method for JWT support - find user by email
+    public User findByEmail(String email) {
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            throw new RuntimeException("User not found with email: " + email);
+        }
+        return userOpt.get();
+    }
+
+    // New method for JWT support - find user by ID
+    public User findById(Integer id) {
+        Optional<User> userOpt = userRepository.findById(id);
+        if (userOpt.isEmpty()) {
+            throw new RuntimeException("User not found with ID: " + id);
+        }
+        return userOpt.get();
+    }
+
+    // Updated method for updating user profile
     public User updateProfile(User user) {
         // Ensure the user exists
         Optional<User> existingUserOpt = userRepository.findById(user.getId());
@@ -81,5 +101,31 @@ public class AuthService {
         }
 
         return userRepository.save(existingUser);
+    }
+
+    // Optional: Method to validate user exists for JWT token
+    public boolean userExists(String email) {
+        return userRepository.findByEmail(email).isPresent();
+    }
+
+    // Optional: Method to get user profile without sensitive data
+    public Map<String, Object> getUserProfile(String email) {
+        User user = findByEmail(email);
+        Map<String, Object> profile = new HashMap<>();
+        profile.put("userId", user.getId());
+        profile.put("fullName", user.getFullName());
+        profile.put("email", user.getEmail());
+        profile.put("phone", user.getPhone());
+        profile.put("address", user.getAddress());
+        profile.put("dateOfBirth", user.getDateOfBirth());
+        
+        if (user.getProfilePhoto() != null) {
+            profile.put("profilePhoto", user.getProfilePhoto());
+        }
+        if (user.getPhoto() != null) {
+            profile.put("photo", user.getPhoto());
+        }
+        
+        return profile;
     }
 }

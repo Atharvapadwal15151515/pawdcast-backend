@@ -20,6 +20,7 @@ public class CorsConfig {
         ));
         configuration.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS","PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
+        configuration.setExposedHeaders(List.of("Authorization")); // Important for JWT
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 

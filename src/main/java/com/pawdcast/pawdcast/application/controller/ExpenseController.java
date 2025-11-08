@@ -3,12 +3,13 @@ package com.pawdcast.pawdcast.application.controller;
 import com.pawdcast.pawdcast.application.model.Expense;
 import com.pawdcast.pawdcast.application.model.User;
 import com.pawdcast.pawdcast.application.service.ExpenseService;
+import com.pawdcast.pawdcast.application.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -23,22 +24,28 @@ public class ExpenseController {
     @Autowired
     private ExpenseService expenseService;
     
-    private User getCurrentUser(HttpSession session) {
-        return (User) session.getAttribute("user");
+    @Autowired
+    private AuthService authService;
+    
+    private User getCurrentUser(HttpServletRequest request) {
+        String userEmail = (String) request.getAttribute("userEmail");
+        if (userEmail == null) {
+            throw new RuntimeException("User not logged in");
+        }
+        return authService.findByEmail(userEmail);
     }
     
     @PostMapping
     public ResponseEntity<?> createExpense(
             @RequestBody Expense expense,
-            HttpSession session) {
+            HttpServletRequest request) {
         
-        User user = getCurrentUser(session);
+        User user = getCurrentUser(request);
         System.out.println("=== CREATE EXPENSE ===");
-        System.out.println("Session ID: " + session.getId());
-        System.out.println("User from session: " + user);
+        System.out.println("User: " + user);
         
         if (user == null) {
-            System.out.println("ERROR: User not found in session");
+            System.out.println("ERROR: User not found");
             return ResponseEntity.status(401).body("User not logged in");
         }
         System.out.println("User ID: " + user.getId());
@@ -60,8 +67,8 @@ public class ExpenseController {
     
     // Get all expenses for current user
     @GetMapping
-    public ResponseEntity<?> getAllExpenses(HttpSession session) {
-        User user = getCurrentUser(session);
+    public ResponseEntity<?> getAllExpenses(HttpServletRequest request) {
+        User user = getCurrentUser(request);
         if (user == null) {
             return ResponseEntity.status(401).body("User not logged in");
         }
@@ -72,8 +79,8 @@ public class ExpenseController {
     
     // Get current month expenses
     @GetMapping("/current-month")
-    public ResponseEntity<?> getCurrentMonthExpenses(HttpSession session) {
-        User user = getCurrentUser(session);
+    public ResponseEntity<?> getCurrentMonthExpenses(HttpServletRequest request) {
+        User user = getCurrentUser(request);
         if (user == null) {
             return ResponseEntity.status(401).body("User not logged in");
         }
@@ -84,8 +91,8 @@ public class ExpenseController {
     
     // Get expense by ID
     @GetMapping("/{expenseId}")
-    public ResponseEntity<?> getExpenseById(@PathVariable Integer expenseId, HttpSession session) {
-        User user = getCurrentUser(session);
+    public ResponseEntity<?> getExpenseById(@PathVariable Integer expenseId, HttpServletRequest request) {
+        User user = getCurrentUser(request);
         if (user == null) {
             return ResponseEntity.status(401).body("User not logged in");
         }
@@ -103,9 +110,9 @@ public class ExpenseController {
     public ResponseEntity<?> getExpensesByDateRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-            HttpSession session) {
+            HttpServletRequest request) {
         
-        User user = getCurrentUser(session);
+        User user = getCurrentUser(request);
         if (user == null) {
             return ResponseEntity.status(401).body("User not logged in");
         }
@@ -116,8 +123,8 @@ public class ExpenseController {
     
     // Get expenses by category
     @GetMapping("/category/{category}")
-    public ResponseEntity<?> getExpensesByCategory(@PathVariable String category, HttpSession session) {
-        User user = getCurrentUser(session);
+    public ResponseEntity<?> getExpensesByCategory(@PathVariable String category, HttpServletRequest request) {
+        User user = getCurrentUser(request);
         if (user == null) {
             return ResponseEntity.status(401).body("User not logged in");
         }
@@ -131,9 +138,9 @@ public class ExpenseController {
     public ResponseEntity<?> getTotalExpenses(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-            HttpSession session) {
+            HttpServletRequest request) {
         
-        User user = getCurrentUser(session);
+        User user = getCurrentUser(request);
         if (user == null) {
             return ResponseEntity.status(401).body("User not logged in");
         }
@@ -147,9 +154,9 @@ public class ExpenseController {
     public ResponseEntity<?> updateExpense(
             @PathVariable Integer expenseId,
             @RequestBody Expense expenseDetails,
-            HttpSession session) {
+            HttpServletRequest request) {
         
-        User user = getCurrentUser(session);
+        User user = getCurrentUser(request);
         if (user == null) {
             return ResponseEntity.status(401).body("User not logged in");
         }
@@ -164,8 +171,8 @@ public class ExpenseController {
     
     // Delete an expense
     @DeleteMapping("/{expenseId}")
-    public ResponseEntity<?> deleteExpense(@PathVariable Integer expenseId, HttpSession session) {
-        User user = getCurrentUser(session);
+    public ResponseEntity<?> deleteExpense(@PathVariable Integer expenseId, HttpServletRequest request) {
+        User user = getCurrentUser(request);
         if (user == null) {
             return ResponseEntity.status(401).body("User not logged in");
         }
@@ -180,8 +187,8 @@ public class ExpenseController {
     
     // Get all categories for current user
     @GetMapping("/categories")
-    public ResponseEntity<?> getCategories(HttpSession session) {
-        User user = getCurrentUser(session);
+    public ResponseEntity<?> getCategories(HttpServletRequest request) {
+        User user = getCurrentUser(request);
         if (user == null) {
             return ResponseEntity.status(401).body("User not logged in");
         }
@@ -195,9 +202,9 @@ public class ExpenseController {
     public ResponseEntity<?> getMonthlyExpenses(
             @RequestParam int month,
             @RequestParam int year,
-            HttpSession session) {
+            HttpServletRequest request) {
         
-        User user = getCurrentUser(session);
+        User user = getCurrentUser(request);
         if (user == null) {
             return ResponseEntity.status(401).body("User not logged in");
         }
@@ -206,64 +213,58 @@ public class ExpenseController {
         return ResponseEntity.ok(expenses);
     }
     
-    // Session debug endpoint
+    // Session debug endpoint (updated for JWT)
     @GetMapping("/session-debug")
-    public ResponseEntity<?> sessionDebug(HttpSession session) {
-        User user = getCurrentUser(session);
-        
-        java.util.Enumeration<String> attributes = session.getAttributeNames();
-        java.util.List<String> attributeList = new java.util.ArrayList<>();
-        while (attributes.hasMoreElements()) {
-            String attr = attributes.nextElement();
-            attributeList.add(attr + ": " + session.getAttribute(attr));
-        }
+    public ResponseEntity<?> sessionDebug(HttpServletRequest request) {
+        User user = getCurrentUser(request);
         
         java.util.Map<String, Object> debugInfo = new java.util.HashMap<>();
-        debugInfo.put("sessionId", session.getId());
-        debugInfo.put("userInSession", user);
-        debugInfo.put("allSessionAttributes", attributeList);
+        debugInfo.put("userInRequest", user);
         
         if (user != null) {
             debugInfo.put("userId", user.getId());
             debugInfo.put("userEmail", user.getEmail());
         }
         
+        // JWT specific info
+        String userEmail = (String) request.getAttribute("userEmail");
+        debugInfo.put("jwtUserEmail", userEmail);
+        
         return ResponseEntity.ok(debugInfo);
     }
- // In ExpenseController.java - Add this endpoint
 
- // Get dashboard statistics
- @GetMapping("/dashboard-stats")
- public ResponseEntity<?> getDashboardStats(HttpSession session) {
-     User user = getCurrentUser(session);
-     if (user == null) {
-         return ResponseEntity.status(401).body("User not logged in");
-     }
-     
-     try {
-         Map<String, Object> stats = expenseService.getDashboardStats(user.getId());
-         return ResponseEntity.ok(stats);
-     } catch (Exception e) {
-         System.out.println("Error getting dashboard stats: " + e.getMessage());
-         e.printStackTrace();
-         return ResponseEntity.badRequest().body("Error getting dashboard statistics");
-     }
- }
+    // Get dashboard statistics
+    @GetMapping("/dashboard-stats")
+    public ResponseEntity<?> getDashboardStats(HttpServletRequest request) {
+        User user = getCurrentUser(request);
+        if (user == null) {
+            return ResponseEntity.status(401).body("User not logged in");
+        }
+        
+        try {
+            Map<String, Object> stats = expenseService.getDashboardStats(user.getId());
+            return ResponseEntity.ok(stats);
+        } catch (Exception e) {
+            System.out.println("Error getting dashboard stats: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("Error getting dashboard statistics");
+        }
+    }
 
- @GetMapping("/current-month-stats")
- public ResponseEntity<?> getCurrentMonthStats(HttpSession session) {
-     User user = getCurrentUser(session);
-     if (user == null) {
-         return ResponseEntity.status(401).body("User not logged in");
-     }
-     
-     try {
-         Map<String, Object> stats = expenseService.getCurrentMonthStats(user.getId());
-         return ResponseEntity.ok(stats);
-     } catch (Exception e) {
-         System.out.println("Error getting current month stats: " + e.getMessage());
-         e.printStackTrace();
-         return ResponseEntity.badRequest().body("Error getting current month statistics");
-     }
- }
+    @GetMapping("/current-month-stats")
+    public ResponseEntity<?> getCurrentMonthStats(HttpServletRequest request) {
+        User user = getCurrentUser(request);
+        if (user == null) {
+            return ResponseEntity.status(401).body("User not logged in");
+        }
+        
+        try {
+            Map<String, Object> stats = expenseService.getCurrentMonthStats(user.getId());
+            return ResponseEntity.ok(stats);
+        } catch (Exception e) {
+            System.out.println("Error getting current month stats: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("Error getting current month statistics");
+        }
+    }
 }

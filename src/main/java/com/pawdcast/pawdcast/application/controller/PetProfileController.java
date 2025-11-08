@@ -3,7 +3,7 @@ package com.pawdcast.pawdcast.application.controller;
 import com.pawdcast.pawdcast.application.model.PetProfile;
 import com.pawdcast.pawdcast.application.model.User;
 import com.pawdcast.pawdcast.application.service.PetProfileService;
-import jakarta.servlet.http.HttpSession;
+import com.pawdcast.pawdcast.application.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -24,6 +25,17 @@ public class PetProfileController {
     
     @Autowired
     private PetProfileService petProfileService;
+
+    @Autowired
+    private AuthService authService;
+    
+    private User getCurrentUser(HttpServletRequest request) {
+        String userEmail = (String) request.getAttribute("userEmail");
+        if (userEmail == null) {
+            throw new RuntimeException("User not authenticated");
+        }
+        return authService.findByEmail(userEmail);
+    }
     
     // Create Pet Profile
     @PostMapping("/create")
@@ -34,15 +46,11 @@ public class PetProfileController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dob,
             @RequestParam(required = false) String medicalRecords,
             @RequestParam(required = false) MultipartFile photo,
-            HttpSession session) {
+            HttpServletRequest request) {
         
         try {
-            // Get logged-in user from session
-            User user = (User) session.getAttribute("user");
-            if (user == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body("User not logged in. Please login first.");
-            }
+            // Get logged-in user from JWT
+            User user = getCurrentUser(request);
             
             // Process photo
             byte[] photoBytes = null;
@@ -78,6 +86,8 @@ public class PetProfileController {
             
             return ResponseEntity.ok(response);
             
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (IOException e) {
             return ResponseEntity.badRequest()
                     .body("Error processing uploaded photo: " + e.getMessage());
@@ -88,13 +98,9 @@ public class PetProfileController {
     
     // Get all pet profiles for logged-in user
     @GetMapping("/my-pets")
-    public ResponseEntity<?> getMyPetProfiles(HttpSession session) {
+    public ResponseEntity<?> getMyPetProfiles(HttpServletRequest request) {
         try {
-            User user = (User) session.getAttribute("user");
-            if (user == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body("User not logged in. Please login first.");
-            }
+            User user = getCurrentUser(request);
             
             List<PetProfile> petProfiles = petProfileService.getPetProfilesByOwnerId(user.getId());
             
@@ -114,6 +120,8 @@ public class PetProfileController {
             
             return ResponseEntity.ok(response);
             
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error retrieving pet profiles: " + e.getMessage());
         }
@@ -121,12 +129,9 @@ public class PetProfileController {
     
     // Get pet profile photo
     @GetMapping("/{petId}/photo")
-    public ResponseEntity<byte[]> getPetProfilePhoto(@PathVariable Integer petId, HttpSession session) {
+    public ResponseEntity<byte[]> getPetProfilePhoto(@PathVariable Integer petId, HttpServletRequest request) {
         try {
-            User user = (User) session.getAttribute("user");
-            if (user == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            }
+            User user = getCurrentUser(request);
             
             // Verify the pet profile belongs to the logged-in user
             if (!petProfileService.isPetProfileOwner(petId, user.getId())) {
@@ -144,6 +149,8 @@ public class PetProfileController {
                     .header("Content-Type", "image/jpeg") // Adjust based on your image type
                     .body(petProfile.getPhoto());
             
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
@@ -151,13 +158,9 @@ public class PetProfileController {
     
     // Get specific pet profile details
     @GetMapping("/{petId}")
-    public ResponseEntity<?> getPetProfileDetails(@PathVariable Integer petId, HttpSession session) {
+    public ResponseEntity<?> getPetProfileDetails(@PathVariable Integer petId, HttpServletRequest request) {
         try {
-            User user = (User) session.getAttribute("user");
-            if (user == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body("User not logged in. Please login first.");
-            }
+            User user = getCurrentUser(request);
             
             // Verify the pet profile belongs to the logged-in user
             if (!petProfileService.isPetProfileOwner(petId, user.getId())) {
@@ -180,6 +183,8 @@ public class PetProfileController {
             
             return ResponseEntity.ok(response);
             
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -195,14 +200,10 @@ public class PetProfileController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dob,
             @RequestParam(required = false) String medicalRecords,
             @RequestParam(required = false) MultipartFile photo,
-            HttpSession session) {
+            HttpServletRequest request) {
         
         try {
-            User user = (User) session.getAttribute("user");
-            if (user == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body("User not logged in. Please login first.");
-            }
+            User user = getCurrentUser(request);
             
             // Verify the pet profile belongs to the logged-in user
             if (!petProfileService.isPetProfileOwner(petId, user.getId())) {
@@ -238,6 +239,8 @@ public class PetProfileController {
             
             return ResponseEntity.ok(response);
             
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (IOException e) {
             return ResponseEntity.badRequest()
                     .body("Error processing uploaded photo: " + e.getMessage());
@@ -248,13 +251,9 @@ public class PetProfileController {
     
     // Delete pet profile
     @DeleteMapping("/{petId}")
-    public ResponseEntity<?> deletePetProfile(@PathVariable Integer petId, HttpSession session) {
+    public ResponseEntity<?> deletePetProfile(@PathVariable Integer petId, HttpServletRequest request) {
         try {
-            User user = (User) session.getAttribute("user");
-            if (user == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body("User not logged in. Please login first.");
-            }
+            User user = getCurrentUser(request);
             
             // Verify the pet profile belongs to the logged-in user
             if (!petProfileService.isPetProfileOwner(petId, user.getId())) {
@@ -265,6 +264,8 @@ public class PetProfileController {
             petProfileService.deletePetProfile(petId);
             return ResponseEntity.ok("Pet profile deleted successfully");
             
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -272,13 +273,9 @@ public class PetProfileController {
     
     // Check if pet name already exists for current user
     @GetMapping("/check-name")
-    public ResponseEntity<?> checkPetNameAvailability(@RequestParam String name, HttpSession session) {
+    public ResponseEntity<?> checkPetNameAvailability(@RequestParam String name, HttpServletRequest request) {
         try {
-            User user = (User) session.getAttribute("user");
-            if (user == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body("User not logged in. Please login first.");
-            }
+            User user = getCurrentUser(request);
             
             boolean exists = petProfileService.existsByOwnerIdAndName(user.getId(), name);
             
@@ -290,6 +287,8 @@ public class PetProfileController {
             
             return ResponseEntity.ok(response);
             
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error checking pet name availability");
         }

@@ -2,11 +2,13 @@ package com.pawdcast.pawdcast.application.controller;
 
 import com.pawdcast.pawdcast.application.model.User;
 import com.pawdcast.pawdcast.application.service.UserService;
+import com.pawdcast.pawdcast.application.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -18,7 +20,18 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    // Signup endpoint - NO CHANGES NEEDED
+    @Autowired
+    private AuthService authService;
+
+    private User getCurrentUser(HttpServletRequest request) {
+        String userEmail = (String) request.getAttribute("userEmail");
+        if (userEmail == null) {
+            throw new RuntimeException("User not authenticated");
+        }
+        return authService.findByEmail(userEmail);
+    }
+
+    // Signup endpoint - PUBLIC (no changes needed)
     @PostMapping("/signup")
     public ResponseEntity<?> signup(
             @RequestParam String fullName,
@@ -56,7 +69,7 @@ public class UserController {
         return ResponseEntity.ok(createdUser);
     }
 
-    // Login endpoint - NO CHANGES NEEDED
+    // Login endpoint - PUBLIC (no changes needed)
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestParam String email, @RequestParam String password) {
         User user = userService.login(email, password);
@@ -66,13 +79,38 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    // Get user by ID - NO CHANGES NEEDED
-    @GetMapping("/{id}")
-    public ResponseEntity<User> getUser(@PathVariable Integer id) {
-        User user = userService.getUserById(id);
-        if (user == null) {
-            return ResponseEntity.notFound().build();
+    // Get current user's profile - SECURED
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUserProfile(HttpServletRequest request) {
+        try {
+            User user = getCurrentUser(request);
+            // Return user data (consider excluding sensitive fields like password)
+            return ResponseEntity.ok(user);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(401).body(e.getMessage());
         }
-        return ResponseEntity.ok(user);
+    }
+
+    // Get user by ID - SECURED with ownership validation
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getUser(@PathVariable Integer id, HttpServletRequest request) {
+        try {
+            User currentUser = getCurrentUser(request);
+            
+            // Users can only access their own data (unless admin)
+            if (!currentUser.getId().equals(id)) {
+                return ResponseEntity.status(403).body("Access denied");
+            }
+            
+            User user = userService.getUserById(id);
+            if (user == null) {
+                return ResponseEntity.notFound().build();
+            }
+            
+            // Consider returning a DTO without sensitive data
+            return ResponseEntity.ok(user);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(401).body(e.getMessage());
+        }
     }
 }

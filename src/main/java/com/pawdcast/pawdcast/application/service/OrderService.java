@@ -4,7 +4,7 @@ import com.pawdcast.pawdcast.application.model.*;
 import com.pawdcast.pawdcast.application.repository.OrderRepository;
 import com.pawdcast.pawdcast.application.repository.OrderItemRepository;
 import com.pawdcast.pawdcast.application.repository.ProductRepository;
-import jakarta.servlet.http.HttpSession;
+import com.pawdcast.pawdcast.application.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,18 +25,21 @@ public class OrderService {
     private CartService cartService;
 
     @SuppressWarnings("unused")
-	@Autowired
+    @Autowired
     private ProductService productService;
 
     @Autowired
     private ProductRepository productRepository;
 
-    @Transactional
-    public Order createOrder(String shippingAddress, String billingAddress, HttpSession session) {
-        User user = getCurrentUser(session);
-        if (user == null) throw new RuntimeException("User not logged in");
+    @Autowired
+    private UserRepository userRepository;
 
-        List<CartItem> cartItems = cartService.getCartItems(session);
+    @Transactional
+    public Order createOrder(String shippingAddress, String billingAddress, Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        List<CartItem> cartItems = cartService.getCartItems(user.getEmail());
         if (cartItems.isEmpty()) throw new RuntimeException("Cart is empty");
 
         // Calculate total and validate inventory
@@ -78,51 +81,53 @@ public class OrderService {
         }
 
         // Clear cart after successful order
-        cartService.clearCart(session);
+        cartService.clearCart(user.getEmail());
 
         return savedOrder;
     }
 
-    public List<Order> getUserOrders(HttpSession session) {
-        User user = getCurrentUser(session);
-        if (user == null) throw new RuntimeException("User not logged in");
+    public List<Order> getUserOrders(Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
         
         return orderRepository.findByUserOrderByCreatedAtDesc(user);
     }
 
-    public Optional<Order> getOrderById(Integer orderId, HttpSession session) {
-        User user = getCurrentUser(session);
-        if (user == null) throw new RuntimeException("User not logged in");
-        
+    public Optional<Order> getOrderById(Integer orderId, Integer userId) {
         Optional<Order> order = orderRepository.findById(orderId);
-        if (order.isPresent() && !order.get().getUser().getId().equals(user.getId())) {
+        if (order.isPresent() && !order.get().getUser().getId().equals(userId)) {
             throw new RuntimeException("Order not found");
         }
         return order;
     }
 
     @Transactional
-    public Order updateOrderStatus(Integer orderId, String status, HttpSession session) {
-        User user = getCurrentUser(session);
-        if (user == null) throw new RuntimeException("User not logged in");
-
+    public Order updateOrderStatus(Integer orderId, String status, Integer userId) {
         Optional<Order> orderOpt = orderRepository.findById(orderId);
         if (orderOpt.isEmpty()) throw new RuntimeException("Order not found");
 
         Order order = orderOpt.get();
+        
+        // Verify user owns the order (unless admin)
+        if (!order.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Access denied");
+        }
+        
         order.setOrderStatus(status);
         return orderRepository.save(order);
     }
 
     @Transactional
-    public boolean cancelOrder(Integer orderId, HttpSession session) {
-        User user = getCurrentUser(session);
-        if (user == null) throw new RuntimeException("User not logged in");
-
+    public boolean cancelOrder(Integer orderId, Integer userId) {
         Optional<Order> orderOpt = orderRepository.findById(orderId);
         if (orderOpt.isEmpty()) return false;
 
         Order order = orderOpt.get();
+        
+        // Verify user owns the order
+        if (!order.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Access denied");
+        }
         
         // Only allow cancellation for pending or confirmed orders
         if (order.getOrderStatus().equals("pending") || 
@@ -141,9 +146,5 @@ public class OrderService {
         }
         
         return false;
-    }
-
-    private User getCurrentUser(HttpSession session) {
-        return (User) session.getAttribute("user");
     }
 }

@@ -864,6 +864,30 @@
     // Base URL for API
     const API_BASE_URL = '/api';
     
+    // JWT Authentication Helper Function
+    async function authFetch(url, options = {}) {
+        const token = localStorage.getItem("jwtToken");
+        if (!token) {
+            window.location.href = "/login.html";
+            return;
+        }
+        
+        const headers = {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+            ...options.headers
+        };
+        
+        const response = await fetch(url, { ...options, headers });
+        if (response.status === 401) {
+            localStorage.removeItem("jwtToken");
+            localStorage.removeItem("userEmail");
+            window.location.href = "/login.html";
+            return;
+        }
+        return response;
+    }
+
     // Global variables
     let expenses = [];
     let currentUser = null;
@@ -961,11 +985,16 @@
     
     // Check if user is authenticated and load data
     async function checkAuthAndLoadData() {
+        const token = localStorage.getItem("jwtToken");
+        if (!token) {
+            window.location.href = "/login.html";
+            return;
+        }
+        
         try {
-            const response = await fetch('/auth/me', {
-                method: 'GET',
-                credentials: 'include'
-            });
+            // Get user info using authFetch
+            const response = await authFetch('/auth/me');
+            if (!response) return; // authFetch handled redirect
             
             if (response.ok) {
                 const user = await response.json();
@@ -1078,10 +1107,8 @@
         try {
             console.log("Loading stats from API...");
             
-            const response = await fetch(`${API_BASE_URL}/expenses/dashboard-stats`, {
-                method: 'GET',
-                credentials: 'include'
-            });
+            const response = await authFetch(`${API_BASE_URL}/expenses/dashboard-stats`);
+            if (!response) return; // authFetch handled redirect
             
             if (!response.ok) {
                 throw new Error('Failed to fetch dashboard stats');
@@ -1136,10 +1163,8 @@
     
     // Fetch expenses from API
     async function fetchExpenses() {
-        const response = await fetch(`${API_BASE_URL}/expenses`, {
-            method: 'GET',
-            credentials: 'include'
-        });
+        const response = await authFetch(`${API_BASE_URL}/expenses`);
+        if (!response) return []; // authFetch handled redirect
         
         if (!response.ok) {
             throw new Error('Failed to fetch expenses');
@@ -1270,14 +1295,12 @@
     
     // Add expense via API
     async function addExpense(expenseData) {
-        const response = await fetch(`${API_BASE_URL}/expenses`, {
+        const response = await authFetch(`${API_BASE_URL}/expenses`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            credentials: 'include',
             body: JSON.stringify(expenseData)
         });
+        
+        if (!response) throw new Error('Authentication failed'); // authFetch handled redirect
         
         if (!response.ok) {
             const errorText = await response.text();
@@ -1314,10 +1337,8 @@
     
     // Fetch single expense by ID
     async function fetchExpenseById(expenseId) {
-        const response = await fetch(`${API_BASE_URL}/expenses/${expenseId}`, {
-            method: 'GET',
-            credentials: 'include'
-        });
+        const response = await authFetch(`${API_BASE_URL}/expenses/${expenseId}`);
+        if (!response) return null; // authFetch handled redirect
         
         if (!response.ok) {
             throw new Error('Failed to fetch expense');
@@ -1370,14 +1391,12 @@
     
     // Update expense via API
     async function updateExpenseAPI(expenseId, expenseData) {
-        const response = await fetch(`${API_BASE_URL}/expenses/${expenseId}`, {
+        const response = await authFetch(`${API_BASE_URL}/expenses/${expenseId}`, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            credentials: 'include',
             body: JSON.stringify(expenseData)
         });
+        
+        if (!response) throw new Error('Authentication failed'); // authFetch handled redirect
         
         if (!response.ok) {
             const errorText = await response.text();
@@ -1426,10 +1445,11 @@
     
     // Delete expense via API
     async function deleteExpenseAPI(expenseId) {
-        const response = await fetch(`${API_BASE_URL}/expenses/${expenseId}`, {
-            method: 'DELETE',
-            credentials: 'include'
+        const response = await authFetch(`${API_BASE_URL}/expenses/${expenseId}`, {
+            method: 'DELETE'
         });
+        
+        if (!response) throw new Error('Authentication failed'); // authFetch handled redirect
         
         if (!response.ok) {
             const errorText = await response.text();
@@ -1468,10 +1488,8 @@
     
     // Fetch expenses by date range
     async function fetchExpensesByDateRange(startDate, endDate) {
-        const response = await fetch(`${API_BASE_URL}/expenses/date-range?startDate=${startDate}&endDate=${endDate}`, {
-            method: 'GET',
-            credentials: 'include'
-        });
+        const response = await authFetch(`${API_BASE_URL}/expenses/date-range?startDate=${startDate}&endDate=${endDate}`);
+        if (!response) return []; // authFetch handled redirect
         
         if (!response.ok) {
             throw new Error('Failed to fetch expenses by date range');
@@ -1650,10 +1668,8 @@
     // Debug session
     async function debugSession() {
         try {
-            const response = await fetch(`${API_BASE_URL}/expenses/session-debug`, {
-                method: 'GET',
-                credentials: 'include'
-            });
+            const response = await authFetch(`${API_BASE_URL}/expenses/session-debug`);
+            if (!response) return; // authFetch handled redirect
             
             if (response.ok) {
                 const debugInfo = await response.json();
@@ -1701,24 +1717,12 @@
     }
     
     // Handle logout
-    async function handleLogout(e) {
+    function handleLogout(e) {
         e.preventDefault();
-        
-        try {
-            const response = await fetch('/auth/logout', {
-                method: 'POST',
-                credentials: 'include'
-            });
-            
-            if (response.ok) {
-                window.location.href = 'home.html';
-            } else {
-                throw new Error('Logout failed');
-            }
-        } catch (error) {
-            console.error('Error during logout:', error);
-            window.location.href = 'home.html';
-        }
+        // JWT logout - just remove token from localStorage
+        localStorage.removeItem("jwtToken");
+        localStorage.removeItem("userEmail");
+        window.location.href = 'login.html';
     }
     
     // =============== REPORT GENERATION FUNCTIONS ===============

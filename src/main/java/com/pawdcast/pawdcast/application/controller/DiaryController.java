@@ -3,7 +3,7 @@ package com.pawdcast.pawdcast.application.controller;
 import com.pawdcast.pawdcast.application.model.Diary;
 import com.pawdcast.pawdcast.application.model.User;
 import com.pawdcast.pawdcast.application.service.DiaryService;
-import jakarta.servlet.http.HttpSession;
+import com.pawdcast.pawdcast.application.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -29,18 +30,22 @@ public class DiaryController {
     @Autowired
     private DiaryService diaryService;
 
-    private Integer getUserIdFromSession(HttpSession session) {
-        User user = (User) session.getAttribute("user");
-        if (user == null) {
+    @Autowired
+    private AuthService authService;
+
+    private Integer getUserIdFromRequest(HttpServletRequest request) {
+        String userEmail = (String) request.getAttribute("userEmail");
+        if (userEmail == null) {
             throw new RuntimeException("User not authenticated. Please log in.");
         }
+        User user = authService.findByEmail(userEmail);
         return user.getId();
     }
 
     // Create new diary entry - PERFECTED VERSION
     @PostMapping("/create")
     public ResponseEntity<?> createDiaryEntry(
-            HttpSession session,
+            HttpServletRequest request,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate entryDate,
             @RequestParam String content, // MAIN CONTENT - This is mandatory
             @RequestParam(required = false) String entryTitle, // Use entryTitle instead of title
@@ -55,7 +60,7 @@ public class DiaryController {
             @RequestParam(required = false) MultipartFile image) {
         
         try {
-            Integer userId = getUserIdFromSession(session);
+            Integer userId = getUserIdFromRequest(request);
 
             // VALIDATION: Ensure content is provided
             if (content == null || content.trim().isEmpty()) {
@@ -121,9 +126,9 @@ public class DiaryController {
 
     // Get all diary entries for user - PERFECTED VERSION
     @GetMapping("/entries")
-    public ResponseEntity<?> getUserDiaries(HttpSession session) {
+    public ResponseEntity<?> getUserDiaries(HttpServletRequest request) {
         try {
-            Integer userId = getUserIdFromSession(session);
+            Integer userId = getUserIdFromRequest(request);
             
             System.out.println("=== CONTROLLER: Fetching User Diaries ===");
             System.out.println("User ID: " + userId);
@@ -172,9 +177,9 @@ public class DiaryController {
 
     // Get specific diary entry - PERFECTED VERSION
     @GetMapping("/entry/{diaryId}")
-    public ResponseEntity<?> getDiaryEntry(@PathVariable Long diaryId, HttpSession session) {
+    public ResponseEntity<?> getDiaryEntry(@PathVariable Long diaryId, HttpServletRequest request) {
         try {
-            Integer userId = getUserIdFromSession(session);
+            Integer userId = getUserIdFromRequest(request);
             
             System.out.println("=== CONTROLLER: Fetching Specific Diary ===");
             System.out.println("Diary ID: " + diaryId + ", User ID: " + userId);
@@ -218,9 +223,9 @@ public class DiaryController {
 
     // Get diary entry image - PERFECTED VERSION
     @GetMapping("/entry/{diaryId}/image")
-    public ResponseEntity<byte[]> getDiaryImage(@PathVariable Long diaryId, HttpSession session) {
+    public ResponseEntity<byte[]> getDiaryImage(@PathVariable Long diaryId, HttpServletRequest request) {
         try {
-            Integer userId = getUserIdFromSession(session);
+            Integer userId = getUserIdFromRequest(request);
             Optional<Diary> diary = diaryService.getDiaryByIdAndUserId(diaryId, userId);
             
             if (diary.isPresent() && diary.get().hasImage()) {
@@ -241,7 +246,7 @@ public class DiaryController {
     @PutMapping("/entry/{diaryId}")
     public ResponseEntity<?> updateDiaryEntry(
             @PathVariable Long diaryId,
-            HttpSession session,
+            HttpServletRequest request,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate entryDate,
             @RequestParam String content, // MAIN CONTENT - Mandatory
             @RequestParam(required = false) String entryTitle,
@@ -256,7 +261,7 @@ public class DiaryController {
             @RequestParam(required = false) MultipartFile image) {
         
         try {
-            Integer userId = getUserIdFromSession(session);
+            Integer userId = getUserIdFromRequest(request);
 
             // VALIDATION: Ensure content is provided
             if (content == null || content.trim().isEmpty()) {
@@ -313,9 +318,9 @@ public class DiaryController {
 
     // Delete diary entry - PERFECTED VERSION
     @DeleteMapping("/entry/{diaryId}")
-    public ResponseEntity<?> deleteDiaryEntry(@PathVariable Long diaryId, HttpSession session) {
+    public ResponseEntity<?> deleteDiaryEntry(@PathVariable Long diaryId, HttpServletRequest request) {
         try {
-            Integer userId = getUserIdFromSession(session);
+            Integer userId = getUserIdFromRequest(request);
             
             System.out.println("=== CONTROLLER: Deleting Diary Entry ===");
             System.out.println("Diary ID: " + diaryId + ", User ID: " + userId);
@@ -353,10 +358,10 @@ public class DiaryController {
     // Search diary entries - PERFECTED VERSION
     @GetMapping("/search")
     public ResponseEntity<?> searchDiaries(
-            HttpSession session,
+            HttpServletRequest request,
             @RequestParam String query) {
         try {
-            Integer userId = getUserIdFromSession(session);
+            Integer userId = getUserIdFromRequest(request);
             
             System.out.println("=== CONTROLLER: Searching Diaries ===");
             System.out.println("User ID: " + userId + ", Query: " + query);
@@ -391,10 +396,10 @@ public class DiaryController {
     // Check if entry date is available - PERFECTED VERSION
     @GetMapping("/check-date")
     public ResponseEntity<?> checkDateAvailability(
-            HttpSession session,
+            HttpServletRequest request,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate entryDate) {
         try {
-            Integer userId = getUserIdFromSession(session);
+            Integer userId = getUserIdFromRequest(request);
             
             System.out.println("=== CONTROLLER: Checking Date Availability ===");
             System.out.println("User ID: " + userId + ", Date: " + entryDate);
@@ -427,9 +432,9 @@ public class DiaryController {
 
     // Get user diary statistics - NEW ENDPOINT
     @GetMapping("/statistics")
-    public ResponseEntity<?> getDiaryStatistics(HttpSession session) {
+    public ResponseEntity<?> getDiaryStatistics(HttpServletRequest request) {
         try {
-            Integer userId = getUserIdFromSession(session);
+            Integer userId = getUserIdFromRequest(request);
             
             long totalDiaries = diaryService.getDiaryCount(userId);
             long diariesWithImages = diaryService.getDiaryCountWithImages(userId);

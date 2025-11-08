@@ -351,6 +351,7 @@
             justify-content: center;
             gap: 0.5rem;
             letter-spacing: 0.3px;
+            text-decoration: none;
         }
 
         .btn-adopt {
@@ -770,9 +771,9 @@
                 <i class="fas fa-check-circle"></i>
             </div>
             <h3>Adoption Process Started!</h3>
-            <p>You will be contacted by the pet owners soon.</p>
+            <p>The pet owner will contact you soon to discuss the next steps.</p>
             <div class="countdown-timer">
-                Redirecting in <span id="countdown">5</span> seconds...
+                Redirecting to legalization in <span id="countdown">5</span> seconds...
             </div>
             <button class="btn btn-adopt" onclick="redirectToLegalization()">
                 <i class="fas fa-arrow-right"></i>
@@ -789,10 +790,56 @@
         </div>
     </div>
 
-    <script>
-        const apiBase = 'https://pawdcast-backend-5.onrender.com';
+   <script>
+        const apiBase = "https://pawdcast-backend-5.onrender.com/pets";
         let currentPetForAdoption = null;
         let countdownInterval;
+
+        // JWT Authentication Helper Function
+        async function authFetch(url, options = {}) {
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                window.location.href = "/login.html";
+                return;
+            }
+            
+            const headers = {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json",
+                ...options.headers
+            };
+            
+            const response = await fetch(url, { ...options, headers });
+            if (response.status === 401) {
+                localStorage.removeItem("jwtToken");
+                localStorage.removeItem("userEmail");
+                window.location.href = "/login.html";
+                return;
+            }
+            return response;
+        }
+
+        // Check authentication on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem("jwtToken");
+            const isLoginPage = window.location.pathname.includes('login.html') || 
+                              window.location.pathname.includes('signup.html');
+            
+            if (!token && !isLoginPage) {
+                window.location.href = "/login.html";
+                return;
+            }
+            
+            if (token && isLoginPage) {
+                window.location.href = "/dashboard.html";
+                return;
+            }
+            
+            // Load pets only if authenticated and not on login page
+            if (token && !isLoginPage) {
+                loadPets();
+            }
+        });
 
         function getPetIcon(petType) {
             const icons = {
@@ -808,6 +855,7 @@
 
         async function loadPets() {
             try {
+                // Public endpoint - no authentication needed
                 const res = await fetch(`${apiBase}/available`);
                 if (!res.ok) throw new Error('Failed to fetch pets');
                 
@@ -903,7 +951,10 @@
                     // Show loading in button
                     button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
                     
-                    const res = await fetch(`${apiBase}/${giverId}`);
+                    // Use authFetch for authenticated endpoint
+                    const res = await authFetch(`${apiBase}/${giverId}`);
+                    if (!res) return; // authFetch already handled redirect
+                    
                     if (!res.ok) throw new Error('Failed to fetch pet details');
                     
                     const pet = await res.json();
@@ -988,6 +1039,13 @@
         }
 
         function startAdoption(petName, giverId) {
+            // Check if user is authenticated before starting adoption
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                window.location.href = "/login.html";
+                return;
+            }
+            
             currentPetForAdoption = { petName, giverId };
             document.getElementById('modalPetName').textContent = petName;
             document.getElementById('adoptionModal').classList.add('show');
@@ -1000,7 +1058,7 @@
                 // Show success modal with countdown
                 showSuccessModal();
             } else {
-                // Redirect to adoption-seeker form
+                // Redirect to adoption-seeker form (authenticated endpoint)
                 window.location.href = `adoption-seeker.html?petId=${currentPetForAdoption.giverId}&petName=${encodeURIComponent(currentPetForAdoption.petName)}`;
             }
         }
@@ -1035,7 +1093,7 @@
                 clearInterval(countdownInterval);
             }
             
-            // Redirect to legalization page
+            // Redirect to legalization page (authenticated endpoint)
             window.location.href = `petlegal.html?petId=${currentPetForAdoption.giverId}&petName=${encodeURIComponent(currentPetForAdoption.petName)}`;
         }
 
@@ -1086,11 +1144,6 @@
                 closeSuccessModal();
                 closeImageModal();
             }
-        });
-
-        // Initialize the page
-        document.addEventListener('DOMContentLoaded', function() {
-            loadPets();
         });
     </script>
 </body>

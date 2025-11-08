@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.pawdcast.pawdcast.application.model.Breed;
 import com.pawdcast.pawdcast.application.service.BreedService;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 @RestController
 @RequestMapping("/api/breeds")
 @CrossOrigin(origins = "*")
@@ -29,7 +31,7 @@ public class BreedController {
     @Autowired
     private BreedService breedService;
     
-    // Get all breeds
+    // Get all breeds - PUBLIC
     @GetMapping
     public ResponseEntity<List<Breed>> getAllBreeds() {
         try {
@@ -40,7 +42,7 @@ public class BreedController {
         }
     }
     
-    // Get breed by ID
+    // Get breed by ID - PUBLIC
     @GetMapping("/{id}")
     public ResponseEntity<Breed> getBreedById(@PathVariable Long id) {
         try {
@@ -55,7 +57,7 @@ public class BreedController {
         }
     }
     
-    // Get breeds by animal type
+    // Get breeds by animal type - PUBLIC
     @GetMapping("/type/{animalType}")
     public ResponseEntity<List<Breed>> getBreedsByType(@PathVariable String animalType) {
         try {
@@ -66,7 +68,7 @@ public class BreedController {
         }
     }
     
-    // Search breeds
+    // Search breeds - PUBLIC
     @GetMapping("/search")
     public ResponseEntity<List<Breed>> searchBreeds(@RequestParam String q) {
         try {
@@ -77,7 +79,7 @@ public class BreedController {
         }
     }
     
-    // Advanced recommendation engine using Map
+    // Advanced recommendation engine using Map - PUBLIC
     @PostMapping("/recommend")
     public ResponseEntity<List<Breed>> recommendBreeds(@RequestBody Map<String, Object> criteria) {
         try {
@@ -88,7 +90,7 @@ public class BreedController {
         }
     }
     
-    // Simple recommendation with request parameters
+    // Simple recommendation with request parameters - PUBLIC
     @GetMapping("/recommend/simple")
     public ResponseEntity<List<Breed>> simpleRecommendation(
             @RequestParam String animalType,
@@ -102,7 +104,7 @@ public class BreedController {
         }
     }
     
-    // Get allergy-friendly breeds
+    // Get allergy-friendly breeds - PUBLIC
     @GetMapping("/allergy-friendly/{animalType}")
     public ResponseEntity<List<Breed>> getAllergyFriendlyBreeds(@PathVariable String animalType) {
         try {
@@ -113,10 +115,21 @@ public class BreedController {
         }
     }
     
-    // Create new breed
+    // Create new breed - SECURED (Admin only)
     @PostMapping
-    public ResponseEntity<Breed> createBreed(@RequestBody Breed breed) {
+    public ResponseEntity<?> createBreed(@RequestBody Breed breed, HttpServletRequest request) {
         try {
+            // Check authentication
+            String userEmail = (String) request.getAttribute("userEmail");
+            if (userEmail == null) {
+                return new ResponseEntity<>("Authentication required", HttpStatus.UNAUTHORIZED);
+            }
+            
+            // Optional: Add admin role check here if you have roles
+            // if (!userService.isAdmin(userEmail)) {
+            //     return new ResponseEntity<>("Admin access required", HttpStatus.FORBIDDEN);
+            // }
+            
             Breed savedBreed = breedService.saveBreed(breed);
             return new ResponseEntity<>(savedBreed, HttpStatus.CREATED);
         } catch (Exception e) {
@@ -124,10 +137,21 @@ public class BreedController {
         }
     }
     
-    // Update breed
+    // Update breed - SECURED (Admin only)
     @PutMapping("/{id}")
-    public ResponseEntity<Breed> updateBreed(@PathVariable Long id, @RequestBody Breed breed) {
+    public ResponseEntity<?> updateBreed(@PathVariable Long id, @RequestBody Breed breed, HttpServletRequest request) {
         try {
+            // Check authentication
+            String userEmail = (String) request.getAttribute("userEmail");
+            if (userEmail == null) {
+                return new ResponseEntity<>("Authentication required", HttpStatus.UNAUTHORIZED);
+            }
+            
+            // Optional: Add admin role check here if you have roles
+            // if (!userService.isAdmin(userEmail)) {
+            //     return new ResponseEntity<>("Admin access required", HttpStatus.FORBIDDEN);
+            // }
+            
             Breed existingBreed = breedService.getBreedById(id);
             if (existingBreed != null) {
                 breed.setId(id);
@@ -141,10 +165,21 @@ public class BreedController {
         }
     }
     
-    // Delete breed
+    // Delete breed - SECURED (Admin only)
     @DeleteMapping("/{id}")
-    public ResponseEntity<HttpStatus> deleteBreed(@PathVariable Long id) {
+    public ResponseEntity<?> deleteBreed(@PathVariable Long id, HttpServletRequest request) {
         try {
+            // Check authentication
+            String userEmail = (String) request.getAttribute("userEmail");
+            if (userEmail == null) {
+                return new ResponseEntity<>("Authentication required", HttpStatus.UNAUTHORIZED);
+            }
+            
+            // Optional: Add admin role check here if you have roles
+            // if (!userService.isAdmin(userEmail)) {
+            //     return new ResponseEntity<>("Admin access required", HttpStatus.FORBIDDEN);
+            // }
+            
             breedService.deleteBreed(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (Exception e) {
@@ -152,7 +187,7 @@ public class BreedController {
         }
     }
     
-    // Health check endpoint
+    // Health check endpoint - PUBLIC
     @GetMapping("/health")
     public ResponseEntity<Map<String, String>> healthCheck() {
         Map<String, String> response = new HashMap<>();

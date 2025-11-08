@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Adoption Seeker Form - Pawdcast</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@400;500;600&family=Cormorant+Garamond:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         /* DMC Color Palette */
@@ -21,6 +22,7 @@
             --accent-gradient: linear-gradient(135deg, var(--dark-wedgwood), #5a7d4f);
             --dark-gradient: linear-gradient(135deg, var(--very-dark-mocha), var(--black-brown));
             --light-gradient: linear-gradient(135deg, var(--white), #faf9f5);
+            --certificate-gradient: linear-gradient(135deg, #f9f7f2, #f0ebdf);
         }
 
         * {
@@ -30,7 +32,7 @@
         }
 
         body {
-            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: var(--primary-gradient);
             min-height: 100vh;
             color: var(--black-brown);
@@ -377,24 +379,6 @@
             opacity: 0.8;
         }
 
-        /* Upload Progress */
-        .upload-progress {
-            width: 100%;
-            height: 6px;
-            background: var(--dark-yellow-beige);
-            border-radius: 3px;
-            margin-top: 0.5rem;
-            overflow: hidden;
-            display: none;
-        }
-
-        .upload-progress-bar {
-            height: 100%;
-            background: var(--accent-gradient);
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-
         /* Submit Button */
         .submit-container {
             grid-column: 1 / -1;
@@ -586,6 +570,42 @@
             margin-top: 0.25rem;
             text-align: center;
             font-style: italic;
+        }
+
+        /* Certificate Preview (hidden) */
+        #certificatePreview {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .certificate-container {
+            background: white;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .certificate-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: white;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -781,25 +801,58 @@
         </div>
     </div>
 
+    <!-- Certificate Preview Modal -->
+    <div id="certificatePreview" style="display: none;">
+        <button class="certificate-close" onclick="closeCertificatePreview()">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="certificate-container" id="certificateContent">
+            <!-- Certificate content will be generated here -->
+        </div>
+    </div>
+
 <script>
     const API_BASE = 'https://pawdcast-backend-5.onrender.com';
     let currentUser = null;
 
-    // Check authentication status
+    // JWT Authentication Helper Function
+    async function authFetch(url, options = {}) {
+        const token = localStorage.getItem("jwtToken");
+        if (!token) {
+            window.location.href = "/login.html";
+            return;
+        }
+        
+        const headers = {
+            "Authorization": `Bearer ${token}`,
+            ...options.headers
+        };
+        
+        const response = await fetch(url, { ...options, headers });
+        if (response.status === 401) {
+            localStorage.removeItem("jwtToken");
+            localStorage.removeItem("userEmail");
+            window.location.href = "/login.html";
+            return;
+        }
+        return response;
+    }
+
+    // Check authentication status using JWT
     function checkAuthStatus() {
-        return fetch(`${API_BASE}/auth/check`, {
-            credentials: 'include'
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.authenticated) {
-                currentUser = data;
-                return true;
-            } else {
-                return false;
-            }
-        })
-        .catch(() => false);
+        const token = localStorage.getItem("jwtToken");
+        if (!token) {
+            return false;
+        }
+        
+        // You could also verify token validity with the backend if needed
+        // For now, we'll assume valid token means authenticated
+        const userEmail = localStorage.getItem("userEmail");
+        if (userEmail) {
+            currentUser = { email: userEmail, authenticated: true };
+            return true;
+        }
+        return false;
     }
 
     function showMessage(message, type) {
@@ -857,6 +910,231 @@
         }
     }
 
+    // Generate a beautiful certificate with the specified color scheme
+    function generateCertificateHTML(userData) {
+        const today = new Date();
+        const formattedDate = today.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        
+        return `
+            <div style="
+                font-family: 'Cormorant Garamond', serif;
+                background: var(--certificate-gradient);
+                padding: 3rem;
+                border: 15px double #4A3728;
+                border-radius: 5px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                position: relative;
+                text-align: center;
+                color: #2B1F17;
+                max-width: 800px;
+                margin: 0 auto;
+                background-image: 
+                    radial-gradient(circle at 20% 30%, rgba(212, 197, 169, 0.2) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 70%, rgba(184, 160, 130, 0.2) 0%, transparent 50%);
+            ">
+                <!-- Ornamental top border -->
+                <div style="
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    height: 20px;
+                    background: linear-gradient(90deg, 
+                        transparent 10%, 
+                        #4A6741 10%, #4A6741 12%, 
+                        transparent 12%, transparent 88%, 
+                        #4A6741 88%, #4A6741 90%, 
+                        transparent 90%);
+                "></div>
+                
+                <!-- Logo in a decorative circle at the top -->
+                <div style="
+                    width: 140px;
+                    height: 140px;
+                    border-radius: 50%;
+                    background: white;
+                    margin: 0 auto 1.5rem;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border: 8px solid #4A6741;
+                    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                    position: relative;
+                    overflow: hidden;
+                ">
+                    <div style="
+                        position: absolute;
+                        top: -5px;
+                        left: -5px;
+                        right: -5px;
+                        bottom: -5px;
+                        border-radius: 50%;
+                        background: conic-gradient(from 0deg, #4A6741, #B8A082, #8B7355, #4A3728, #4A6741);
+                        z-index: -1;
+                    "></div>
+                    <img src="https://res.cloudinary.com/dkuuvasoe/image/upload/v1760186124/pawdcastlogo_cb1l1b.png" 
+                         alt="Pawdcast Logo" 
+                         style="width: 75%; height: 75%; object-fit: contain; filter: brightness(0.9);">
+                </div>
+                
+                <!-- Certificate Title -->
+                <h1 style="
+                    font-size: 3.5rem;
+                    margin-bottom: 0.5rem;
+                    color: #4A3728;
+                    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+                    letter-spacing: 3px;
+                    font-weight: 700;
+                    position: relative;
+                    display: inline-block;
+                ">
+                    Certificate of Adoption
+                    <div style="
+                        position: absolute;
+                        bottom: -10px;
+                        left: 0;
+                        right: 0;
+                        height: 3px;
+                        background: linear-gradient(to right, transparent, #4A6741, transparent);
+                    "></div>
+                </h1>
+                
+                <!-- Organization Name -->
+                <p style="
+                    font-size: 1.4rem;
+                    margin-bottom: 2rem;
+                    color: #4A6741;
+                    font-style: italic;
+                    letter-spacing: 1px;
+                ">Pawdcast Adoption Center</p>
+                
+                <!-- Certificate Body -->
+                <div style="
+                    font-size: 1.4rem;
+                    margin-bottom: 2rem;
+                    line-height: 1.6;
+                    text-align: center;
+                    max-width: 600px;
+                    margin-left: auto;
+                    margin-right: auto;
+                ">
+                    <p>This is to certify that</p>
+                    <p style="
+                        font-size: 1.8rem;
+                        font-weight: 700;
+                        color: #4A6741;
+                        margin: 0.5rem 0;
+                        text-transform: uppercase;
+                        letter-spacing: 1px;
+                    ">${userData.name || 'the applicant'}</p>
+                    <p>has successfully submitted an application for pet adoption.</p>
+                </div>
+                
+                <div style="
+                    font-size: 1.2rem;
+                    margin-bottom: 2rem;
+                    font-style: italic;
+                    color: #8B7355;
+                    max-width: 600px;
+                    margin-left: auto;
+                    margin-right: auto;
+                ">
+                    We commend your commitment to providing a loving and responsible home for a pet in need.
+                </div>
+                
+                <!-- Signature Section -->
+                <div style="
+                    display: flex;
+                    justify-content: space-between;
+                    margin-top: 3rem;
+                    padding: 0 2rem;
+                ">
+                    <div style="text-align: center;">
+                        <div style="
+                            border-top: 2px solid #4A6741;
+                            width: 200px;
+                            padding-top: 0.5rem;
+                            margin-bottom: 0.5rem;
+                        "></div>
+                        <p style="margin: 0; font-weight: 600;">Date</p>
+                        <p style="margin: 0; color: #4A6741;">${formattedDate}</p>
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <div style="
+                            border-top: 2px solid #4A6741;
+                            width: 200px;
+                            padding-top: 0.5rem;
+                            margin-bottom: 0.5rem;
+                        "></div>
+                        <p style="margin: 0; font-weight: 600;">Pawdcast Director</p>
+                        <p style="margin: 0; color: #4A6741;">Atharva Padwal</p>
+                    </div>
+                </div>
+                
+                <!-- Certificate Number -->
+                <div style="
+                    margin-top: 2rem;
+                    font-size: 1rem;
+                    color: #8B7355;
+                    border-top: 1px solid #D4C5A9;
+                    padding-top: 1rem;
+                ">
+                    Certificate ID: PAW-${Date.now().toString().slice(-6)}
+                </div>
+                
+                <!-- Decorative border elements -->
+                <div style="
+                    position: absolute;
+                    top: 40px;
+                    left: 40px;
+                    width: 40px;
+                    height: 40px;
+                    border: 2px solid #4A6741;
+                    border-radius: 50%;
+                    opacity: 0.3;
+                "></div>
+                
+                <div style="
+                    position: absolute;
+                    top: 40px;
+                    right: 40px;
+                    width: 40px;
+                    height: 40px;
+                    border: 2px solid #4A6741;
+                    border-radius: 50%;
+                    opacity: 0.3;
+                "></div>
+                
+                <div style="
+                    position: absolute;
+                    bottom: 40px;
+                    left: 40px;
+                    width: 40px;
+                    height: 40px;
+                    border: 2px solid #4A6741;
+                    border-radius: 50%;
+                    opacity: 0.3;
+                "></div>
+                
+                <div style="
+                    position: absolute;
+                    bottom: 40px;
+                    right: 40px;
+                    width: 40px;
+                    height: 40px;
+                    border: 2px solid #4A6741;
+                    border-radius: 50%;
+                    opacity: 0.3;
+                "></div>
+            </div>
+        `;
+    }
+
     // Download PDF file
     function downloadPDF(blob, filename) {
         const url = window.URL.createObjectURL(blob);
@@ -870,12 +1148,24 @@
         document.body.removeChild(a);
     }
 
+    // Show certificate preview
+    function showCertificatePreview(userData) {
+        const certificateContent = document.getElementById('certificateContent');
+        certificateContent.innerHTML = generateCertificateHTML(userData);
+        document.getElementById('certificatePreview').style.display = 'flex';
+    }
+
+    // Close certificate preview
+    function closeCertificatePreview() {
+        document.getElementById('certificatePreview').style.display = 'none';
+    }
+
     // Form submission handler with PDF download
     document.getElementById("seekerForm").addEventListener("submit", async function(e) {
         e.preventDefault();
 
-        // Check authentication first
-        const isAuthenticated = await checkAuthStatus();
+        // Check authentication first using JWT
+        const isAuthenticated = checkAuthStatus();
         if (!isAuthenticated) {
             showMessage("Please log in first to submit an adoption application.", "error");
             document.getElementById('loginPrompt').style.display = 'flex';
@@ -901,16 +1191,16 @@
         let formData = new FormData(this);
 
         try {
-            const response = await fetch(`${API_BASE}/seekers/add`, {
+            // Use authFetch for authenticated endpoint with FormData
+            const response = await authFetch(`${API_BASE}/seekers/add`, {
                 method: "POST",
-                body: formData,
-                credentials: 'include'
+                body: formData
+                // Note: Don't set Content-Type header for FormData, let browser set it with boundary
             });
 
+            if (!response) return; // authFetch already handled redirect
+
             if (!response.ok) {
-                if (response.status === 401) {
-                    throw new Error("Please log in to submit an application");
-                }
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
@@ -922,6 +1212,9 @@
                 // Download the PDF certificate
                 downloadPDF(pdfBlob, `adoption-application-receipt-${Date.now()}.pdf`);
                 showMessage("Application submitted successfully! Your receipt is downloading...", "success");
+                
+                // Show a preview of the certificate (optional)
+                // showCertificatePreview(currentUser);
             } else {
                 // Fallback in case response is not PDF
                 throw new Error("Unexpected response format");
@@ -948,13 +1241,12 @@
 
     // Initialize file input handlers and check auth status
     document.addEventListener('DOMContentLoaded', function() {
-        // Check authentication status on page load
-        checkAuthStatus().then(isAuthenticated => {
-            if (!isAuthenticated) {
-                document.getElementById('loginPrompt').style.display = 'flex';
-                showMessage("Please log in to submit an adoption application.", "error");
-            }
-        });
+        // Check authentication status on page load using JWT
+        const isAuthenticated = checkAuthStatus();
+        if (!isAuthenticated) {
+            document.getElementById('loginPrompt').style.display = 'flex';
+            showMessage("Please log in to submit an adoption application.", "error");
+        }
 
         // File input handlers
         const fileInputs = document.querySelectorAll('.file-input');

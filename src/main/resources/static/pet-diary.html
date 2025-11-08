@@ -872,7 +872,7 @@
         <div class="nav-container">
             <div class="nav-logo">
                 <img src="https://res.cloudinary.com/dkuuvasoe/image/upload/v1760186124/pawdcastlogo_cb1l1b.png" alt="PawdCast Logo" class="logo-img">
-                <span>Royal Pet Diary</span>
+                <span> Pet Diary</span>
             </div>
             <div class="nav-links">
                 <button id="homeBtn" class="nav-btn">
@@ -895,7 +895,7 @@
     <section id="welcomeSection" class="section active">
         <div class="container">
             <div class="welcome-container">
-                <h1 class="welcome-title">My Royal Pet Diary</h1>
+                <h1 class="welcome-title">My Pet Diary</h1>
                 <p class="welcome-subtitle">Capture your precious moments in royal style</p>
                 <div class="action-buttons">
                     <button id="welcomeCreateBtn" class="action-btn">
@@ -1043,9 +1043,9 @@
     <!-- Toast Notifications -->
     <div id="toast" class="toast"></div>
 
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+ <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
-        const API_BASE_URL = 'https://pawdcast-backend-5.onrender.com';
+        const API_BASE_URL = 'http://localhost:8080';
         let diaryEntries = [];
         let currentPage = 0;
         let showCover = true;
@@ -1417,5 +1417,7 @@
             }, 3000);
         }
     </script>
+
+
 </body>
 </html>

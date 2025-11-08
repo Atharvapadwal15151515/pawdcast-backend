@@ -16,8 +16,9 @@ import org.springframework.web.multipart.MultipartFile;
 import com.pawdcast.pawdcast.application.model.Document;
 import com.pawdcast.pawdcast.application.model.User;
 import com.pawdcast.pawdcast.application.service.DocumentService;
+import com.pawdcast.pawdcast.application.service.AuthService;
 
-import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/digilocker")
@@ -27,24 +28,28 @@ public class DocumentController {
     @Autowired
     private DocumentService documentService;
 
-    private Integer getUserIdFromSession(HttpSession session) {
-        User user = (User) session.getAttribute("user");
-        if (user == null) {
+    @Autowired
+    private AuthService authService;
+
+    private Integer getUserIdFromRequest(HttpServletRequest request) {
+        String userEmail = (String) request.getAttribute("userEmail");
+        if (userEmail == null) {
             throw new RuntimeException("User not logged in");
         }
+        User user = authService.findByEmail(userEmail);
         return user.getId();
     }
 
     @PostMapping("/upload")
     public ResponseEntity<?> uploadDocument(
-            HttpSession session,
+            HttpServletRequest request,
             @RequestParam String documentName,
             @RequestParam String documentType,
             @RequestParam(required = false) String description,
             @RequestParam MultipartFile file) {
         
         try {
-            Integer userId = getUserIdFromSession(session);
+            Integer userId = getUserIdFromRequest(request);
 
             if (file.isEmpty()) {
                 return ResponseEntity.badRequest().body("File cannot be empty");
@@ -69,9 +74,9 @@ public class DocumentController {
     }
 
     @GetMapping("/documents")
-    public ResponseEntity<?> getUserDocuments(HttpSession session) {
+    public ResponseEntity<?> getUserDocuments(HttpServletRequest request) {
         try {
-            Integer userId = getUserIdFromSession(session);
+            Integer userId = getUserIdFromRequest(request);
             List<Document> documents = documentService.getUserDocuments(userId);
             
             // Return document list without file data
@@ -96,10 +101,10 @@ public class DocumentController {
     @GetMapping("/document/{documentId}/view")
     public ResponseEntity<?> viewDocument(
             @PathVariable Integer documentId,
-            HttpSession session) {
+            HttpServletRequest request) {
         
         try {
-            Integer userId = getUserIdFromSession(session);
+            Integer userId = getUserIdFromRequest(request);
             Document document = documentService.getDocument(documentId, userId);
             
             if (document.getDocumentData() == null || document.getDocumentData().length == 0) {
@@ -131,10 +136,10 @@ public class DocumentController {
     @GetMapping("/document/{documentId}/download")
     public ResponseEntity<byte[]> downloadDocument(
             @PathVariable Integer documentId,
-            HttpSession session) {
+            HttpServletRequest request) {
         
         try {
-            Integer userId = getUserIdFromSession(session);
+            Integer userId = getUserIdFromRequest(request);
             Document document = documentService.getDocument(documentId, userId);
             
             HttpHeaders headers = new HttpHeaders();
@@ -149,9 +154,9 @@ public class DocumentController {
     }
 
     @DeleteMapping("/document/{documentId}")
-    public ResponseEntity<?> deleteDocument(@PathVariable Integer documentId, HttpSession session) {
+    public ResponseEntity<?> deleteDocument(@PathVariable Integer documentId, HttpServletRequest request) {
         try {
-            Integer userId = getUserIdFromSession(session);
+            Integer userId = getUserIdFromRequest(request);
             documentService.deleteDocument(documentId, userId);
             return ResponseEntity.ok("Image deleted successfully");
         } catch (RuntimeException e) {
@@ -161,10 +166,10 @@ public class DocumentController {
 
     @GetMapping("/search")
     public ResponseEntity<?> searchDocuments(
-            HttpSession session,
+            HttpServletRequest request,
             @RequestParam String query) {
         try {
-            Integer userId = getUserIdFromSession(session);
+            Integer userId = getUserIdFromRequest(request);
             List<Document> documents = documentService.searchDocuments(userId, query);
             return ResponseEntity.ok(createDocumentListResponse(documents));
         } catch (RuntimeException e) {
@@ -175,9 +180,9 @@ public class DocumentController {
     @GetMapping("/type/{documentType}")
     public ResponseEntity<?> getDocumentsByType(
             @PathVariable String documentType,
-            HttpSession session) {
+            HttpServletRequest request) {
         try {
-            Integer userId = getUserIdFromSession(session);
+            Integer userId = getUserIdFromRequest(request);
             List<Document> documents = documentService.getDocumentsByType(userId, documentType);
             return ResponseEntity.ok(createDocumentListResponse(documents));
         } catch (RuntimeException e) {

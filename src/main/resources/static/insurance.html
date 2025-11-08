@@ -819,9 +819,22 @@
     <p>Caring for pets, one paw at a time. 🐾</p>
 </footer>
 <script>
-    let insuranceInfoData;
-    let estimatorData;
+let insuranceInfoData;
+let estimatorData;
 
+// Check authentication on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const token = localStorage.getItem("jwtToken");
+    if (!token) {
+        window.location.href = "/login.html";
+        return;
+    }
+    
+    // Load insurance data
+    loadInsuranceData();
+});
+
+function loadInsuranceData() {
     // Fetch Insurance Information
     fetch("https://pawdcast-backend-5.onrender.com/api/insurance/info")
         .then(res => res.json())
@@ -836,130 +849,131 @@
         .then(res => res.json())
         .then(data => estimatorData = data.providers)
         .catch(err => console.error("Error loading estimator data:", err));
+}
 
-    function displayInsuranceInfo() {
-        let infoDiv = document.getElementById("info-content");
-        let html = "";
+function displayInsuranceInfo() {
+    let infoDiv = document.getElementById("info-content");
+    let html = "";
 
-        if (insuranceInfoData.introduction) {
-            html += `<p>${insuranceInfoData.introduction}</p>`;
-        }
-
-        if (insuranceInfoData.whyNeed) {
-            html += "<h3>🌟 Why You Need Pet Insurance:</h3><ul>";
-            insuranceInfoData.whyNeed.forEach(item => html += `<li>${item}</li>`);
-            html += "</ul>";
-        }
-
-        if (insuranceInfoData.types) {
-            html += "<h3>📋 Types of Pet Insurance:</h3><ul>";
-            insuranceInfoData.types.forEach(type => html += `<li><b>${type.type}:</b> ${type.description}</li>`);
-            html += "</ul>";
-        }
-
-        if (insuranceInfoData.inclusions) {
-            html += "<h3>✅ Inclusions:</h3><ul>";
-            insuranceInfoData.inclusions.forEach(item => html += `<li>${item}</li>`);
-            html += "</ul>";
-        }
-
-        if (insuranceInfoData.exclusions) {
-            html += "<h3>❌ Exclusions:</h3><ul>";
-            insuranceInfoData.exclusions.forEach(item => html += `<li>${item}</li>`);
-            html += "</ul>";
-        }
-
-        if (insuranceInfoData.eligibility) {
-            html += "<h3>📝 Eligibility:</h3><ul>";
-            for (let key in insuranceInfoData.eligibility) {
-                html += `<li><b>${key}:</b> ${insuranceInfoData.eligibility[key]}</li>`;
-            }
-            html += "</ul>";
-        }
-
-        if (insuranceInfoData.laws) {
-            html += "<h3>⚖️ Laws & Regulations:</h3><ul>";
-            insuranceInfoData.laws.forEach(item => html += `<li>${item}</li>`);
-            html += "</ul>";
-        }
-
-        infoDiv.innerHTML = html;
+    if (insuranceInfoData.introduction) {
+        html += `<p>${insuranceInfoData.introduction}</p>`;
     }
 
-    function estimateInsurance() {
-        let petType = document.getElementById("petType").value;
-        let age = parseFloat(document.getElementById("age").value);
-        let resultsDiv = document.getElementById("results");
-        resultsDiv.innerHTML = "<div class='loading'>Finding the perfect plan for your pet</div>";
-
-        setTimeout(() => {
-            resultsDiv.innerHTML = "";
-
-            if (!estimatorData) {
-                resultsDiv.innerHTML = "<p class='no-results'>⚠️ Error loading insurance data. Please try again.</p>";
-                return;
-            }
-
-            if (isNaN(age) || age < 0) {
-                resultsDiv.innerHTML = "<p class='no-results'>⚠️ Please enter a valid age for your pet.</p>";
-                return;
-            }
-
-            let matches = estimatorData.filter(p =>
-                p.petType === petType && age >= p.minAge && age <= p.maxAge
-            );
-
-            if (matches.length === 0) {
-                resultsDiv.innerHTML = `<p class='no-results'>😔 No insurance plans available for a ${petType} aged ${age} years.</p>`;
-            } else {
-                matches.forEach((p, index) => {
-                    let card = document.createElement("div");
-                    card.className = "card";
-                    card.style.animationDelay = `${index * 0.1}s`;
-                    card.innerHTML = `
-                        <h3>🎯 ${p.name}</h3>
-                        <p><b>📅 Eligibility:</b> ${p.minAge} - ${p.maxAge} years</p>
-                        <p><b>💵 Premium Range:</b> ${p.premiumRange}</p>
-                        <h4>🎁 Benefits:</h4>
-                        <ul>${p.benefits.map(b => `<li>${b}</li>`).join("")}</ul>
-                    `;
-                    resultsDiv.appendChild(card);
-                });
-            }
-        }, 500);
+    if (insuranceInfoData.whyNeed) {
+        html += "<h3>🌟 Why You Need Pet Insurance:</h3><ul>";
+        insuranceInfoData.whyNeed.forEach(item => html += `<li>${item}</li>`);
+        html += "</ul>";
     }
 
-    // Scroll to Estimator Function
-    function scrollToEstimator() {
-        const estimatorSection = document.getElementById('estimator');
-        estimatorSection.scrollIntoView({ 
-            behavior: 'smooth',
-            block: 'start'
-        });
-        
-        // Add a visual highlight effect
-        estimatorSection.style.boxShadow = '0 0 0 4px rgba(62, 95, 111, 0.3)';
-        setTimeout(() => {
-            estimatorSection.style.boxShadow = '0 10px 40px rgba(0,0,0,0.12)';
-        }, 2000);
+    if (insuranceInfoData.types) {
+        html += "<h3>📋 Types of Pet Insurance:</h3><ul>";
+        insuranceInfoData.types.forEach(type => html += `<li><b>${type.type}:</b> ${type.description}</li>`);
+        html += "</ul>";
     }
 
-    // Scroll to Top Functionality
-    window.onscroll = function() {
-        const scrollTop = document.getElementById("scrollTop");
-        if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
-            scrollTop.classList.add("visible");
+    if (insuranceInfoData.inclusions) {
+        html += "<h3>✅ Inclusions:</h3><ul>";
+        insuranceInfoData.inclusions.forEach(item => html += `<li>${item}</li>`);
+        html += "</ul>";
+    }
+
+    if (insuranceInfoData.exclusions) {
+        html += "<h3>❌ Exclusions:</h3><ul>";
+        insuranceInfoData.exclusions.forEach(item => html += `<li>${item}</li>`);
+        html += "</ul>";
+    }
+
+    if (insuranceInfoData.eligibility) {
+        html += "<h3>📝 Eligibility:</h3><ul>";
+        for (let key in insuranceInfoData.eligibility) {
+            html += `<li><b>${key}:</b> ${insuranceInfoData.eligibility[key]}</li>`;
+        }
+        html += "</ul>";
+    }
+
+    if (insuranceInfoData.laws) {
+        html += "<h3>⚖️ Laws & Regulations:</h3><ul>";
+        insuranceInfoData.laws.forEach(item => html += `<li>${item}</li>`);
+        html += "</ul>";
+    }
+
+    infoDiv.innerHTML = html;
+}
+
+function estimateInsurance() {
+    let petType = document.getElementById("petType").value;
+    let age = parseFloat(document.getElementById("age").value);
+    let resultsDiv = document.getElementById("results");
+    resultsDiv.innerHTML = "<div class='loading'>Finding the perfect plan for your pet</div>";
+
+    setTimeout(() => {
+        resultsDiv.innerHTML = "";
+
+        if (!estimatorData) {
+            resultsDiv.innerHTML = "<p class='no-results'>⚠️ Error loading insurance data. Please try again.</p>";
+            return;
+        }
+
+        if (isNaN(age) || age < 0) {
+            resultsDiv.innerHTML = "<p class='no-results'>⚠️ Please enter a valid age for your pet.</p>";
+            return;
+        }
+
+        let matches = estimatorData.filter(p =>
+            p.petType === petType && age >= p.minAge && age <= p.maxAge
+        );
+
+        if (matches.length === 0) {
+            resultsDiv.innerHTML = `<p class='no-results'>😔 No insurance plans available for a ${petType} aged ${age} years.</p>`;
         } else {
-            scrollTop.classList.remove("visible");
+            matches.forEach((p, index) => {
+                let card = document.createElement("div");
+                card.className = "card";
+                card.style.animationDelay = `${index * 0.1}s`;
+                card.innerHTML = `
+                    <h3>🎯 ${p.name}</h3>
+                    <p><b>📅 Eligibility:</b> ${p.minAge} - ${p.maxAge} years</p>
+                    <p><b>💵 Premium Range:</b> ${p.premiumRange}</p>
+                    <h4>🎁 Benefits:</h4>
+                    <ul>${p.benefits.map(b => `<li>${b}</li>`).join("")}</ul>
+                `;
+                resultsDiv.appendChild(card);
+            });
         }
-    };
+    }, 500);
+}
 
-    function scrollToTop() {
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
+// Scroll to Estimator Function
+function scrollToEstimator() {
+    const estimatorSection = document.getElementById('estimator');
+    estimatorSection.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+    });
+    
+    // Add a visual highlight effect
+    estimatorSection.style.boxShadow = '0 0 0 4px rgba(62, 95, 111, 0.3)';
+    setTimeout(() => {
+        estimatorSection.style.boxShadow = '0 10px 40px rgba(0,0,0,0.12)';
+    }, 2000);
+}
+
+// Scroll to Top Functionality
+window.onscroll = function() {
+    const scrollTop = document.getElementById("scrollTop");
+    if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+        scrollTop.classList.add("visible");
+    } else {
+        scrollTop.classList.remove("visible");
     }
+};
+
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
 </script>
 </body>
 </html>

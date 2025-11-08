@@ -2,10 +2,12 @@ package com.pawdcast.pawdcast.application.controller;
 
 import com.pawdcast.pawdcast.application.model.User;
 import com.pawdcast.pawdcast.application.service.UserRegistrationService;
+import com.pawdcast.pawdcast.application.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,6 +20,18 @@ public class UserRegistrationController {
     @Autowired
     private UserRegistrationService userRegistrationService;
 
+    @Autowired
+    private AuthService authService;
+
+    private User getCurrentUser(HttpServletRequest request) {
+        String userEmail = (String) request.getAttribute("userEmail");
+        if (userEmail == null) {
+            throw new RuntimeException("User not authenticated");
+        }
+        return authService.findByEmail(userEmail);
+    }
+
+    // Register endpoints - PUBLIC (no changes needed)
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody UserRegistrationRequest request) {
         try {
@@ -99,6 +113,7 @@ public class UserRegistrationController {
         }
     }
 
+    // Login endpoint - PUBLIC (no changes needed)
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody LoginRequest request) {
         try {
@@ -136,27 +151,64 @@ public class UserRegistrationController {
         }
     }
 
-    @PutMapping("/{userId}/password")
-    public ResponseEntity<?> updatePassword(@PathVariable Integer userId, @RequestBody PasswordUpdateRequest request) {
+    // Update password - SECURED with ownership validation
+    @PutMapping("/password")
+    public ResponseEntity<?> updatePassword(@RequestBody PasswordUpdateRequest request, HttpServletRequest servletRequest) {
         try {
+            User currentUser = getCurrentUser(servletRequest);
+            
             if (request.getNewPassword() == null || request.getNewPassword().trim().isEmpty()) {
                 return ResponseEntity.badRequest().body(createErrorResponse("New password is required"));
             }
 
-            userRegistrationService.updatePassword(userId, request.getNewPassword());
+            userRegistrationService.updatePassword(currentUser.getId(), request.getNewPassword());
 
             return ResponseEntity.ok(createSuccessResponse("Password updated successfully"));
 
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
+            return ResponseEntity.status(401).body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(createErrorResponse("Password update failed: " + e.getMessage()));
         }
     }
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<?> getUserProfile(@PathVariable Integer userId) {
+    // Get current user's profile - SECURED
+    @GetMapping("/profile")
+    public ResponseEntity<?> getCurrentUserProfile(HttpServletRequest request) {
         try {
+            User currentUser = getCurrentUser(request);
+            
+            Optional<User> userOptional = userRegistrationService.getUserById(currentUser.getId());
+            
+            if (userOptional.isPresent()) {
+                User user = userOptional.get();
+                user.setPassword(null); // Don't expose password
+                
+                Map<String, Object> response = createSuccessResponse("User profile retrieved");
+                response.put("user", user);
+                return ResponseEntity.ok(response);
+            } else {
+                return ResponseEntity.status(404).body(createErrorResponse("User not found"));
+            }
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(401).body(createErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(createErrorResponse("Failed to fetch user profile: " + e.getMessage()));
+        }
+    }
+
+    // Get user by ID - SECURED with ownership validation (admin or same user)
+    @GetMapping("/{userId}")
+    public ResponseEntity<?> getUserProfile(@PathVariable Integer userId, HttpServletRequest request) {
+        try {
+            User currentUser = getCurrentUser(request);
+            
+            // Users can only access their own data (unless admin)
+            if (!currentUser.getId().equals(userId)) {
+                return ResponseEntity.status(403).body(createErrorResponse("Access denied"));
+            }
+            
             Optional<User> userOptional = userRegistrationService.getUserById(userId);
             
             if (userOptional.isPresent()) {
@@ -170,6 +222,8 @@ public class UserRegistrationController {
                 return ResponseEntity.status(404).body(createErrorResponse("User not found"));
             }
 
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(401).body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(createErrorResponse("Failed to fetch user profile: " + e.getMessage()));
         }
@@ -190,7 +244,7 @@ public class UserRegistrationController {
         return response;
     }
 
-    // Request DTO classes
+    // Request DTO classes (no changes needed)
     public static class UserRegistrationRequest {
         private String fullName;
         private String email;

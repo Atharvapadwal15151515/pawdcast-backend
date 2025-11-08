@@ -502,7 +502,6 @@
   </div>
 
 <script>
-    const API_BASE = 'https://pawdcast-backend-5.onrender.com';
     let allTips = [];
 
     // Show loading state
@@ -517,7 +516,7 @@
     async function fetchTips() {
       showLoading();
       try {
-        const response = await fetch(`${API_BASE}/api/training-tips`);
+        const response = await fetch("/api/training-tips");
         if (!response.ok) throw new Error("Failed to load tips");
         allTips = await response.json();
 

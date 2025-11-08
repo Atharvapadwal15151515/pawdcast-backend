@@ -703,10 +703,34 @@
         </div>
     </div>
 
-    <script>
+  <script>
         // API Base URL
         const API_BASE_URL = 'https://pawdcast-backend-5.onrender.com';
         
+        // JWT Authentication Helper Function
+        async function authFetch(url, options = {}) {
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                window.location.href = "/login.html";
+                return;
+            }
+            
+            const headers = {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json",
+                ...options.headers
+            };
+            
+            const response = await fetch(url, { ...options, headers });
+            if (response.status === 401) {
+                localStorage.removeItem("jwtToken");
+                localStorage.removeItem("userEmail");
+                window.location.href = "/login.html";
+                return;
+            }
+            return response;
+        }
+
         // Global state
         let currentUser = null;
         let currentPetId = null;
@@ -790,19 +814,26 @@
         
         // Authentication Functions
         async function checkAuthentication() {
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                app.classList.add('hidden');
+                loginModal.classList.remove('hidden');
+                return;
+            }
+
             try {
-                const response = await fetch(`${API_BASE_URL}/auth/check`);
-                const data = await response.json();
+                const response = await authFetch(`${API_BASE_URL}/auth/me`);
+                if (!response) return; // authFetch handled redirect
                 
-                if (data.authenticated) {
-                    currentUser = data;
+                if (response.ok) {
+                    const userData = await response.json();
+                    currentUser = userData;
                     await loadUserProfile();
                     app.classList.remove('hidden');
                     loginModal.classList.add('hidden');
                     await loadUserPets();
                 } else {
-                    app.classList.add('hidden');
-                    loginModal.classList.remove('hidden');
+                    throw new Error('Not authenticated');
                 }
             } catch (error) {
                 console.error('Auth check failed:', error);
@@ -814,7 +845,9 @@
         // Load user profile with photo
         async function loadUserProfile() {
             try {
-                const response = await fetch(`${API_BASE_URL}/auth/me`);
+                const response = await authFetch(`${API_BASE_URL}/auth/me`);
+                if (!response) return; // authFetch handled redirect
+                
                 if (response.ok) {
                     const userData = await response.json();
                     currentUser = { ...currentUser, ...userData };
@@ -849,13 +882,25 @@
                 });
                 
                 if (response.ok) {
-                    const userData = await response.json();
-                    currentUser = userData;
-                    await loadUserProfile();
-                    app.classList.remove('hidden');
-                    loginModal.classList.add('hidden');
-                    await loadUserPets();
-                    showNotification('Login successful!', 'success');
+                    const data = await response.json();
+                    if (data.token) {
+                        // Store JWT token
+                        localStorage.setItem("jwtToken", data.token);
+                        localStorage.setItem("userEmail", data.email || data.user?.email);
+                        
+                        // Get user data
+                        const userResponse = await authFetch(`${API_BASE_URL}/auth/me`);
+                        if (userResponse && userResponse.ok) {
+                            currentUser = await userResponse.json();
+                            await loadUserProfile();
+                            app.classList.remove('hidden');
+                            loginModal.classList.add('hidden');
+                            await loadUserPets();
+                            showNotification('Login successful!', 'success');
+                        }
+                    } else {
+                        throw new Error('No token received');
+                    }
                 } else {
                     throw new Error('Login failed');
                 }
@@ -883,10 +928,24 @@
                 });
                 
                 if (response.ok) {
-                    signupModal.classList.add('hidden');
-                    loginModal.classList.remove('hidden');
-                    showNotification('Account created successfully! Please login.', 'success');
-                    signupForm.reset();
+                    const data = await response.json();
+                    if (data.token) {
+                        // Store JWT token
+                        localStorage.setItem("jwtToken", data.token);
+                        localStorage.setItem("userEmail", data.email || data.user?.email);
+                        
+                        signupModal.classList.add('hidden');
+                        app.classList.remove('hidden');
+                        await loadUserProfile();
+                        await loadUserPets();
+                        showNotification('Account created successfully!', 'success');
+                        signupForm.reset();
+                    } else {
+                        signupModal.classList.add('hidden');
+                        loginModal.classList.remove('hidden');
+                        showNotification('Account created successfully! Please login.', 'success');
+                        signupForm.reset();
+                    }
                 } else {
                     throw new Error('Signup failed');
                 }
@@ -948,13 +1007,12 @@
             };
             
             try {
-                const response = await fetch(`${API_BASE_URL}/api/habits`, {
+                const response = await authFetch(`${API_BASE_URL}/api/habits`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
                     body: JSON.stringify(habitData)
                 });
+                
+                if (!response) return; // authFetch handled redirect
                 
                 if (response.ok) {
                     const newHabit = await response.json();
@@ -974,7 +1032,9 @@
         // Load user's pets from PetProfileController
         async function loadUserPets() {
             try {
-                const response = await fetch(`${API_BASE_URL}/pet-profiles/my-pets`);
+                const response = await authFetch(`${API_BASE_URL}/pet-profiles/my-pets`);
+                if (!response) return; // authFetch handled redirect
+                
                 if (response.ok) {
                     currentPets = await response.json();
                     renderPets();
@@ -1074,7 +1134,9 @@
             if (!currentPetId) return;
             
             try {
-                const response = await fetch(`${API_BASE_URL}/api/habits/pet/${currentPetId}`);
+                const response = await authFetch(`${API_BASE_URL}/api/habits/pet/${currentPetId}`);
+                if (!response) return; // authFetch handled redirect
+                
                 if (response.ok) {
                     currentHabits = await response.json();
                     renderHabits();
@@ -1172,12 +1234,11 @@
         // Mark habit as completed
         async function markHabitComplete(habitId) {
             try {
-                const response = await fetch(`${API_BASE_URL}/api/habits/${habitId}/complete`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
+                const response = await authFetch(`${API_BASE_URL}/api/habits/${habitId}/complete`, {
+                    method: 'POST'
                 });
+                
+                if (!response) return; // authFetch handled redirect
                 
                 if (response.ok) {
                     await loadHabits();
@@ -1194,7 +1255,9 @@
         // Load analytics data
         async function loadAnalytics() {
             try {
-                const response = await fetch(`${API_BASE_URL}/api/habits/user/analytics`);
+                const response = await authFetch(`${API_BASE_URL}/api/habits/user/analytics`);
+                if (!response) return; // authFetch handled redirect
+                
                 if (response.ok) {
                     const analytics = await response.json();
                     updateAnalyticsUI(analytics);
@@ -1365,6 +1428,13 @@
                     notificationContainer.removeChild(notification);
                 }, 300);
             }, 3000);
+        }
+
+        // Add logout functionality
+        function logout() {
+            localStorage.removeItem("jwtToken");
+            localStorage.removeItem("userEmail");
+            window.location.href = "/login.html";
         }
     </script>
 </body>

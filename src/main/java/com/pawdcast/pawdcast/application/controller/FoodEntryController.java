@@ -5,13 +5,14 @@ import com.pawdcast.pawdcast.application.model.PetProfile;
 import com.pawdcast.pawdcast.application.model.User;
 import com.pawdcast.pawdcast.application.service.FoodEntryService;
 import com.pawdcast.pawdcast.application.service.PetProfileService;
-import jakarta.servlet.http.HttpSession;
+import com.pawdcast.pawdcast.application.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +29,17 @@ public class FoodEntryController {
     @Autowired
     private PetProfileService petProfileService;
     
+    @Autowired
+    private AuthService authService;
+    
+    private User getCurrentUser(HttpServletRequest request) {
+        String userEmail = (String) request.getAttribute("userEmail");
+        if (userEmail == null) {
+            throw new RuntimeException("User not logged in. Please login first.");
+        }
+        return authService.findByEmail(userEmail);
+    }
+    
     // Create a new food entry
     @PostMapping("/create")
     public ResponseEntity<?> createFoodEntry(
@@ -37,14 +49,10 @@ public class FoodEntryController {
             @RequestParam String unit,
             @RequestParam(required = false) String notes,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime feedingTime,
-            HttpSession session) {
+            HttpServletRequest request) {
         
         try {
-            User user = (User) session.getAttribute("user");
-            if (user == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body("User not logged in. Please login first.");
-            }
+            User user = getCurrentUser(request);
             
             // Verify that the pet name belongs to the logged-in user
             if (!petProfileService.existsByOwnerIdAndName(user.getId(), petName)) {
@@ -70,6 +78,8 @@ public class FoodEntryController {
             
             return ResponseEntity.ok(response);
             
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -77,13 +87,9 @@ public class FoodEntryController {
     
     // Get all food entries for logged-in user's pets
     @GetMapping("/my-entries")
-    public ResponseEntity<?> getMyFoodEntries(HttpSession session) {
+    public ResponseEntity<?> getMyFoodEntries(HttpServletRequest request) {
         try {
-            User user = (User) session.getAttribute("user");
-            if (user == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body("User not logged in. Please login first.");
-            }
+            User user = getCurrentUser(request);
             
             List<FoodEntry> foodEntries = foodEntryService.getFoodEntriesByUserPets(user.getId());
             
@@ -103,6 +109,8 @@ public class FoodEntryController {
             
             return ResponseEntity.ok(response);
             
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error retrieving food entries: " + e.getMessage());
         }
@@ -110,13 +118,9 @@ public class FoodEntryController {
     
     // Get food entries for a specific pet
     @GetMapping("/pet/{petName}")
-    public ResponseEntity<?> getFoodEntriesByPet(@PathVariable String petName, HttpSession session) {
+    public ResponseEntity<?> getFoodEntriesByPet(@PathVariable String petName, HttpServletRequest request) {
         try {
-            User user = (User) session.getAttribute("user");
-            if (user == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body("User not logged in. Please login first.");
-            }
+            User user = getCurrentUser(request);
             
             List<FoodEntry> foodEntries = foodEntryService.getFoodEntriesByPetName(petName, user.getId());
             
@@ -135,6 +139,8 @@ public class FoodEntryController {
             
             return ResponseEntity.ok(response);
             
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -142,13 +148,9 @@ public class FoodEntryController {
     
     // Get user's pets for dropdown selection
     @GetMapping("/my-pets")
-    public ResponseEntity<?> getMyPets(HttpSession session) {
+    public ResponseEntity<?> getMyPets(HttpServletRequest request) {
         try {
-            User user = (User) session.getAttribute("user");
-            if (user == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body("User not logged in. Please login first.");
-            }
+            User user = getCurrentUser(request);
             
             List<PetProfile> petProfiles = petProfileService.getPetProfilesByOwnerId(user.getId());
             
@@ -162,6 +164,8 @@ public class FoodEntryController {
             
             return ResponseEntity.ok(response);
             
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error retrieving pets: " + e.getMessage());
         }
@@ -177,14 +181,10 @@ public class FoodEntryController {
             @RequestParam String unit,
             @RequestParam(required = false) String notes,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime feedingTime,
-            HttpSession session) {
+            HttpServletRequest request) {
         
         try {
-            User user = (User) session.getAttribute("user");
-            if (user == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body("User not logged in. Please login first.");
-            }
+            User user = getCurrentUser(request);
             
             // Verify that the new pet name belongs to the user
             if (!petProfileService.existsByOwnerIdAndName(user.getId(), petName)) {
@@ -216,6 +216,8 @@ public class FoodEntryController {
             
             return ResponseEntity.ok(response);
             
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -223,17 +225,15 @@ public class FoodEntryController {
     
     // Delete food entry
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteFoodEntry(@PathVariable Long id, HttpSession session) {
+    public ResponseEntity<?> deleteFoodEntry(@PathVariable Long id, HttpServletRequest request) {
         try {
-            User user = (User) session.getAttribute("user");
-            if (user == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body("User not logged in. Please login first.");
-            }
+            User user = getCurrentUser(request);
             
             foodEntryService.deleteFoodEntry(id, user.getId());
             return ResponseEntity.ok("Food entry deleted successfully");
             
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -245,14 +245,10 @@ public class FoodEntryController {
             @PathVariable String petName,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
-            HttpSession session) {
+            HttpServletRequest request) {
         
         try {
-            User user = (User) session.getAttribute("user");
-            if (user == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body("User not logged in. Please login first.");
-            }
+            User user = getCurrentUser(request);
             
             List<FoodEntry> foodEntries = foodEntryService.getFoodEntriesByDateRange(
                     petName, user.getId(), startDate, endDate);
@@ -271,6 +267,8 @@ public class FoodEntryController {
             
             return ResponseEntity.ok(response);
             
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

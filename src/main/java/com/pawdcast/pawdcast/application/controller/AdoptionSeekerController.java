@@ -14,8 +14,10 @@ import org.springframework.web.multipart.MultipartFile;
 import com.pawdcast.pawdcast.application.model.AdoptionSeeker;
 import com.pawdcast.pawdcast.application.model.User;
 import com.pawdcast.pawdcast.application.service.AdoptionSeekerService;
+import com.pawdcast.pawdcast.application.service.AuthService;
 import com.pawdcast.pawdcast.application.service.CertificateService;
-import jakarta.servlet.http.HttpSession;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/seekers")
@@ -28,9 +30,12 @@ public class AdoptionSeekerController {
     @Autowired
     private CertificateService certificateService;
 
-    // Create new seeker with file uploads and return certificate
+    @Autowired
+    private AuthService authService;
+
+    // Create new seeker with file uploads and return certificate - SECURED
     @PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<byte[]> addSeeker(
+    public ResponseEntity<?> addSeeker(
             @RequestParam String address,
             @RequestParam(required = false) MultipartFile idProof,
             @RequestParam(required = false) MultipartFile incomeProof,
@@ -39,14 +44,17 @@ public class AdoptionSeekerController {
             @RequestParam(required = false) MultipartFile vaccinationCertificate,
             @RequestParam(required = false) MultipartFile adoptionAgreement,
             @RequestParam(required = false) MultipartFile photo,
-            HttpSession session
+            HttpServletRequest request
     ) throws IOException {
         
-        // Get user from session
-        User user = (User) session.getAttribute("user");
-        if (user == null) {
-            throw new RuntimeException("User not logged in. Please login first.");
+        // Get user from JWT token
+        String userEmail = (String) request.getAttribute("userEmail");
+        if (userEmail == null) {
+            return ResponseEntity.status(401).body("User not logged in. Please login first.");
         }
+
+        // Fetch user details from database
+        User user = authService.findByEmail(userEmail);
 
         AdoptionSeeker seeker = new AdoptionSeeker();
         seeker.setAddress(address);
@@ -104,19 +112,38 @@ public class AdoptionSeekerController {
                 .body(certificatePdf);
     }
 
-    // Other methods remain the same...
+    // Get all seekers - SECURED
     @GetMapping("/all")
-    public List<AdoptionSeeker> getAllSeekers() {
-        return adoptionSeekerService.getAllSeekers();
+    public ResponseEntity<?> getAllSeekers(HttpServletRequest request) {
+        // Check authentication
+        String userEmail = (String) request.getAttribute("userEmail");
+        if (userEmail == null) {
+            return ResponseEntity.status(401).body("Authentication required");
+        }
+
+        return ResponseEntity.ok(adoptionSeekerService.getAllSeekers());
     }
 
+    // Get seeker by ID - SECURED
     @GetMapping("/{id}")
-    public Optional<AdoptionSeeker> getSeekerById(@PathVariable int id) {
-        return adoptionSeekerService.getSeekerById(id);
+    public ResponseEntity<?> getSeekerById(@PathVariable int id, HttpServletRequest request) {
+        // Check authentication
+        String userEmail = (String) request.getAttribute("userEmail");
+        if (userEmail == null) {
+            return ResponseEntity.status(401).body("Authentication required");
+        }
+
+        Optional<AdoptionSeeker> seeker = adoptionSeekerService.getSeekerById(id);
+        if (seeker.isPresent()) {
+            return ResponseEntity.ok(seeker.get());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
+    // Update seeker - SECURED
     @PutMapping(value = "/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public AdoptionSeeker updateSeeker(
+    public ResponseEntity<?> updateSeeker(
             @RequestParam Integer seekerId,
             @RequestParam(required = false) String address,
             @RequestParam(required = false) MultipartFile idProof,
@@ -126,21 +153,25 @@ public class AdoptionSeekerController {
             @RequestParam(required = false) MultipartFile vaccinationCertificate,
             @RequestParam(required = false) MultipartFile adoptionAgreement,
             @RequestParam(required = false) MultipartFile photo,
-            HttpSession session
+            HttpServletRequest request
     ) throws IOException {
         
-        User user = (User) session.getAttribute("user");
-        if (user == null) {
-            throw new RuntimeException("User not logged in.");
+        // Get user from JWT token
+        String userEmail = (String) request.getAttribute("userEmail");
+        if (userEmail == null) {
+            return ResponseEntity.status(401).body("User not logged in.");
         }
 
+        // Fetch user details from database
+        User user = authService.findByEmail(userEmail);
         Optional<AdoptionSeeker> existingSeeker = adoptionSeekerService.getSeekerById(seekerId);
 
         if (existingSeeker.isPresent()) {
             AdoptionSeeker seeker = existingSeeker.get();
             
+            // Check permission - user can only update their own seeker record
             if (seeker.getSeekerId() != user.getId()) {
-                throw new RuntimeException("You don't have permission to update this seeker record.");
+                return ResponseEntity.status(403).body("You don't have permission to update this seeker record.");
             }
 
             if (address != null) seeker.setAddress(address);
@@ -152,34 +183,65 @@ public class AdoptionSeekerController {
             if (adoptionAgreement != null && !adoptionAgreement.isEmpty()) seeker.setAdoptionAgreement(adoptionAgreement.getBytes());
             if (photo != null && !photo.isEmpty()) seeker.setPhoto(photo.getBytes());
 
-            return adoptionSeekerService.updateSeeker(seeker);
+            return ResponseEntity.ok(adoptionSeekerService.updateSeeker(seeker));
         }
-        return null;
+        return ResponseEntity.notFound().build();
     }
 
+    // Delete seeker - SECURED
     @DeleteMapping("/delete/{id}")
-    public void deleteSeeker(@PathVariable int id, HttpSession session) {
-        User user = (User) session.getAttribute("user");
-        if (user == null) {
-            throw new RuntimeException("User not logged in.");
+    public ResponseEntity<?> deleteSeeker(@PathVariable int id, HttpServletRequest request) {
+        // Get user from JWT token
+        String userEmail = (String) request.getAttribute("userEmail");
+        if (userEmail == null) {
+            return ResponseEntity.status(401).body("User not logged in.");
         }
         
+        // Fetch user details from database
+        User user = authService.findByEmail(userEmail);
         Optional<AdoptionSeeker> seeker = adoptionSeekerService.getSeekerById(id);
-        if (seeker.isPresent() && seeker.get().getSeekerId() != user.getId()) {
-            throw new RuntimeException("You don't have permission to delete this seeker record.");
-        }
         
-        adoptionSeekerService.deleteSeeker(id);
+        if (seeker.isPresent()) {
+            // Check permission - user can only delete their own seeker record
+            if (seeker.get().getSeekerId() != user.getId()) {
+                return ResponseEntity.status(403).body("You don't have permission to delete this seeker record.");
+            }
+            
+            adoptionSeekerService.deleteSeeker(id);
+            return ResponseEntity.ok().body("Seeker record deleted successfully");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
+    // Check if seeker exists - SECURED
     @GetMapping("/exists/{id}")
-    public boolean seekerExists(@PathVariable int id) {
-        return adoptionSeekerService.seekerExists(id);
+    public ResponseEntity<?> seekerExists(@PathVariable int id, HttpServletRequest request) {
+        // Check authentication
+        String userEmail = (String) request.getAttribute("userEmail");
+        if (userEmail == null) {
+            return ResponseEntity.status(401).body("Authentication required");
+        }
+
+        return ResponseEntity.ok(adoptionSeekerService.seekerExists(id));
     }
 
+    // Get seeker photo - SECURED
     @GetMapping("/{id}/photo")
-    public @ResponseBody byte[] getSeekerPhoto(@PathVariable int id) {
+    public ResponseEntity<?> getSeekerPhoto(@PathVariable int id, HttpServletRequest request) {
+        // Check authentication
+        String userEmail = (String) request.getAttribute("userEmail");
+        if (userEmail == null) {
+            return ResponseEntity.status(401).body("Authentication required");
+        }
+
         Optional<AdoptionSeeker> seeker = adoptionSeekerService.getSeekerById(id);
-        return seeker.map(AdoptionSeeker::getPhoto).orElse(null);
+        if (seeker.isPresent() && seeker.get().getPhoto() != null) {
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_JPEG)
+                    .body(seeker.get().getPhoto());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

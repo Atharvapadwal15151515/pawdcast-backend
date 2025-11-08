@@ -1,16 +1,26 @@
 package com.pawdcast.pawdcast.application.controller;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.pawdcast.pawdcast.application.model.Adoption;
 import com.pawdcast.pawdcast.application.service.AdoptionService;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/adoptions")
@@ -20,15 +30,22 @@ public class AdoptionController {
     @Autowired
     private AdoptionService adoptionService;
 
-    // Create adoption request with multipart/form-data support
+    // Create adoption request with multipart/form-data support - SECURED
     @PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Adoption addAdoption(
+    public ResponseEntity<?> addAdoption(
             @RequestParam Integer seekerId,
             @RequestParam Integer giverId,
             @RequestParam(required = false) String adoptionStatus,
             @RequestParam(required = false) MultipartFile adoptionAgreement,
-            @RequestParam(required = false) String notes
+            @RequestParam(required = false) String notes,
+            HttpServletRequest request
     ) throws IOException {
+        // Check authentication
+        String userEmail = (String) request.getAttribute("userEmail");
+        if (userEmail == null) {
+            return ResponseEntity.status(401).body("Authentication required");
+        }
+
         Adoption adoption = new Adoption();
         adoption.setSeekerId(seekerId);
         adoption.setGiverId(giverId);
@@ -39,43 +56,79 @@ public class AdoptionController {
             adoption.setAdoptionAgreement(adoptionAgreement.getBytes());
         }
 
-        return adoptionService.saveAdoption(adoption);
+        return ResponseEntity.ok(adoptionService.saveAdoption(adoption));
     }
 
-    // Get all adoptions
+    // Get all adoptions - SECURED
     @GetMapping("/all")
-    public List<Adoption> getAllAdoptions() {
-        return adoptionService.getAllAdoptions();
+    public ResponseEntity<?> getAllAdoptions(HttpServletRequest request) {
+        // Check authentication
+        String userEmail = (String) request.getAttribute("userEmail");
+        if (userEmail == null) {
+            return ResponseEntity.status(401).body("Authentication required");
+        }
+
+        return ResponseEntity.ok(adoptionService.getAllAdoptions());
     }
 
-    // Get adoption by ID
+    // Get adoption by ID - SECURED
     @GetMapping("/{id}")
-    public Optional<Adoption> getAdoptionById(@PathVariable int id) {
-        return adoptionService.getAdoptionById(id);
+    public ResponseEntity<?> getAdoptionById(@PathVariable int id, HttpServletRequest request) {
+        // Check authentication
+        String userEmail = (String) request.getAttribute("userEmail");
+        if (userEmail == null) {
+            return ResponseEntity.status(401).body("Authentication required");
+        }
+
+        Optional<Adoption> adoption = adoptionService.getAdoptionById(id);
+        if (adoption.isPresent()) {
+            return ResponseEntity.ok(adoption.get());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
-    // Get adoptions by seeker
+    // Get adoptions by seeker - SECURED
     @GetMapping("/seeker/{seekerId}")
-    public List<Adoption> getAdoptionsBySeeker(@PathVariable int seekerId) {
-        return adoptionService.getAdoptionsBySeekerId(seekerId);
+    public ResponseEntity<?> getAdoptionsBySeeker(@PathVariable int seekerId, HttpServletRequest request) {
+        // Check authentication
+        String userEmail = (String) request.getAttribute("userEmail");
+        if (userEmail == null) {
+            return ResponseEntity.status(401).body("Authentication required");
+        }
+
+        return ResponseEntity.ok(adoptionService.getAdoptionsBySeekerId(seekerId));
     }
 
-    // Get adoptions by giver
+    // Get adoptions by giver - SECURED
     @GetMapping("/giver/{giverId}")
-    public List<Adoption> getAdoptionsByGiver(@PathVariable int giverId) {
-        return adoptionService.getAdoptionsByGiverId(giverId);
+    public ResponseEntity<?> getAdoptionsByGiver(@PathVariable int giverId, HttpServletRequest request) {
+        // Check authentication
+        String userEmail = (String) request.getAttribute("userEmail");
+        if (userEmail == null) {
+            return ResponseEntity.status(401).body("Authentication required");
+        }
+
+        return ResponseEntity.ok(adoptionService.getAdoptionsByGiverId(giverId));
     }
 
-    // Update adoption
+    // Update adoption - SECURED
     @PutMapping(value = "/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Adoption updateAdoption(
+    public ResponseEntity<?> updateAdoption(
             @RequestParam Integer adoptionId,
             @RequestParam(required = false) Integer seekerId,
             @RequestParam(required = false) Integer giverId,
             @RequestParam(required = false) String adoptionStatus,
             @RequestParam(required = false) MultipartFile adoptionAgreement,
-            @RequestParam(required = false) String notes
+            @RequestParam(required = false) String notes,
+            HttpServletRequest request
     ) throws IOException {
+        // Check authentication
+        String userEmail = (String) request.getAttribute("userEmail");
+        if (userEmail == null) {
+            return ResponseEntity.status(401).body("Authentication required");
+        }
+
         Optional<Adoption> existingAdoption = adoptionService.getAdoptionById(adoptionId);
         if (existingAdoption.isPresent()) {
             Adoption adoption = existingAdoption.get();
@@ -88,21 +141,40 @@ public class AdoptionController {
                 adoption.setAdoptionAgreement(adoptionAgreement.getBytes());
             }
 
-            return adoptionService.updateAdoption(adoption);
+            return ResponseEntity.ok(adoptionService.updateAdoption(adoption));
         }
-        return null;
+        return ResponseEntity.notFound().build();
     }
 
-    // Delete adoption
+    // Delete adoption - SECURED
     @DeleteMapping("/delete/{id}")
-    public void deleteAdoption(@PathVariable int id) {
+    public ResponseEntity<?> deleteAdoption(@PathVariable int id, HttpServletRequest request) {
+        // Check authentication
+        String userEmail = (String) request.getAttribute("userEmail");
+        if (userEmail == null) {
+            return ResponseEntity.status(401).body("Authentication required");
+        }
+
         adoptionService.deleteAdoption(id);
+        return ResponseEntity.ok().body("Adoption deleted successfully");
     }
 
-    // Serve adoption agreement document
+    // Serve adoption agreement document - SECURED
     @GetMapping("/{id}/adoption-agreement")
-    public @ResponseBody byte[] getAdoptionAgreement(@PathVariable int id) {
+    public ResponseEntity<?> getAdoptionAgreement(@PathVariable int id, HttpServletRequest request) {
+        // Check authentication
+        String userEmail = (String) request.getAttribute("userEmail");
+        if (userEmail == null) {
+            return ResponseEntity.status(401).body("Authentication required");
+        }
+
         Optional<Adoption> adoption = adoptionService.getAdoptionById(id);
-        return adoption.map(Adoption::getAdoptionAgreement).orElse(null);
+        if (adoption.isPresent() && adoption.get().getAdoptionAgreement() != null) {
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .body(adoption.get().getAdoptionAgreement());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

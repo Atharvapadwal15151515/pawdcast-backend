@@ -58,4 +58,20 @@ public class PetHealthService {
     public List<PetHealth> getHealthRecordsByPetId(Integer petId) {
         return petHealthRepository.findByPetPetIdOrderByEntryDateDesc(petId);
     }
+
+    // ✅ New method to check if pet belongs to user
+    public boolean isPetOwnedByUser(Integer petId, Integer userId) {
+        PetProfile pet = petProfileRepository.findById(petId)
+                .orElseThrow(() -> new RuntimeException("Pet not found with ID: " + petId));
+        return pet.getOwnerId().equals(userId);
+    }
+
+    // ✅ New method to get health records by pet ID with ownership validation
+    public List<PetHealth> getHealthRecordsByPetIdAndOwnerId(Integer petId, Integer ownerId) {
+        // Verify ownership first
+        if (!isPetOwnedByUser(petId, ownerId)) {
+            throw new RuntimeException("Access denied - pet does not belong to user");
+        }
+        return petHealthRepository.findByPetPetIdOrderByEntryDateDesc(petId);
+    }
 }

@@ -889,6 +889,30 @@
         let allProducts = [];
         let filteredProducts = [];
 
+        // JWT Authentication Helper Function
+        async function authFetch(url, options = {}) {
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                window.location.href = "/login.html";
+                return;
+            }
+            
+            const headers = {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json",
+                ...options.headers
+            };
+            
+            const response = await fetch(url, { ...options, headers });
+            if (response.status === 401) {
+                localStorage.removeItem("jwtToken");
+                localStorage.removeItem("userEmail");
+                window.location.href = "/login.html";
+                return;
+            }
+            return response;
+        }
+
         // Load products on page load
         document.addEventListener('DOMContentLoaded', function() {
             checkAuth();
@@ -908,16 +932,24 @@
         }
 
         function checkAuth() {
-            fetch(`${API_BASE_URL}/auth/check`)
-                .then(response => response.json())
-                .then(data => {
-                    if (!data.authenticated) {
-                        window.location.href = 'home.html';
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                window.location.href = "/login.html";
+                return;
+            }
+            
+            // Optional: Verify token with backend
+            authFetch(`${API_BASE_URL}/auth/verify`)
+                .then(response => {
+                    if (!response || !response.ok) {
+                        throw new Error('Token verification failed');
                     }
                 })
                 .catch(error => {
                     console.error('Auth check failed:', error);
-                    window.location.href = 'home.html';
+                    localStorage.removeItem("jwtToken");
+                    localStorage.removeItem("userEmail");
+                    window.location.href = "/login.html";
                 });
         }
 
@@ -925,6 +957,7 @@
             const container = document.getElementById('productsContainer');
             container.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i> Loading products...</div>';
 
+            // Products endpoint is public - no authentication needed
             fetch(`${API_BASE_URL}/api/products`)
                 .then(response => {
                     if (!response.ok) {
@@ -1080,6 +1113,7 @@
             
             document.getElementById('productModal').style.display = 'flex';
 
+            // Product details endpoint is public - no authentication needed
             fetch(`${API_BASE_URL}/api/products/${productId}`)
                 .then(response => {
                     if (!response.ok) {
@@ -1163,17 +1197,16 @@
         }
 
         function addToCart(productId) {
-            fetch(`${API_BASE_URL}/api/cart/add`, {
+            authFetch(`${API_BASE_URL}/api/cart/add`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
                 body: JSON.stringify({
                     productId: productId,
                     quantity: 1
                 })
             })
             .then(response => {
+                if (!response) return; // authFetch handled redirect
+                
                 if (!response.ok) {
                     throw new Error('Failed to add to cart');
                 }
@@ -1190,8 +1223,11 @@
         }
 
         function updateCartCount() {
-            fetch(`${API_BASE_URL}/api/cart/count`)
-                .then(response => response.json())
+            authFetch(`${API_BASE_URL}/api/cart/count`)
+                .then(response => {
+                    if (!response) return; // authFetch handled redirect
+                    return response.json();
+                })
                 .then(data => {
                     document.getElementById('cartCount').textContent = data.count || 0;
                     // Add animation to cart count
@@ -1208,10 +1244,10 @@
 
         document.getElementById('logoutBtn').addEventListener('click', function(e) {
             e.preventDefault();
-            fetch(`${API_BASE_URL}/auth/logout`, { method: 'POST' })
-                .then(() => {
-                    window.location.href = 'home.html';
-                });
+            // JWT logout - just remove token from localStorage
+            localStorage.removeItem("jwtToken");
+            localStorage.removeItem("userEmail");
+            window.location.href = 'login.html';
         });
 
         // Add enter key functionality for search
@@ -1246,5 +1282,6 @@
             }
         });
     </script>
+
 </body>
 </html>

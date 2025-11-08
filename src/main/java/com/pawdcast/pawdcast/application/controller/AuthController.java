@@ -2,7 +2,9 @@ package com.pawdcast.pawdcast.application.controller;
 
 import com.pawdcast.pawdcast.application.model.User;
 import com.pawdcast.pawdcast.application.service.AuthService;
-import jakarta.servlet.http.HttpSession;
+import com.pawdcast.pawdcast.application.util.JwtUtil;
+
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +24,10 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
-    // Signup
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    // Signup - No changes needed as it doesn't use session
     @PostMapping("/signup")
     public ResponseEntity<?> signup(
             @RequestParam String fullName,
@@ -56,25 +61,28 @@ public class AuthController {
         }
     }
 
-    // Login - Enhanced for ecommerce
+    // Login - Updated for JWT
     @PostMapping("/login")
     public ResponseEntity<?> login(
             @RequestParam String email,
-            @RequestParam String password,
-            HttpSession session
+            @RequestParam String password
     ) {
         try {
             User user = authService.login(email, password);
-            session.setAttribute("user", user);
+            
+            // Generate JWT token
+            String token = jwtUtil.generateToken(user.getEmail());
 
-            // Enhanced response with all user details needed for ecommerce
+            // Enhanced response with JWT token and all user details needed for ecommerce
             Map<String, Object> response = new HashMap<>();
+            response.put("token", token); // JWT token
             response.put("userId", user.getId());
             response.put("fullName", user.getFullName());
             response.put("email", user.getEmail());
             response.put("phone", user.getPhone());
             response.put("address", user.getAddress()); // Crucial for shipping
             response.put("dateOfBirth", user.getDateOfBirth());
+            response.put("message", "Login successful");
             
             // Add profile photo if exists
             if (user.getProfilePhoto() != null) {
@@ -90,19 +98,29 @@ public class AuthController {
         }
     }
 
-    // Logout
+    // Logout - Updated for JWT (client-side token removal)
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpSession session) {
-        session.invalidate();
-        return ResponseEntity.ok("Logged out successfully!");
+    public ResponseEntity<?> logout() {
+        // With JWT, logout is handled client-side by removing the token
+        // This endpoint can be used for server-side cleanup if needed
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Logout successful - please remove token client-side");
+        return ResponseEntity.ok(response);
     }
 
-    // Get current logged-in user - Enhanced for ecommerce
+    // Get current logged-in user - Updated for JWT
     @GetMapping("/me")
-    public ResponseEntity<?> getCurrentUser(HttpSession session) {
-        User user = (User) session.getAttribute("user");
-        if (user == null) {
+    public ResponseEntity<?> getCurrentUser(HttpServletRequest request) {
+        // Get email from JWT filter (replaces session.getAttribute("user"))
+        String email = (String) request.getAttribute("userEmail");
+        if (email == null) {
             return ResponseEntity.status(401).body("No user logged in");
+        }
+        
+        // Fetch user from database using email
+        User user = authService.findByEmail(email);
+        if (user == null) {
+            return ResponseEntity.status(401).body("User not found");
         }
         
         // Return user details without sensitive data
@@ -125,35 +143,45 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    // Check authentication status - Useful for frontend
+    // Check authentication status - Updated for JWT
     @GetMapping("/check")
-    public ResponseEntity<?> checkAuth(HttpSession session) {
-        User user = (User) session.getAttribute("user");
+    public ResponseEntity<?> checkAuth(HttpServletRequest request) {
+        String email = (String) request.getAttribute("userEmail");
         Map<String, Object> response = new HashMap<>();
-        response.put("authenticated", user != null);
+        response.put("authenticated", email != null);
         
-        if (user != null) {
-            response.put("userId", user.getId());
-            response.put("fullName", user.getFullName());
-            response.put("email", user.getEmail());
+        if (email != null) {
+            User user = authService.findByEmail(email);
+            if (user != null) {
+                response.put("userId", user.getId());
+                response.put("fullName", user.getFullName());
+                response.put("email", user.getEmail());
+            }
         }
         
         return ResponseEntity.ok(response);
     }
 
-    // Update user profile - Useful for ecommerce (address, phone updates)
+    // Update user profile - Updated for JWT
     @PutMapping("/profile")
     public ResponseEntity<?> updateProfile(
             @RequestParam String fullName,
             @RequestParam String phone,
             @RequestParam String address,
             @RequestParam(required = false) MultipartFile profilePhoto,
-            HttpSession session
+            HttpServletRequest request
     ) {
         try {
-            User currentUser = (User) session.getAttribute("user");
-            if (currentUser == null) {
+            // Get email from JWT filter
+            String email = (String) request.getAttribute("userEmail");
+            if (email == null) {
                 return ResponseEntity.status(401).body("User not logged in");
+            }
+
+            // Fetch current user from database
+            User currentUser = authService.findByEmail(email);
+            if (currentUser == null) {
+                return ResponseEntity.status(401).body("User not found");
             }
 
             // Update user details
@@ -166,9 +194,8 @@ public class AuthController {
                 currentUser.setProfilePhoto(profilePhotoBytes);
             }
 
-            // Save updated user (you might need to add this method to AuthService)
+            // Save updated user
             User updatedUser = authService.updateProfile(currentUser);
-            session.setAttribute("user", updatedUser); // Update session
 
             Map<String, Object> response = new HashMap<>();
             response.put("userId", updatedUser.getId());

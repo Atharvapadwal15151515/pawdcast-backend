@@ -1132,9 +1132,33 @@
     </main>
 
    <script>
-        let loggedInUser = JSON.parse(localStorage.getItem("currentUser"));
+        let loggedInUser = null;
         let currentPet = null;
         let userPets = [];
+
+        // JWT Authentication Helper Function
+        async function authFetch(url, options = {}) {
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                window.location.href = "/login.html";
+                return;
+            }
+            
+            const headers = {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json",
+                ...options.headers
+            };
+            
+            const response = await fetch(url, { ...options, headers });
+            if (response.status === 401) {
+                localStorage.removeItem("jwtToken");
+                localStorage.removeItem("userEmail");
+                window.location.href = "/login.html";
+                return;
+            }
+            return response;
+        }
 
         // Function to display profile photo
         function displayProfilePhoto(user) {
@@ -1232,16 +1256,15 @@
         }
 
         async function loadUserPets() {
-            if (!loggedInUser) {
-                alert("Please login first!");
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                window.location.href = "/login.html";
                 return;
             }
 
             try {
-                const res = await fetch('https://pawdcast-backend-5.onrender.com/pet-profiles/my-pets', {
-                    method: 'GET',
-                    credentials: 'include'
-                });
+                const res = await authFetch('https://pawdcast-backend-5.onrender.com/pet-profiles/my-pets');
+                if (!res) return; // authFetch handled redirect
                 
                 console.log('Pets response status:', res.status);
                 
@@ -1310,10 +1333,12 @@
             const petCardsWithStats = await Promise.all(
                 userPets.map(async (pet) => {
                     try {
-                        const res = await fetch(`https://pawdcast-backend-5.onrender.com/pet-health/records/${pet.petId}`, {
-                            method: 'GET',
-                            credentials: 'include'
-                        });
+                        const res = await authFetch(`https://pawdcast-backend-5.onrender.com/pet-health/records/${pet.petId}`);
+                        if (!res) return {
+                            ...pet,
+                            recordsCount: 0,
+                            lastRecordDate: 'Error loading'
+                        };
                         
                         let recordsCount = 0;
                         let lastRecordDate = 'No records';
@@ -1374,10 +1399,8 @@
         // Load pet details including photo
         async function loadPetDetails(petId) {
             try {
-                const res = await fetch(`https://pawdcast-backend-5.onrender.com/pet-profiles/${petId}`, {
-                    method: 'GET',
-                    credentials: 'include'
-                });
+                const res = await authFetch(`https://pawdcast-backend-5.onrender.com/pet-profiles/${petId}`);
+                if (!res) return; // authFetch handled redirect
 
                 if (res.ok) {
                     const pet = await res.json();
@@ -1398,10 +1421,8 @@
         // Load pet photo
         async function loadPetPhoto(petId) {
             try {
-                const res = await fetch(`https://pawdcast-backend-5.onrender.com/pet-profiles/${petId}/photo`, {
-                    method: 'GET',
-                    credentials: 'include'
-                });
+                const res = await authFetch(`https://pawdcast-backend-5.onrender.com/pet-profiles/${petId}/photo`);
+                if (!res) return; // authFetch handled redirect
 
                 if (res.ok) {
                     const photoBlob = await res.blob();
@@ -1434,10 +1455,8 @@
         // Enhanced function to load pet health records with better formatting
         async function loadPetHealthRecords(petId) {
             try {
-                const res = await fetch(`https://pawdcast-backend-5.onrender.com/pet-health/records/${petId}`, {
-                    method: 'GET',
-                    credentials: 'include'
-                });
+                const res = await authFetch(`https://pawdcast-backend-5.onrender.com/pet-health/records/${petId}`);
+                if (!res) return; // authFetch handled redirect
 
                 const recordsList = document.getElementById('healthRecordsList');
                 
@@ -1637,10 +1656,12 @@
 
                 console.log('Submitting health data:', params.toString());
 
-                const res = await fetch(`https://pawdcast-backend-5.onrender.com/pet-health/add?${params.toString()}`, { 
-                    method: "POST",
-                    credentials: 'include'
+                // Use authFetch for the health record submission
+                const res = await authFetch(`https://pawdcast-backend-5.onrender.com/pet-health/add?${params.toString()}`, { 
+                    method: "POST"
                 });
+
+                if (!res) return; // authFetch handled redirect
 
                 console.log('Health save response status:', res.status);
 
@@ -1678,10 +1699,8 @@
         // Check session and load user data
         async function checkSession() {
             try {
-                const response = await fetch('https://pawdcast-backend-5.onrender.com/auth/me', {
-                    method: 'GET',
-                    credentials: 'include'
-                });
+                const response = await authFetch('https://pawdcast-backend-5.onrender.com/auth/me');
+                if (!response) return null; // authFetch handled redirect
                 
                 if (response.ok) {
                     const user = await response.json();
@@ -1702,7 +1721,7 @@
             const today = new Date().toISOString().split('T')[0];
             document.querySelector('input[name="entryDate"]').value = today;
             
-            // Check session first
+            // Check session first using JWT
             const sessionUser = await checkSession();
             
             if (sessionUser) {
@@ -1717,14 +1736,11 @@
                     document.getElementById('petSelect').value = petId;
                     showHealthRecords(petId);
                 }
-            } else if (loggedInUser) {
-                console.log('Using localStorage user, loading pets...');
-                await loadUserPets();
             } else {
-                console.log('No user found');
+                console.log('No user found, redirecting to login...');
                 const petSelect = document.getElementById("petSelect");
                 petSelect.innerHTML = '<option value="">Please login first</option>';
-                alert("Please login first from the home page!");
+                window.location.href = "/login.html";
             }
         };
 
@@ -1744,6 +1760,13 @@
                 });
             });
         });
+
+        // Add logout functionality
+        function logout() {
+            localStorage.removeItem("jwtToken");
+            localStorage.removeItem("userEmail");
+            window.location.href = "/login.html";
+        }
     </script>
 </body>
 </html>

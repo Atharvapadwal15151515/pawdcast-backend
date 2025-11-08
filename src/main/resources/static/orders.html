@@ -1003,10 +1003,34 @@
         <div id="toast" class="toast"></div>
     </main>
 
-    <script>
+   <script>
         const API_BASE_URL = 'https://pawdcast-backend-5.onrender.com';
         let allOrders = [];
         let filteredOrders = [];
+
+        // JWT Authentication Helper Function
+        async function authFetch(url, options = {}) {
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                window.location.href = "/login.html";
+                return;
+            }
+            
+            const headers = {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json",
+                ...options.headers
+            };
+            
+            const response = await fetch(url, { ...options, headers });
+            if (response.status === 401) {
+                localStorage.removeItem("jwtToken");
+                localStorage.removeItem("userEmail");
+                window.location.href = "/login.html";
+                return;
+            }
+            return response;
+        }
 
         function showToast(message, isError = false) {
             const toast = document.getElementById('toast');
@@ -1029,21 +1053,24 @@
         });
 
         function checkAuth() {
-            fetch(`${API_BASE_URL}/auth/check`)
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                window.location.href = "/login.html";
+                return;
+            }
+            
+            // Optional: Verify token with backend
+            authFetch(`${API_BASE_URL}/auth/verify`)
                 .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Not authenticated');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (!data.authenticated) {
-                        window.location.href = 'home.html';
+                    if (!response || !response.ok) {
+                        throw new Error('Token verification failed');
                     }
                 })
                 .catch(error => {
                     console.error('Auth check failed:', error);
-                    window.location.href = 'home.html';
+                    localStorage.removeItem("jwtToken");
+                    localStorage.removeItem("userEmail");
+                    window.location.href = "/login.html";
                 });
         }
 
@@ -1053,8 +1080,10 @@
             showLoading(true);
             hideError();
             
-            fetch(`${API_BASE_URL}/api/orders`)
+            authFetch(`${API_BASE_URL}/api/orders`)
                 .then(response => {
+                    if (!response) return; // authFetch handled redirect
+                    
                     console.log('Orders API response status:', response.status);
                     if (!response.ok) {
                         return response.text().then(text => {
@@ -1249,8 +1278,10 @@
         function viewOrderDetails(orderId) {
             console.log('Viewing order details for:', orderId);
             
-            fetch(`${API_BASE_URL}/api/orders/${orderId}`)
+            authFetch(`${API_BASE_URL}/api/orders/${orderId}`)
                 .then(response => {
+                    if (!response) return; // authFetch handled redirect
+                    
                     if (!response.ok) {
                         return response.text().then(text => {
                             throw new Error(text);
@@ -1391,10 +1422,12 @@
                 orderCard.style.pointerEvents = 'none';
             }
 
-            fetch(`${API_BASE_URL}/api/orders/${orderId}/cancel`, {
+            authFetch(`${API_BASE_URL}/api/orders/${orderId}/cancel`, {
                 method: 'POST'
             })
             .then(response => {
+                if (!response) return; // authFetch handled redirect
+                
                 if (!response.ok) {
                     return response.text().then(text => {
                         throw new Error(text);
@@ -1452,8 +1485,11 @@
         }
 
         function updateCartCount() {
-            fetch(`${API_BASE_URL}/api/cart/count`)
-                .then(response => response.json())
+            authFetch(`${API_BASE_URL}/api/cart/count`)
+                .then(response => {
+                    if (!response) return; // authFetch handled redirect
+                    return response.json();
+                })
                 .then(data => {
                     document.getElementById('cartCount').textContent = data.count || 0;
                 })
@@ -1464,10 +1500,10 @@
 
         document.getElementById('logoutBtn').addEventListener('click', function(e) {
             e.preventDefault();
-            fetch(`${API_BASE_URL}/auth/logout`, { method: 'POST' })
-                .then(() => {
-                    window.location.href = 'home.html';
-                });
+            // JWT logout - just remove token from localStorage
+            localStorage.removeItem("jwtToken");
+            localStorage.removeItem("userEmail");
+            window.location.href = 'login.html';
         });
     </script>
 </body>

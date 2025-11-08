@@ -5,7 +5,6 @@ import com.pawdcast.pawdcast.application.model.Product;
 import com.pawdcast.pawdcast.application.model.User;
 import com.pawdcast.pawdcast.application.repository.CartItemRepository;
 import com.pawdcast.pawdcast.application.repository.ProductRepository;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,18 +21,21 @@ public class CartService {
     private ProductRepository productRepository;
 
     @SuppressWarnings("unused")
-	@Autowired
+    @Autowired
     private ProductService productService;
 
-    public List<CartItem> getCartItems(HttpSession session) {
-        User user = getCurrentUser(session);
+    @Autowired
+    private AuthService authService;
+
+    public List<CartItem> getCartItems(String userEmail) {
+        User user = getCurrentUser(userEmail);
         if (user == null) return List.of();
         return cartItemRepository.findByUserId(user.getId());
     }
 
     @Transactional
-    public CartItem addToCart(Integer productId, Integer quantity, HttpSession session) {
-        User user = getCurrentUser(session);
+    public CartItem addToCart(Integer productId, Integer quantity, String userEmail) {
+        User user = getCurrentUser(userEmail);
         if (user == null) throw new RuntimeException("User not logged in");
 
         Optional<Product> productOpt = productRepository.findById(productId);
@@ -57,8 +59,8 @@ public class CartService {
     }
 
     @Transactional
-    public CartItem updateCartItem(Integer productId, Integer quantity, HttpSession session) {
-        User user = getCurrentUser(session);
+    public CartItem updateCartItem(Integer productId, Integer quantity, String userEmail) {
+        User user = getCurrentUser(userEmail);
         if (user == null) throw new RuntimeException("User not logged in");
 
         Optional<CartItem> cartItemOpt = cartItemRepository.findByUserIdAndProductId(user.getId(), productId);
@@ -79,30 +81,34 @@ public class CartService {
     }
 
     @Transactional
-    public void removeFromCart(Integer productId, HttpSession session) {
-        User user = getCurrentUser(session);
+    public void removeFromCart(Integer productId, String userEmail) {
+        User user = getCurrentUser(userEmail);
         if (user == null) throw new RuntimeException("User not logged in");
         
         cartItemRepository.deleteByUserIdAndProductId(user.getId(), productId);
     }
 
     @Transactional
-    public void clearCart(HttpSession session) {
-        User user = getCurrentUser(session);
+    public void clearCart(String userEmail) {
+        User user = getCurrentUser(userEmail);
         if (user == null) throw new RuntimeException("User not logged in");
         
         cartItemRepository.deleteByUserId(user.getId());
     }
 
-    public Integer getCartItemsCount(HttpSession session) {
-        User user = getCurrentUser(session);
+    public Integer getCartItemsCount(String userEmail) {
+        User user = getCurrentUser(userEmail);
         if (user == null) return 0;
         
         Integer count = cartItemRepository.getTotalCartItemsCount(user.getId());
         return count != null ? count : 0;
     }
 
-    private User getCurrentUser(HttpSession session) {
-        return (User) session.getAttribute("user");
+    private User getCurrentUser(String userEmail) {
+        try {
+            return authService.findByEmail(userEmail);
+        } catch (Exception e) {
+            throw new RuntimeException("User not found with email: " + userEmail);
+        }
     }
 }

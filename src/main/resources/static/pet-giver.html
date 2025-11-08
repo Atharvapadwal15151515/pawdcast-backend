@@ -569,7 +569,7 @@
         </div>
     </div>
 
-    <script>
+  <script>
         const form = document.getElementById('petForm');
         const loadingState = document.getElementById('loadingState');
         const successMessage = document.getElementById('successMessage');
@@ -596,7 +596,7 @@
 
             let formData = new FormData(this);
 
-            fetch('https://pawdcast-backend-5.onrender.com/pets/add', {
+            fetch('http://localhost:8080/pets/add', {
                 method: 'POST',
                 body: formData
             })
